@@ -3,6 +3,8 @@
 
 #include <raylib.h>
 #include <vector>
+#include <memory>
+#include "mushroom.h"
 
 #define TILE_SIZE 42 // Shared constant
 
@@ -32,7 +34,7 @@ class Mario {
         Mario(int x, int y, Texture2D sprites);
         Rectangle returnRec();
         Vector2 getPos();
-        void update(const std::vector<Rectangle>& statics, float cameraX);
+       void update(const std::vector<Rectangle>& statics, float cameraX, std::vector<std::unique_ptr<Mushroom>>& mushrooms);
         void draw();
         void reset(float x, float y);
         float getVelY() { return velY; }

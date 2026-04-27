@@ -1,4 +1,5 @@
 #include "blocks.h"
+#include <iostream>
 
 // Base Block
 Block::Block(int x, int y, Texture2D sprites) : rectXPos(x), rectYPos(y), spriteSheet(sprites) {}
@@ -48,25 +49,41 @@ void EmptyBlock::draw() {
         (Vector2){ 0, 0 }, 0.0f, WHITE);
 }
 
-// PowerUp Block
-PowerUpBlock::PowerUpBlock(int x, int y, Texture2D sprites) : Block(x, y, sprites) {}
+PowerUpBlock::PowerUpBlock(int x, int y, Texture2D sprites, Texture2D itemTex, std::string type) 
+    : Block(x, y, sprites), itemTexture(itemTex), itemType(type) {
+    itemX = (float)x;
+    itemY = (float)y;
+}
 
 Rectangle PowerUpBlock::getSensor() {
     return {(float)rectXPos + 12, (float)rectYPos + TILE_SIZE - 2, (float)TILE_SIZE - 24, 10.0f};
 }
 
-void PowerUpBlock::update(Rectangle marioRec, float marioVelY) {
-    if (isSpent) return;
+std::unique_ptr<Mushroom> PowerUpBlock::takeMushroom() {
+    return std::move(releasedMushroom);
+}
 
-    animTimer += GetFrameTime();
-    if (animTimer > 0.15f) {
-        frame = (frame + 1) % 3;
-        animTimer = 0;
+void PowerUpBlock::update(Rectangle marioRec, float marioVelY) {
+    if (!isSpent) {
+        animTimer += GetFrameTime();
+        if (animTimer > 0.10f) {
+            frame = (frame + 1) % 3;
+            animTimer = 0;
+        }
     }
 
-    if (!isBumping && marioVelY < 0 && CheckCollisionRecs(marioRec, getSensor())) {
+    if (!isSpent && !isBumping && marioVelY < 0 && CheckCollisionRecs(marioRec, getSensor())) {
         isBumping = true;
         bumpTimer = 0.1f;
+        isSpent = true;
+        itemActive = true;
+        
+        if (itemType == "coin") {
+            std::cout << "Money!" << std::endl;
+            spawnTimer = 0.2f; 
+        } else if (itemType == "mushroom") {
+            spawnTimer = 1.0f;
+        }
     }
 
     if (isBumping) {
@@ -76,21 +93,45 @@ void PowerUpBlock::update(Rectangle marioRec, float marioVelY) {
         else {
             offsetY = 0;
             isBumping = false;
-            isSpent = true;
+        }
+    }
+
+    if (itemActive) {
+        if (itemType == "coin") {
+            spawnTimer -= GetFrameTime();
+            itemY -= 15.0f;
+            if (spawnTimer <= 0) {
+                itemActive = false;
+            }
+        } 
+        else if (itemType == "mushroom") {
+            if (spawnTimer > 0) {
+                spawnTimer -= GetFrameTime();
+                itemY -= (TILE_SIZE * GetFrameTime());
+                if (spawnTimer <= 0) {
+                    releasedMushroom = std::make_unique<Mushroom>(itemX, itemY, itemTexture);
+                    itemActive = false; 
+                }
+            }
         }
     }
 }
 
 void PowerUpBlock::draw() {
-    if (isSpent) {
-        DrawTexturePro(spriteSheet, (Rectangle){ 349.0f, 78.0f, 16.0f, 16.0f }, 
-            (Rectangle){ (float)rectXPos, (float)rectYPos, (float)TILE_SIZE, (float)TILE_SIZE }, 
+    if (itemActive) {
+        Rectangle src;
+        if (itemType == "coin") src = { 298.0f, 95.0f, 16.0f, 16.0f };
+        else if (itemType == "mushroom") src = { 0.0f, 8.0f, 16.0f, 16.0f };
+
+        DrawTexturePro(itemTexture, src,
+            (Rectangle){ itemX, itemY, (float)TILE_SIZE, (float)TILE_SIZE },
             {0,0}, 0.0f, WHITE);
-    } else {
-        float srcX = 298.0f + (frame * 17.0f); 
-        DrawTexturePro(spriteSheet, 
-            (Rectangle){ srcX, 78.0f, 16.0f, 16.0f }, 
-            (Rectangle){ (float)rectXPos, (float)rectYPos + offsetY, (float)TILE_SIZE, (float)TILE_SIZE }, 
-            (Vector2){ 0, 0 }, 0.0f, WHITE);
     }
+
+    Rectangle blockSrc = isSpent ? (Rectangle){ 349.0f, 78.0f, 16.0f, 16.0f } 
+                                 : (Rectangle){ 298.0f + (frame * 17.0f), 78.0f, 16.0f, 16.0f };
+    
+    DrawTexturePro(spriteSheet, blockSrc, 
+        (Rectangle){ (float)rectXPos, (float)rectYPos + offsetY, (float)TILE_SIZE, (float)TILE_SIZE }, 
+        {0,0}, 0.0f, WHITE);
 }

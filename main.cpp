@@ -7,6 +7,7 @@
 #include "drawTiledRect.h"
 #include "backgroundProp.h"
 #include "blocks.h"
+#include "mushroom.h"
 
 #define TILE_SIZE 42
 
@@ -27,12 +28,17 @@ int main() {
     Texture2D marioSheet = LoadTextureFromImage(img2);
     UnloadImage(img2);
 
+    Image img3 = LoadImage("52569.png");
+    ImageColorReplace(&img3, (Color){146, 144, 255, 255}, BLANK);
+    Texture2D mushroomSheet = LoadTextureFromImage(img3);
+    UnloadImage(img3);
+
     std::vector<std::unique_ptr<Block>> blocks;
 
     blocks.push_back(std::make_unique<BrickBlock>(500, 400, spriteSheet));
-    blocks.push_back(std::make_unique<PowerUpBlock>(542, 400, spriteSheet));
+    blocks.push_back(std::make_unique<PowerUpBlock>(542, 400, spriteSheet, mushroomSheet, "mushroom"));
     blocks.push_back(std::make_unique<BrickBlock>(584, 400, spriteSheet));
-    blocks.push_back(std::make_unique<PowerUpBlock>(626, 400, spriteSheet));
+    blocks.push_back(std::make_unique<PowerUpBlock>(626, 400, spriteSheet, spriteSheet, "coin"));
     blocks.push_back(std::make_unique<BrickBlock>(668, 400, spriteSheet));
 
     DrawTiledRect Ground1(0, 600, 870, 80, spriteSheet, {0, 16, 16, 16}, TILE_SIZE, TILE_SIZE);
@@ -51,6 +57,7 @@ int main() {
     float deathTimer = 0.0f;
 
     std::vector<Rectangle> collisionObjects;
+    std::vector<std::unique_ptr<Mushroom>> activeMushrooms;
     collisionObjects.push_back(Ground1.returnRec());
 
     for (auto& block : blocks) {
@@ -68,8 +75,16 @@ int main() {
             if (!isDead) {
                 for (auto& block : blocks) {
                     block->update(MarioObj.returnRec(), MarioObj.getVelY());
+                    
+                    auto* pBlock = dynamic_cast<PowerUpBlock*>(block.get());
+                    if (pBlock) {
+                        auto newMush = pBlock->takeMushroom();
+                        if (newMush) activeMushrooms.push_back(std::move(newMush));
+                    }
                 }
-                MarioObj.update(collisionObjects, camera.target.x);
+
+                for (auto& mush : activeMushrooms) mush->update(collisionObjects);
+                MarioObj.update(collisionObjects, camera.target.x, activeMushrooms);
                 float scrollThreshold = screenWidth / 1.67f;
                 if (MarioObj.getPos().x > scrollThreshold) {
                     float targetX = MarioObj.getPos().x - scrollThreshold;
@@ -110,6 +125,9 @@ int main() {
                     for (auto& block : blocks) {
                         block->draw();
                     }
+                    for (auto& mush : activeMushrooms) {
+                        mush->draw();
+                    }
                     MarioObj.draw();
                 EndMode2D();
                 DrawText("swag bros", 50, 50, 36, WHITE);
@@ -124,6 +142,8 @@ int main() {
         }
     }
     UnloadTexture(spriteSheet);
+    UnloadTexture(marioSheet);
+    UnloadTexture(mushroomSheet);
     CloseWindow();
     return 0;
 }

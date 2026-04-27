@@ -1,4 +1,7 @@
 #include "mario.h"
+#include "mushroom.h"
+#include <iostream>
+#include <memory>
 
 Mario::Mario(int x, int y, Texture2D sprites) : posX((float)x), posY((float)y), sprites(sprites) {}
 
@@ -10,7 +13,7 @@ Vector2 Mario::getPos() {
     return (Vector2){ (float)posX, (float)posY };
 }
 
-void Mario::update(const std::vector<Rectangle>& statics, float cameraX) {
+void Mario::update(const std::vector<Rectangle>& statics, float cameraX, std::vector<std::unique_ptr<Mushroom>>& mushrooms) {
     bool moving = false;
     if (IsKeyDown(KEY_D)) { velX += acceleration; facingRight = true; moving = true; }
     if (IsKeyDown(KEY_A)) { velX -= acceleration; facingRight = false; moving = true; }
@@ -73,6 +76,15 @@ void Mario::update(const std::vector<Rectangle>& statics, float cameraX) {
     if (posX < cameraX) {
         posX = cameraX;
         if (velX < 0) velX = 0;
+    }
+
+    for (auto it = mushrooms.begin(); it != mushrooms.end(); ) {
+        if (CheckCollisionRecs(this->returnRec(), (*it)->returnRec())) {
+            std::cout << "Mario touched the mushroom" << std::endl;
+            it = mushrooms.erase(it); // Remove mushroom after touch
+        } else {
+            ++it;
+        }
     }
 }
 

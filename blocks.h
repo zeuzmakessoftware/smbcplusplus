@@ -2,6 +2,8 @@
 #define BLOCKS_H
 
 #include <raylib.h>
+#include <string>
+#include "mushroom.h"
 
 #define TILE_SIZE 42
 
@@ -49,10 +51,18 @@ private:
     float animTimer = 0;
     int frame = 0;
 
+    std::string itemType;
+    bool itemActive = false;
+    float itemX, itemY;
+    float spawnTimer = 0.0f;
+    
+    std::unique_ptr<Mushroom> releasedMushroom;
+    Texture2D itemTexture;
+
 public:
-    PowerUpBlock(int x, int y, Texture2D sprites);
+    PowerUpBlock(int x, int y, Texture2D sprites, Texture2D itemTex, std::string type = "coin");
     Rectangle getSensor();
-    bool getIsSpent() const { return isSpent; }
+    std::unique_ptr<Mushroom> takeMushroom(); 
     void update(Rectangle marioRec, float marioVelY) override;
     void draw() override;
 };
