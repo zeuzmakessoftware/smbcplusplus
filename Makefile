@@ -1,5 +1,5 @@
 all:
-	g++ main.cpp mario.cpp drawTiledRect.cpp backgroundProp.cpp -o main -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
+	g++ main.cpp mario.cpp drawTiledRect.cpp backgroundProp.cpp blocks.cpp -o main -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
 	./main
 
 texture:

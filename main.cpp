@@ -2,28 +2,13 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
 #include "mario.h"
 #include "drawTiledRect.h"
 #include "backgroundProp.h"
+#include "blocks.h"
 
 #define TILE_SIZE 42
-
-class BrickBlock {
-    private:
-        int rectXPos;
-        int rectYPos;
-        Texture2D spriteSheet;
-    public:
-        BrickBlock(int x, int y, Texture2D sprites) : rectXPos(x), rectYPos(y), spriteSheet(sprites) {}
-
-        Rectangle returnRec() {
-            return {(float)rectXPos, (float)rectYPos, (float)TILE_SIZE, (float)TILE_SIZE};
-        }
-
-        void draw() {
-            DrawTexturePro(spriteSheet, (Rectangle){ 17.0f, 16.0f, 16.0f, 16.0f }, (Rectangle){ 500.0f, 400.0f, TILE_SIZE, TILE_SIZE }, (Vector2){ 0, 0 }, 0.0f, WHITE);
-        }
-};
 
 int main() {
     int screenWidth = 670;
@@ -42,8 +27,16 @@ int main() {
     Texture2D marioSheet = LoadTextureFromImage(img2);
     UnloadImage(img2);
 
+    std::vector<std::unique_ptr<Block>> blocks;
+
+    blocks.push_back(std::make_unique<BrickBlock>(500, 400, spriteSheet));
+    blocks.push_back(std::make_unique<PowerUpBlock>(542, 400, spriteSheet));
+    blocks.push_back(std::make_unique<BrickBlock>(584, 400, spriteSheet));
+    blocks.push_back(std::make_unique<PowerUpBlock>(626, 400, spriteSheet));
+    blocks.push_back(std::make_unique<BrickBlock>(668, 400, spriteSheet));
+
     DrawTiledRect Ground1(0, 600, 870, 80, spriteSheet, {0, 16, 16, 16}, TILE_SIZE, TILE_SIZE);
-    BrickBlock Brick1(500, 400, spriteSheet);
+
     Mario MarioObj(100, 0, marioSheet);
 
     Camera2D camera = { 0 };
@@ -59,7 +52,10 @@ int main() {
 
     std::vector<Rectangle> collisionObjects;
     collisionObjects.push_back(Ground1.returnRec());
-    collisionObjects.push_back(Brick1.returnRec());
+
+    for (auto& block : blocks) {
+        collisionObjects.push_back(block->returnRec());
+    }
 
     while (!WindowShouldClose()) {
         if (!gameStarted) {
@@ -70,8 +66,10 @@ int main() {
             EndDrawing();
         } else {
             if (!isDead) {
+                for (auto& block : blocks) {
+                    block->update(MarioObj.returnRec(), MarioObj.getVelY());
+                }
                 MarioObj.update(collisionObjects, camera.target.x);
-
                 float scrollThreshold = screenWidth / 1.67f;
                 if (MarioObj.getPos().x > scrollThreshold) {
                     float targetX = MarioObj.getPos().x - scrollThreshold;
@@ -109,7 +107,9 @@ int main() {
                     for (auto& prop : levelProps) {
                         prop.draw();
                     }
-                    Brick1.draw();
+                    for (auto& block : blocks) {
+                        block->draw();
+                    }
                     MarioObj.draw();
                 EndMode2D();
                 DrawText("swag bros", 50, 50, 36, WHITE);
