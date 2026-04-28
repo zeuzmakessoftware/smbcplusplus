@@ -1,7 +1,7 @@
 all:
-	g++ main.cpp mario.cpp drawTiledRect.cpp backgroundProp.cpp blocks.cpp mushroom.cpp -o main -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
+	g++ main.cpp mario.cpp drawTiledRect.cpp backgroundProp.cpp blocks.cpp mushroom.cpp goomba.cpp -o main -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
 	./main
 
 texture:
 	g++ textureFinderDebug.cpp -o textureFinderDebug -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
-	./textureFinderDebug "52569.png"
+	./textureFinderDebug "52570.png"

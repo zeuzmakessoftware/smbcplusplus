@@ -46,6 +46,9 @@ class Mario {
         float getVelY() { return velY; }
         void drawDebug();
         bool getIsBig() { return isBig; }
+        void setIsBig(bool b) { isBig = b; }
+        void setVelY(float y) { velY = y; }
+        bool getIsTransforming() const { return isTransforming; }
 };
 
 #endif

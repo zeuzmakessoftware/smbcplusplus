@@ -8,6 +8,7 @@
 #include "backgroundProp.h"
 #include "blocks.h"
 #include "mushroom.h"
+#include "goomba.h"
 
 #define TILE_SIZE 42
 
@@ -33,17 +34,18 @@ int main() {
     Texture2D mushroomSheet = LoadTextureFromImage(img3);
     UnloadImage(img3);
 
+    Image img4 = LoadImage("52570.png");
+    ImageColorReplace(&img4, (Color){146, 144, 255, 255}, BLANK);
+    Texture2D enemiesSheet = LoadTextureFromImage(img4);
+    UnloadImage(img4);
+
     std::vector<std::unique_ptr<Block>> blocks;
+    std::vector<std::unique_ptr<Goomba>> goombas;
+    std::vector<Rectangle> collisionObjects;
+    std::vector<std::unique_ptr<Mushroom>> activeMushrooms;
     std::vector<Particle> brickParticles;
 
-    blocks.push_back(std::make_unique<BrickBlock>(500, 400, spriteSheet));
-    blocks.push_back(std::make_unique<PowerUpBlock>(542, 400, spriteSheet, mushroomSheet, "mushroom"));
-    blocks.push_back(std::make_unique<BrickBlock>(584, 400, spriteSheet));
-    blocks.push_back(std::make_unique<PowerUpBlock>(626, 400, spriteSheet, spriteSheet, "coin"));
-    blocks.push_back(std::make_unique<BrickBlock>(668, 400, spriteSheet));
-
     DrawTiledRect Ground1(0, 600, 870, 80, spriteSheet, {0, 16, 16, 16}, TILE_SIZE, TILE_SIZE);
-
     Mario MarioObj(100, 0, marioSheet);
 
     Camera2D camera = { 0 };
@@ -52,18 +54,37 @@ int main() {
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
-    SetTargetFPS(60);
-
     bool isDead = false;
     float deathTimer = 0.0f;
 
-    std::vector<Rectangle> collisionObjects;
-    std::vector<std::unique_ptr<Mushroom>> activeMushrooms;
-    collisionObjects.push_back(Ground1.returnRec());
+    auto ResetLevel = [&]() {
+        blocks.clear();
+        goombas.clear();
+        activeMushrooms.clear();
+        brickParticles.clear();
+        collisionObjects.clear();
 
-    for (auto& block : blocks) {
-        collisionObjects.push_back(block->returnRec());
-    }
+        goombas.push_back(std::make_unique<Goomba>(800, 500, enemiesSheet));
+
+        blocks.push_back(std::make_unique<BrickBlock>(500, 400, spriteSheet));
+        blocks.push_back(std::make_unique<PowerUpBlock>(542, 400, spriteSheet, mushroomSheet, "mushroom"));
+        blocks.push_back(std::make_unique<BrickBlock>(584, 400, spriteSheet));
+        blocks.push_back(std::make_unique<PowerUpBlock>(626, 400, spriteSheet, spriteSheet, "coin"));
+        blocks.push_back(std::make_unique<BrickBlock>(668, 400, spriteSheet));
+
+        collisionObjects.push_back(Ground1.returnRec());
+        for (auto& block : blocks) {
+            collisionObjects.push_back(block->returnRec());
+        }
+
+        MarioObj.reset(100, 0);
+        camera.target = (Vector2){ 0, 0 };
+        isDead = false;
+    };
+
+    ResetLevel();
+
+    SetTargetFPS(60);
 
     while (!WindowShouldClose()) {
         if (!gameStarted) {
@@ -80,7 +101,6 @@ int main() {
                     auto* brick = dynamic_cast<BrickBlock*>(it->get());
                     if (brick && brick->isDestroyed()) {
                         brick->SpawnBrickParticles(brickParticles);
-                        
                         it = blocks.erase(it);
                         
                         collisionObjects.clear();
@@ -96,16 +116,26 @@ int main() {
                     }
                 }
 
-                BrickBlock::updateParticles(brickParticles);
+                for (auto it = goombas.begin(); it != goombas.end(); ) {
+                    if (!MarioObj.getIsTransforming()) {
+                        float mVelY = MarioObj.getVelY();
+                        bool mBig = MarioObj.getIsBig();
+                        (*it)->update(collisionObjects, MarioObj.returnRec(), isDead, mBig, mVelY, deathTimer);
+                        MarioObj.setIsBig(mBig);
+                        MarioObj.setVelY(mVelY);
+                    }
+                    if ((*it)->shouldRemove()) it = goombas.erase(it);
+                    else ++it;
+                }
 
+                BrickBlock::updateParticles(brickParticles);
                 for (auto& mush : activeMushrooms) mush->update(collisionObjects);
                 MarioObj.update(collisionObjects, camera.target.x, activeMushrooms);
+
                 float scrollThreshold = screenWidth / 1.67f;
                 if (MarioObj.getPos().x > scrollThreshold) {
                     float targetX = MarioObj.getPos().x - scrollThreshold;
-                    if (targetX > camera.target.x) {
-                        camera.target.x = targetX;
-                    }
+                    if (targetX > camera.target.x) camera.target.x = targetX;
                 }
 
                 if (MarioObj.getPos().y > 700) {
@@ -114,15 +144,10 @@ int main() {
                 }
             } else {
                 deathTimer -= GetFrameTime();
-
-                if (deathTimer <= 0) {
-                    MarioObj.reset(100, 0);
-                    camera.target = (Vector2){ 0, 0 };
-                    isDead = false; 
-                }
+                if (deathTimer <= 0) ResetLevel();
             }
-            std::vector<BackgroundProp> levelProps;
 
+            std::vector<BackgroundProp> levelProps;
             levelProps.push_back(BackgroundProp(0, 474, spriteSheet, HILL_LAYOUT));
             levelProps.push_back(BackgroundProp(460, 558, spriteSheet, GRASS_LAYOUT));
             levelProps.push_back(BackgroundProp(320, 220, spriteSheet, CLOUD_LAYOUT));
@@ -130,31 +155,20 @@ int main() {
             levelProps.push_back(BackgroundProp(1000, 220, spriteSheet, CLOUD_LAYOUT));
 
             BeginDrawing();
-                //ClearBackground(Color({146, 144, 255, 255}));
                 ClearBackground(Color({91, 140, 255, 255}));
                 BeginMode2D(camera);
-                    Ground1.draw(); // Draw initial ground
-                    for (auto& prop : levelProps) {
-                        prop.draw();
-                    }
-                    for (auto& block : blocks) {
-                        block->draw();
-                    }
-                    for (auto& mush : activeMushrooms) {
-                        mush->draw();
-                    }
+                    Ground1.draw(); 
+                    for (auto& prop : levelProps) prop.draw();
+                    for (auto& block : blocks) block->draw();
+                    for (auto& mush : activeMushrooms) mush->draw();
+                    for (auto& goom : goombas) goom->draw();
                     BrickBlock::drawParticles(brickParticles, spriteSheet);
                     MarioObj.draw();
-                    /* for (auto& block : blocks) {
-                        block->drawDebug();
-                    }
-                    MarioObj.drawDebug(); FOR DEBUG */
                 EndMode2D();
                 DrawText("swag bros", 50, 50, 36, WHITE);
 
                 if (isDead) {
                     DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.6f));
-                    
                     int textWidth = MeasureText("skull emoji", 60);
                     DrawText("skull emoji", (screenWidth / 2) - (textWidth / 2), (screenHeight / 2) - 30, 60, RED);
                 }

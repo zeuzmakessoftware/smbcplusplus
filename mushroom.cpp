@@ -14,7 +14,7 @@ void Mushroom::update(const std::vector<Rectangle>& statics) {
     pos.x += velX;
     for (const auto& rect : statics) {
         if (CheckCollisionRecs(returnRec(), rect)) {
-            velX *= -0.5;
+            velX *= -0.2;
             pos.x += velX;
         }
     }
