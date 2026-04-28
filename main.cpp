@@ -11,6 +11,28 @@
 
 #define TILE_SIZE 42
 
+struct Particle {
+    Vector2 pos;
+    Vector2 vel;
+    float rotation;
+    bool active;
+};
+
+void SpawnBrickParticles(std::vector<Particle>& particles, Vector2 pos) {
+    float speeds[2] = { -4.0f, 4.0f };
+    float jumps[2] = { -8.0f, -12.0f };
+    
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            particles.push_back({
+                { pos.x + (i * 20), pos.y + (j * 20) }, 
+                { speeds[i], jumps[j] }, 
+                0.0f, true 
+            });
+        }
+    }
+}
+
 int main() {
     int screenWidth = 670;
     int screenHeight = 670;
@@ -34,6 +56,7 @@ int main() {
     UnloadImage(img3);
 
     std::vector<std::unique_ptr<Block>> blocks;
+    std::vector<Particle> brickParticles;
 
     blocks.push_back(std::make_unique<BrickBlock>(500, 400, spriteSheet));
     blocks.push_back(std::make_unique<PowerUpBlock>(542, 400, spriteSheet, mushroomSheet, "mushroom"));
@@ -73,13 +96,37 @@ int main() {
             EndDrawing();
         } else {
             if (!isDead) {
-                for (auto& block : blocks) {
-                    block->update(MarioObj.returnRec(), MarioObj.getVelY());
+                for (auto it = blocks.begin(); it != blocks.end(); ) {
+                    (*it)->update(MarioObj.returnRec(), MarioObj.getVelY(), MarioObj.getIsBig());
                     
-                    auto* pBlock = dynamic_cast<PowerUpBlock*>(block.get());
-                    if (pBlock) {
-                        auto newMush = pBlock->takeMushroom();
-                        if (newMush) activeMushrooms.push_back(std::move(newMush));
+                    auto* brick = dynamic_cast<BrickBlock*>(it->get());
+                    if (brick && brick->isDestroyed()) {
+                        SpawnBrickParticles(brickParticles, {(float)brick->getRectX(), (float)brick->getRectY()});
+                        
+                        it = blocks.erase(it);
+                        
+                        collisionObjects.clear();
+                        collisionObjects.push_back(Ground1.returnRec());
+                        for (auto& b : blocks) collisionObjects.push_back(b->returnRec());
+                    } else {
+                        auto* pBlock = dynamic_cast<PowerUpBlock*>(it->get());
+                        if (pBlock) {
+                            auto newMush = pBlock->takeMushroom();
+                            if (newMush) activeMushrooms.push_back(std::move(newMush));
+                        }
+                        ++it;
+                    }
+                }
+
+                for (int i = 0; i < brickParticles.size(); i++) {
+                    brickParticles[i].pos.x += brickParticles[i].vel.x;
+                    brickParticles[i].pos.y += brickParticles[i].vel.y;
+                    brickParticles[i].vel.y += 0.5f;
+                    brickParticles[i].rotation += 12.0f;
+
+                    if (brickParticles[i].pos.y > 800) {
+                        brickParticles.erase(brickParticles.begin() + i);
+                        i--;
                     }
                 }
 
@@ -127,6 +174,12 @@ int main() {
                     }
                     for (auto& mush : activeMushrooms) {
                         mush->draw();
+                    }
+                    for (auto& p : brickParticles) {
+                        DrawTexturePro(spriteSheet, 
+                            (Rectangle){ 17.0f, 16.0f, 8.0f, 8.0f },
+                            (Rectangle){ p.pos.x, p.pos.y, 20.0f, 20.0f }, 
+                            (Vector2){ 10, 10 }, p.rotation, WHITE);
                     }
                     MarioObj.draw();
                     /* for (auto& block : blocks) {

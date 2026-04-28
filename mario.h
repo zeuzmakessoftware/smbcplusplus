@@ -45,6 +45,7 @@ class Mario {
         void reset(float x, float y);
         float getVelY() { return velY; }
         void drawDebug();
+        bool getIsBig() { return isBig; }
 };
 
 #endif

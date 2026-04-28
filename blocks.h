@@ -18,8 +18,12 @@ public:
     virtual ~Block() {}
 
     virtual Rectangle returnRec();
-    virtual void update(Rectangle marioRec, float marioVelY) = 0;
+    virtual void update(Rectangle marioRec, float marioVelY, bool isBig = false) = 0; 
     virtual void draw() = 0;
+    
+    int getRectX() { return rectXPos; }
+    int getRectY() { return rectYPos; }
+
     virtual void drawDebug() {}
 };
 
@@ -28,19 +32,21 @@ private:
     float offsetY = 0;
     float bumpTimer = 0;
     bool isBumping = false;
+    bool destroyed = false; 
 
 public:
     BrickBlock(int x, int y, Texture2D sprites);
     Rectangle getSensor();
-    void update(Rectangle marioRec, float marioVelY) override;
+    void update(Rectangle marioRec, float marioVelY, bool isBig) override; 
     void draw() override;
     void drawDebug() override;
+    bool isDestroyed() { return destroyed; }
 };
 
 class EmptyBlock : public Block {
 public:
     EmptyBlock(int x, int y, Texture2D sprites);
-    void update(Rectangle marioRec, float marioVelY) override {} // Does nothing
+    void update(Rectangle marioRec, float marioVelY, bool isBig) override {} 
     void draw() override;
 };
 
@@ -65,7 +71,7 @@ public:
     PowerUpBlock(int x, int y, Texture2D sprites, Texture2D itemTex, std::string type = "coin");
     Rectangle getSensor();
     std::unique_ptr<Mushroom> takeMushroom(); 
-    void update(Rectangle marioRec, float marioVelY) override;
+    void update(Rectangle marioRec, float marioVelY, bool isBig) override; 
     void draw() override;
     void drawDebug() override;
 };

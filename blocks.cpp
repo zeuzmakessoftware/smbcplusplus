@@ -13,10 +13,14 @@ Rectangle BrickBlock::getSensor() {
     return {(float)rectXPos + 12, (float)rectYPos + TILE_SIZE - 2, (float)TILE_SIZE - 24, 10.0f};
 }
 
-void BrickBlock::update(Rectangle marioRec, float marioVelY) {
+void BrickBlock::update(Rectangle marioRec, float marioVelY, bool isBig) {
     if (!isBumping && CheckCollisionRecs(marioRec, getSensor())) {
-        isBumping = true;
-        bumpTimer = 0.1f;
+        if (isBig) {
+            destroyed = true; 
+        } else {
+            isBumping = true;
+            bumpTimer = 0.1f;
+        }
     }
 
     if (isBumping) {
@@ -65,10 +69,10 @@ std::unique_ptr<Mushroom> PowerUpBlock::takeMushroom() {
     return std::move(releasedMushroom);
 }
 
-void PowerUpBlock::update(Rectangle marioRec, float marioVelY) {
+void PowerUpBlock::update(Rectangle marioRec, float marioVelY, bool isBig) {
     if (!isSpent) {
         animTimer += GetFrameTime();
-        if (animTimer > 0.10f) {
+        if (animTimer > 0.20f) {
             frame = (frame + 1) % 3;
             animTimer = 0;
         }
@@ -81,7 +85,6 @@ void PowerUpBlock::update(Rectangle marioRec, float marioVelY) {
         itemActive = true;
         
         if (itemType == "coin") {
-            std::cout << "Money!" << std::endl;
             spawnTimer = 0.1f; 
         } else if (itemType == "mushroom") {
             spawnTimer = 1.0f;
