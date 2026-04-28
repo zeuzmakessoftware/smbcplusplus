@@ -3,9 +3,18 @@
 
 #include <raylib.h>
 #include <string>
+#include <vector>
+#include <memory>
 #include "mushroom.h"
 
 #define TILE_SIZE 42
+
+struct Particle {
+    Vector2 pos;
+    Vector2 vel;
+    float rotation;
+    bool active;
+};
 
 class Block {
 protected:
@@ -41,6 +50,10 @@ public:
     void draw() override;
     void drawDebug() override;
     bool isDestroyed() { return destroyed; }
+    
+    static void updateParticles(std::vector<Particle>& particles);
+    static void drawParticles(std::vector<Particle>& particles, Texture2D spriteSheet);
+    void SpawnBrickParticles(std::vector<Particle>& particles);
 };
 
 class EmptyBlock : public Block {

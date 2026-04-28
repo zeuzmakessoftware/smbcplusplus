@@ -11,28 +11,6 @@
 
 #define TILE_SIZE 42
 
-struct Particle {
-    Vector2 pos;
-    Vector2 vel;
-    float rotation;
-    bool active;
-};
-
-void SpawnBrickParticles(std::vector<Particle>& particles, Vector2 pos) {
-    float speeds[2] = { -4.0f, 4.0f };
-    float jumps[2] = { -8.0f, -12.0f };
-    
-    for (int i = 0; i < 2; i++) {
-        for (int j = 0; j < 2; j++) {
-            particles.push_back({
-                { pos.x + (i * 20), pos.y + (j * 20) }, 
-                { speeds[i], jumps[j] }, 
-                0.0f, true 
-            });
-        }
-    }
-}
-
 int main() {
     int screenWidth = 670;
     int screenHeight = 670;
@@ -101,7 +79,7 @@ int main() {
                     
                     auto* brick = dynamic_cast<BrickBlock*>(it->get());
                     if (brick && brick->isDestroyed()) {
-                        SpawnBrickParticles(brickParticles, {(float)brick->getRectX(), (float)brick->getRectY()});
+                        brick->SpawnBrickParticles(brickParticles);
                         
                         it = blocks.erase(it);
                         
@@ -118,17 +96,7 @@ int main() {
                     }
                 }
 
-                for (int i = 0; i < brickParticles.size(); i++) {
-                    brickParticles[i].pos.x += brickParticles[i].vel.x;
-                    brickParticles[i].pos.y += brickParticles[i].vel.y;
-                    brickParticles[i].vel.y += 0.5f;
-                    brickParticles[i].rotation += 12.0f;
-
-                    if (brickParticles[i].pos.y > 800) {
-                        brickParticles.erase(brickParticles.begin() + i);
-                        i--;
-                    }
-                }
+                BrickBlock::updateParticles(brickParticles);
 
                 for (auto& mush : activeMushrooms) mush->update(collisionObjects);
                 MarioObj.update(collisionObjects, camera.target.x, activeMushrooms);
@@ -175,12 +143,7 @@ int main() {
                     for (auto& mush : activeMushrooms) {
                         mush->draw();
                     }
-                    for (auto& p : brickParticles) {
-                        DrawTexturePro(spriteSheet, 
-                            (Rectangle){ 17.0f, 16.0f, 8.0f, 8.0f },
-                            (Rectangle){ p.pos.x, p.pos.y, 20.0f, 20.0f }, 
-                            (Vector2){ 10, 10 }, p.rotation, WHITE);
-                    }
+                    BrickBlock::drawParticles(brickParticles, spriteSheet);
                     MarioObj.draw();
                     /* for (auto& block : blocks) {
                         block->drawDebug();
