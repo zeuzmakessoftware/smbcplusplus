@@ -2,12 +2,8 @@
 
 Goomba::Goomba(float x, float y, Texture2D s) : pos({x, y}), sprites(s) {}
 
-void Goomba::update(const std::vector<Rectangle>& statics, Rectangle marioRec, bool& marioIsDead, bool& marioIsBig, float& marioVelY, float& deathTimer) {
-    if (isSquashed) {
-        squashTimer -= GetFrameTime();
-        if (squashTimer <= 0) isAlive = false;
-        return;
-    }
+void Goomba::updatePhysics(const std::vector<Rectangle>& statics) {
+    if (isSquashed) return;
 
     velY += 0.97f; 
     pos.y += velY;
@@ -30,15 +26,28 @@ void Goomba::update(const std::vector<Rectangle>& statics, Rectangle marioRec, b
         frameTimer = 0;
         currentFrame = (currentFrame + 1) % 2;
     }
+}
+
+void Goomba::update(const std::vector<Rectangle>& statics, Mario& marioObj, bool& marioIsDead, float& deathTimer) {
+    if (isSquashed) {
+        squashTimer -= GetFrameTime();
+        if (squashTimer <= 0) isAlive = false;
+        return;
+    }
+
+    updatePhysics(statics);
+
+    Rectangle marioRec = marioObj.returnRec();
+    float marioVelY = marioObj.getVelY();
 
     if (CheckCollisionRecs({pos.x, pos.y, 42, 42}, marioRec)) {
-        if (marioVelY > 0 && (marioRec.y + marioRec.height) < (pos.y + 20)) {
+        if (marioVelY > 0.0f && (marioRec.y + marioRec.height) < (pos.y + 20) && !marioObj.getIsTransforming()) {
             isSquashed = true;
-            marioVelY = -15.0f;
+            marioObj.setVelY(-15.0f);
         } 
-        else {
-            if (marioIsBig) {
-                marioIsBig = false;
+        else if (!marioObj.getIsInvincible() && !marioObj.getIsTransforming()) {
+            if (marioObj.getIsBig()) {
+                marioObj.startShrink();
             } else {
                 marioIsDead = true;
                 deathTimer = 4.0f;
@@ -68,4 +77,12 @@ void Goomba::draw() {
         
         DrawTexturePro(sprites, source, dest, { 0, 0 }, 0.0f, WHITE);
     }
+}
+
+void Goomba::drawDebug() {
+    if (!isAlive || isSquashed) return;
+
+    DrawRectangleLinesEx({pos.x, pos.y, 42, 42}, 1.0f, RED);
+
+    DrawRectangleLinesEx({pos.x, pos.y, 42, 20}, 2.0f, GREEN);
 }

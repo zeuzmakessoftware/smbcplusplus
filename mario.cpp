@@ -14,6 +14,19 @@ Vector2 Mario::getPos() {
 }
 
 void Mario::update(const std::vector<Rectangle>& statics, float cameraX, std::vector<std::unique_ptr<Mushroom>>& mushrooms) {
+    if (isInvincible) {
+        invincibilityTimer -= GetFrameTime();
+        if (invincibilityTimer <= 0) isInvincible = false;
+    }
+
+    if (isTransforming) {
+        transformationTimer -= GetFrameTime();
+        if (transformationTimer <= 0) {
+            isTransforming = false;
+        }
+        return; 
+    }
+    
     if (isTransforming) {
         transformationTimer -= GetFrameTime();
         if (transformationTimer <= 0) {
@@ -88,9 +101,10 @@ void Mario::update(const std::vector<Rectangle>& statics, float cameraX, std::ve
     for (auto it = mushrooms.begin(); it != mushrooms.end(); ) {
         if (CheckCollisionRecs(this->returnRec(), (*it)->returnRec())) {
             if (!isBig && !isTransforming) {
+                isBig = true;
                 isTransforming = true;
                 transformationTimer = transformationDuration;
-                posY -= TILE_SIZE; 
+                posY -= TILE_SIZE;
             }
             it = mushrooms.erase(it);
         } else {
@@ -100,32 +114,46 @@ void Mario::update(const std::vector<Rectangle>& statics, float cameraX, std::ve
 }
 
 void Mario::draw() {
+    if (isInvincible && !isTransforming) {
+        if ((int)(GetTime() * 15) % 2 == 0) return; 
+    }
+
     float sourceX;
     float sourceY = 8.0f;
     float sourceHeight = 16.0f;
     float drawHeight = (float)TILE_SIZE;
     float drawY = posY;
 
-    if (!isGrounded) sourceX = 96.0f;
-    else if (velX > 0.1f || velX < -0.1f) sourceX = walkFrames[currentFrame];
-    else sourceX = 0.0f;
+    if (!isGrounded) {
+        sourceX = 96.0f;
+    } else if (velX > 0.1f || velX < -0.1f) {
+        sourceX = walkFrames[currentFrame];
+    } else {
+        sourceX = 0.0f;
+    }
 
     if (isTransforming) {
         bool toggle = (int)(transformationTimer * 15) % 2 == 0;
+        
         if (toggle) {
             sourceY = 32.0f; 
-            sourceHeight = 32.0f;
+            sourceHeight = 32.0f; 
             drawHeight = (float)TILE_SIZE * 2;
+            drawY = posY - TILE_SIZE;
         } else {
-            drawY += TILE_SIZE; 
+            sourceY = 8.0f; 
+            sourceHeight = 16.0f; 
+            drawHeight = (float)TILE_SIZE;
+            drawY = posY;
         }
     } else if (isBig) {
         sourceY = 32.0f; 
-        sourceHeight = 32.0f;
+        sourceHeight = 32.0f; 
         drawHeight = (float)TILE_SIZE * 2;
     }
 
     Rectangle sourceRec = { sourceX, sourceY, 16.0f, sourceHeight };
+    
     if (!facingRight) sourceRec.width = -16.0f;
 
     DrawTexturePro(
@@ -154,4 +182,17 @@ void Mario::drawDebug() {
     DrawRectangleLinesEx(returnRec(), 2.0f, GREEN);
     
     DrawCircle(posX, posY, 5, RED);
+}
+
+void Mario::startShrink() {
+    if (!isTransforming && isBig) {
+        isBig = false;
+        posY += TILE_SIZE;
+
+        isTransforming = true;
+        transformationTimer = transformationDuration;
+        
+        isInvincible = true;
+        invincibilityTimer = invincibilityDuration + transformationDuration; 
+    }
 }

@@ -36,6 +36,10 @@ class Mario {
         const float bigWalkFrames[3] = { 20.0f, 38.0f, 56.0f };
         const float frameDuration = 0.1f;
 
+        bool isInvincible = false;
+        float invincibilityTimer = 0.0f;
+        const float invincibilityDuration = 2.0f;
+
     public:
         Mario(int x, int y, Texture2D sprites);
         Rectangle returnRec();
@@ -49,6 +53,8 @@ class Mario {
         void setIsBig(bool b) { isBig = b; }
         void setVelY(float y) { velY = y; }
         bool getIsTransforming() const { return isTransforming; }
+        void startShrink();
+        bool getIsInvincible() const { return isInvincible; }
 };
 
 #endif
