@@ -44,6 +44,7 @@ int main() {
     std::vector<Rectangle> collisionObjects;
     std::vector<std::unique_ptr<Mushroom>> activeMushrooms;
     std::vector<Particle> brickParticles;
+    std::vector<BackgroundProp> levelProps;
 
     Mario MarioObj(100, 0, marioSheet);
 
@@ -62,11 +63,19 @@ int main() {
         activeMushrooms.clear();
         brickParticles.clear();
         collisionObjects.clear();
+        levelProps.clear();
+
+        levelProps.push_back(BackgroundProp(0, 474, spriteSheet, HILL_LAYOUT));
+        levelProps.push_back(BackgroundProp(460, 558, spriteSheet, GRASS_LAYOUT));
+        levelProps.push_back(BackgroundProp(320, 220, spriteSheet, CLOUD_LAYOUT));
+        levelProps.push_back(BackgroundProp(670, 516, spriteSheet, SMALL_HILL_LAYOUT));
+        levelProps.push_back(BackgroundProp(1000, 220, spriteSheet, CLOUD_LAYOUT));
 
         goombas.push_back(std::make_unique<Goomba>((22 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet));
+        goombas.push_back(std::make_unique<Goomba>((32 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet));
 
         blocks.push_back(std::make_unique<DrawTiledRect>(
-            0, 600, 1500, 80, spriteSheet, (Rectangle){0, 16, 16, 16}, TILE_SIZE, TILE_SIZE
+            0, 600, 2000, 80, spriteSheet, (Rectangle){0, 16, 16, 16}, TILE_SIZE, TILE_SIZE
         ));
         blocks.push_back(std::make_unique<PowerUpBlock>((16 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, spriteSheet, "coin"));
         blocks.push_back(std::make_unique<BrickBlock>((20 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet));
@@ -75,17 +84,8 @@ int main() {
         blocks.push_back(std::make_unique<BrickBlock>((22 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet));
         blocks.push_back(std::make_unique<PowerUpBlock>((23 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, spriteSheet, "coin"));
         blocks.push_back(std::make_unique<BrickBlock>((24 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet));
-        blocks.push_back(std::make_unique<PipeBlock>(
-            (28 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2, 2, spriteSheet
-        ));
-        blocks.push_back(std::make_unique<PipeBlock>(
-            (38 * TILE_SIZE), (11 * TILE_SIZE) + 12, 2, 3, spriteSheet
-        ));
-        /* blocks.push_back(std::make_unique<BrickBlock>(500, 400, spriteSheet));
-        blocks.push_back(std::make_unique<PowerUpBlock>(542, 400, spriteSheet, mushroomSheet, "mushroom"));
-        blocks.push_back(std::make_unique<BrickBlock>(584, 400, spriteSheet));
-        blocks.push_back(std::make_unique<PowerUpBlock>(626, 400, spriteSheet, spriteSheet, "coin"));
-        blocks.push_back(std::make_unique<BrickBlock>(668, 400, spriteSheet)); */
+        blocks.push_back(std::make_unique<PipeBlock>((28 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2, 2, spriteSheet));
+        blocks.push_back(std::make_unique<PipeBlock>((38 * TILE_SIZE), (11 * TILE_SIZE) + 12, 2, 3, spriteSheet));
 
         for (auto& block : blocks) {
             collisionObjects.push_back(block->returnRec());
@@ -133,12 +133,8 @@ int main() {
                     if (!MarioObj.getIsTransforming()) {
                         (*it)->update(collisionObjects, MarioObj, isDead, deathTimer, camera.target.x);
                     } 
-
-                    if ((*it)->shouldRemove()) {
-                        it = goombas.erase(it);
-                    } else {
-                        ++it;
-                    }
+                    if ((*it)->shouldRemove()) it = goombas.erase(it);
+                    else ++it;
                 }
 
                 BrickBlock::updateParticles(brickParticles);
@@ -160,29 +156,18 @@ int main() {
                 if (deathTimer <= 0) ResetLevel();
             }
 
-            std::vector<BackgroundProp> levelProps;
-            levelProps.push_back(BackgroundProp(0, 474, spriteSheet, HILL_LAYOUT));
-            levelProps.push_back(BackgroundProp(460, 558, spriteSheet, GRASS_LAYOUT));
-            levelProps.push_back(BackgroundProp(320, 220, spriteSheet, CLOUD_LAYOUT));
-            levelProps.push_back(BackgroundProp(670, 516, spriteSheet, SMALL_HILL_LAYOUT));
-            levelProps.push_back(BackgroundProp(1000, 220, spriteSheet, CLOUD_LAYOUT));
-
             BeginDrawing();
                 ClearBackground(Color({91, 140, 255, 255}));
                 BeginMode2D(camera);
                     for (auto& prop : levelProps) prop.draw();
                     for (auto& block : blocks) block->draw();
                     for (auto& mush : activeMushrooms) mush->draw();
-                    for (auto& goom : goombas) {
-                        goom->draw();
-                        //goom->drawDebug();
-                    }
+                    for (auto& goom : goombas) goom->draw();
                     BrickBlock::drawParticles(brickParticles, spriteSheet);
                     MarioObj.draw();
-                    //MarioObj.drawDebug();
                 EndMode2D();
+                
                 DrawText("swag bros", 50, 50, 36, WHITE);
-
                 if (isDead) {
                     DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.6f));
                     int textWidth = MeasureText("skull emoji", 60);
