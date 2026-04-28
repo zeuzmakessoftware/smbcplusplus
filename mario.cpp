@@ -139,12 +139,12 @@ void Mario::draw() {
             sourceY = 32.0f; 
             sourceHeight = 32.0f; 
             drawHeight = (float)TILE_SIZE * 2;
-            drawY = posY - TILE_SIZE;
+            drawY = isBig ? posY : posY - TILE_SIZE;
         } else {
             sourceY = 8.0f; 
             sourceHeight = 16.0f; 
             drawHeight = (float)TILE_SIZE;
-            drawY = posY;
+            drawY = isBig ? posY + TILE_SIZE : posY;
         }
     } else if (isBig) {
         sourceY = 32.0f; 
