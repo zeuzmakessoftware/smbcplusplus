@@ -2,8 +2,9 @@
 
 DrawTiledRect::DrawTiledRect(int rectX, int rectY, int rectW, int rectH, Texture2D sprites, 
     Rectangle textureLoc, int tileW, int tileH) 
-    : rectXPos(rectX), rectYPos(rectY), rectWidth(rectW), rectHeight(rectH), 
-    spriteSheet(sprites), textureLocation(textureLoc), tileWidth(tileW), tileHeight(tileH)
+    : Block(rectX, rectY, sprites),
+      rectWidth(rectW), rectHeight(rectH), 
+      textureLocation(textureLoc), tileWidth(tileW), tileHeight(tileH)
     {}
 
 Rectangle DrawTiledRect::returnRec() {
@@ -21,11 +22,8 @@ void DrawTiledRect::draw() {
     else {
         for (float i = (float)rectYPos; i < (float)rectYPos + rectHeight; i += tileHeight) {
             for (float j = (float)rectXPos; j < (float)rectXPos + rectWidth; j += tileWidth) {
-                
                 Rectangle destRec = { j, i, (float)tileWidth, (float)tileHeight };
-                Vector2 origin = { 0, 0 };
-                
-                DrawTexturePro(spriteSheet, textureLocation, destRec, origin, 0.0f, WHITE);
+                DrawTexturePro(spriteSheet, textureLocation, destRec, {0, 0}, 0.0f, WHITE);
             }
         }
     }

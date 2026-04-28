@@ -45,7 +45,6 @@ int main() {
     std::vector<std::unique_ptr<Mushroom>> activeMushrooms;
     std::vector<Particle> brickParticles;
 
-    DrawTiledRect Ground1(0, 600, 870, 80, spriteSheet, {0, 16, 16, 16}, TILE_SIZE, TILE_SIZE);
     Mario MarioObj(100, 0, marioSheet);
 
     Camera2D camera = { 0 };
@@ -66,13 +65,15 @@ int main() {
 
         goombas.push_back(std::make_unique<Goomba>(800, 600, enemiesSheet));
 
+        blocks.push_back(std::make_unique<DrawTiledRect>(
+            0, 600, 1500, 80, spriteSheet, (Rectangle){0, 16, 16, 16}, TILE_SIZE, TILE_SIZE
+        ));
         blocks.push_back(std::make_unique<BrickBlock>(500, 400, spriteSheet));
         blocks.push_back(std::make_unique<PowerUpBlock>(542, 400, spriteSheet, mushroomSheet, "mushroom"));
         blocks.push_back(std::make_unique<BrickBlock>(584, 400, spriteSheet));
         blocks.push_back(std::make_unique<PowerUpBlock>(626, 400, spriteSheet, spriteSheet, "coin"));
         blocks.push_back(std::make_unique<BrickBlock>(668, 400, spriteSheet));
 
-        collisionObjects.push_back(Ground1.returnRec());
         for (auto& block : blocks) {
             collisionObjects.push_back(block->returnRec());
         }
@@ -104,7 +105,6 @@ int main() {
                         it = blocks.erase(it);
                         
                         collisionObjects.clear();
-                        collisionObjects.push_back(Ground1.returnRec());
                         for (auto& b : blocks) collisionObjects.push_back(b->returnRec());
                     } else {
                         auto* pBlock = dynamic_cast<PowerUpBlock*>(it->get());
@@ -157,7 +157,6 @@ int main() {
             BeginDrawing();
                 ClearBackground(Color({91, 140, 255, 255}));
                 BeginMode2D(camera);
-                    Ground1.draw(); 
                     for (auto& prop : levelProps) prop.draw();
                     for (auto& block : blocks) block->draw();
                     for (auto& mush : activeMushrooms) mush->draw();
