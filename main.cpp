@@ -63,16 +63,23 @@ int main() {
         brickParticles.clear();
         collisionObjects.clear();
 
-        goombas.push_back(std::make_unique<Goomba>(800, 600, enemiesSheet));
+        goombas.push_back(std::make_unique<Goomba>((22 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet));
 
         blocks.push_back(std::make_unique<DrawTiledRect>(
             0, 600, 1500, 80, spriteSheet, (Rectangle){0, 16, 16, 16}, TILE_SIZE, TILE_SIZE
         ));
-        blocks.push_back(std::make_unique<BrickBlock>(500, 400, spriteSheet));
+        blocks.push_back(std::make_unique<PowerUpBlock>((16 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, spriteSheet, "coin"));
+        blocks.push_back(std::make_unique<BrickBlock>((20 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet));
+        blocks.push_back(std::make_unique<PowerUpBlock>((21 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "mushroom"));
+        blocks.push_back(std::make_unique<PowerUpBlock>((22 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, spriteSheet, "coin"));
+        blocks.push_back(std::make_unique<BrickBlock>((22 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet));
+        blocks.push_back(std::make_unique<PowerUpBlock>((23 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, spriteSheet, "coin"));
+        blocks.push_back(std::make_unique<BrickBlock>((24 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet));
+        /* blocks.push_back(std::make_unique<BrickBlock>(500, 400, spriteSheet));
         blocks.push_back(std::make_unique<PowerUpBlock>(542, 400, spriteSheet, mushroomSheet, "mushroom"));
         blocks.push_back(std::make_unique<BrickBlock>(584, 400, spriteSheet));
         blocks.push_back(std::make_unique<PowerUpBlock>(626, 400, spriteSheet, spriteSheet, "coin"));
-        blocks.push_back(std::make_unique<BrickBlock>(668, 400, spriteSheet));
+        blocks.push_back(std::make_unique<BrickBlock>(668, 400, spriteSheet)); */
 
         for (auto& block : blocks) {
             collisionObjects.push_back(block->returnRec());
@@ -132,7 +139,7 @@ int main() {
                 for (auto& mush : activeMushrooms) mush->update(collisionObjects);
                 MarioObj.update(collisionObjects, camera.target.x, activeMushrooms);
 
-                float scrollThreshold = screenWidth / 1.67f;
+                float scrollThreshold = screenWidth / 1.967f;
                 if (MarioObj.getPos().x > scrollThreshold) {
                     float targetX = MarioObj.getPos().x - scrollThreshold;
                     if (targetX > camera.target.x) camera.target.x = targetX;
