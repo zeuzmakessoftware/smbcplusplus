@@ -4,4 +4,4 @@ all:
 
 texture:
 	g++ textureFinderDebug.cpp -o textureFinderDebug -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
-	./textureFinderDebug "52570.png"
+	./textureFinderDebug "52571.png"

@@ -89,4 +89,19 @@ public:
     void drawDebug() override;
 };
 
+class PipeBlock : public Block {
+private:
+    int tilesWide;
+    int tilesHigh;
+
+public:
+    PipeBlock(int x, int y, int width, int height, Texture2D sprites);
+    
+    Rectangle returnRec() override;
+    
+    void update(Rectangle marioRec, float marioVelY, bool isBig) override {} 
+    
+    void draw() override;
+};
+
 #endif

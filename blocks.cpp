@@ -183,3 +183,35 @@ void PowerUpBlock::drawDebug() {
     DrawRectangleLinesEx(returnRec(), 1.0f, BLUE);
     DrawRectangleLinesEx(getSensor(), 1.0f, RED);
 }
+
+PipeBlock::PipeBlock(int x, int y, int width, int height, Texture2D sprites) 
+    : Block(x, y, sprites), tilesWide(width), tilesHigh(height) {}
+
+Rectangle PipeBlock::returnRec() {
+    return { (float)rectXPos, (float)rectYPos, (float)tilesWide * TILE_SIZE, (float)tilesHigh * TILE_SIZE };
+}
+
+void PipeBlock::draw() {
+    for (int i = 0; i < tilesWide; i++) {
+        for (int j = 0; j < tilesHigh; j++) {
+            Rectangle src;
+
+            if (j == 0) { 
+                src = (i == 0) ? (Rectangle){ 119.0f, 196.0f, 16.0f, 16.0f }
+                               : (Rectangle){ 136.0f, 196.0f, 16.0f, 16.0f };
+            } else { 
+                src = (i == 0) ? (Rectangle){ 119.0f, 213.0f, 16.0f, 16.0f }
+                               : (Rectangle){ 136.0f, 213.0f, 16.0f, 16.0f };
+            }
+
+            DrawTexturePro(spriteSheet, src,
+                (Rectangle){ 
+                    (float)rectXPos + (i * TILE_SIZE), 
+                    (float)rectYPos + (j * TILE_SIZE), 
+                    (float)TILE_SIZE, 
+                    (float)TILE_SIZE 
+                },
+                {0, 0}, 0.0f, WHITE);
+        }
+    }
+}

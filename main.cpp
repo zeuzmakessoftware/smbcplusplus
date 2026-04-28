@@ -75,6 +75,12 @@ int main() {
         blocks.push_back(std::make_unique<BrickBlock>((22 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet));
         blocks.push_back(std::make_unique<PowerUpBlock>((23 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, spriteSheet, "coin"));
         blocks.push_back(std::make_unique<BrickBlock>((24 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet));
+        blocks.push_back(std::make_unique<PipeBlock>(
+            (28 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2, 2, spriteSheet
+        ));
+        blocks.push_back(std::make_unique<PipeBlock>(
+            (38 * TILE_SIZE), (11 * TILE_SIZE) + 12, 2, 3, spriteSheet
+        ));
         /* blocks.push_back(std::make_unique<BrickBlock>(500, 400, spriteSheet));
         blocks.push_back(std::make_unique<PowerUpBlock>(542, 400, spriteSheet, mushroomSheet, "mushroom"));
         blocks.push_back(std::make_unique<BrickBlock>(584, 400, spriteSheet));
