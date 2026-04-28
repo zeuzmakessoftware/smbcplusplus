@@ -6,7 +6,7 @@
 #include <memory>
 #include "mushroom.h"
 
-#define TILE_SIZE 42 // Shared constant
+#define TILE_SIZE 42 
 
 class Mario {
     private:
@@ -25,19 +25,26 @@ class Mario {
         bool facingRight = true;
         Texture2D sprites;
 
+        bool isBig = false;
+        bool isTransforming = false;
+        float transformationTimer = 0.0f;
+        const float transformationDuration = 1.0f;
+
         float frameTimer = 0.0f;
         int currentFrame = 0;
         const float walkFrames[3] = { 20.0f, 38.0f, 56.0f };
+        const float bigWalkFrames[3] = { 20.0f, 38.0f, 56.0f };
         const float frameDuration = 0.1f;
 
     public:
         Mario(int x, int y, Texture2D sprites);
         Rectangle returnRec();
         Vector2 getPos();
-       void update(const std::vector<Rectangle>& statics, float cameraX, std::vector<std::unique_ptr<Mushroom>>& mushrooms);
+        void update(const std::vector<Rectangle>& statics, float cameraX, std::vector<std::unique_ptr<Mushroom>>& mushrooms);
         void draw();
         void reset(float x, float y);
         float getVelY() { return velY; }
+        void drawDebug();
 };
 
 #endif

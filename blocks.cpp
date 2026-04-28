@@ -1,14 +1,12 @@
 #include "blocks.h"
 #include <iostream>
 
-// Base Block
 Block::Block(int x, int y, Texture2D sprites) : rectXPos(x), rectYPos(y), spriteSheet(sprites) {}
 
 Rectangle Block::returnRec() {
     return {(float)rectXPos + 4, (float)rectYPos, (float)TILE_SIZE - 8, (float)TILE_SIZE};
 }
 
-// Brick Block
 BrickBlock::BrickBlock(int x, int y, Texture2D sprites) : Block(x, y, sprites) {}
 
 Rectangle BrickBlock::getSensor() {
@@ -16,7 +14,7 @@ Rectangle BrickBlock::getSensor() {
 }
 
 void BrickBlock::update(Rectangle marioRec, float marioVelY) {
-    if (!isBumping && marioVelY < 0 && CheckCollisionRecs(marioRec, getSensor())) {
+    if (!isBumping && CheckCollisionRecs(marioRec, getSensor())) {
         isBumping = true;
         bumpTimer = 0.1f;
     }
@@ -39,7 +37,11 @@ void BrickBlock::draw() {
         (Vector2){ 0, 0 }, 0.0f, WHITE);
 }
 
-// Empty Block
+void BrickBlock::drawDebug() {
+    DrawRectangleLinesEx(returnRec(), 1.0f, BLUE);
+    DrawRectangleLinesEx(getSensor(), 1.0f, RED);
+}
+
 EmptyBlock::EmptyBlock(int x, int y, Texture2D sprites) : Block(x, y, sprites) {}
 
 void EmptyBlock::draw() {
@@ -72,7 +74,12 @@ void PowerUpBlock::update(Rectangle marioRec, float marioVelY) {
         }
     }
 
-    if (!isSpent && !isBumping && marioVelY < 0 && CheckCollisionRecs(marioRec, getSensor())) {
+    printf("marioRec: x=%.2f, y=%.2f, w=%.2f, h=%.2f\n", 
+        marioRec.x, marioRec.y, marioRec.width, marioRec.height);
+    printf("getSensor(): x=%.2f, y=%.2f, w=%.2f, h=%.2f\n", 
+        getSensor().x, getSensor().y, getSensor().width, getSensor().height);
+
+    if (!isSpent && !isBumping && CheckCollisionRecs(marioRec, getSensor())) {
         isBumping = true;
         bumpTimer = 0.1f;
         isSpent = true;
@@ -80,7 +87,7 @@ void PowerUpBlock::update(Rectangle marioRec, float marioVelY) {
         
         if (itemType == "coin") {
             std::cout << "Money!" << std::endl;
-            spawnTimer = 0.2f; 
+            spawnTimer = 0.1f; 
         } else if (itemType == "mushroom") {
             spawnTimer = 1.0f;
         }
@@ -134,4 +141,9 @@ void PowerUpBlock::draw() {
     DrawTexturePro(spriteSheet, blockSrc, 
         (Rectangle){ (float)rectXPos, (float)rectYPos + offsetY, (float)TILE_SIZE, (float)TILE_SIZE }, 
         {0,0}, 0.0f, WHITE);
+}
+
+void PowerUpBlock::drawDebug() {
+    DrawRectangleLinesEx(returnRec(), 1.0f, BLUE);
+    DrawRectangleLinesEx(getSensor(), 1.0f, RED);
 }

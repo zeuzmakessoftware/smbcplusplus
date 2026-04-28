@@ -129,6 +129,10 @@ int main() {
                         mush->draw();
                     }
                     MarioObj.draw();
+                    /* for (auto& block : blocks) {
+                        block->drawDebug();
+                    }
+                    MarioObj.drawDebug(); FOR DEBUG */
                 EndMode2D();
                 DrawText("swag bros", 50, 50, 36, WHITE);
 

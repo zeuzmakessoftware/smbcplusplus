@@ -20,6 +20,7 @@ public:
     virtual Rectangle returnRec();
     virtual void update(Rectangle marioRec, float marioVelY) = 0;
     virtual void draw() = 0;
+    virtual void drawDebug() {}
 };
 
 class BrickBlock : public Block {
@@ -33,6 +34,7 @@ public:
     Rectangle getSensor();
     void update(Rectangle marioRec, float marioVelY) override;
     void draw() override;
+    void drawDebug() override;
 };
 
 class EmptyBlock : public Block {
@@ -65,6 +67,7 @@ public:
     std::unique_ptr<Mushroom> takeMushroom(); 
     void update(Rectangle marioRec, float marioVelY) override;
     void draw() override;
+    void drawDebug() override;
 };
 
 #endif
