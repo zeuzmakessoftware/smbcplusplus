@@ -28,7 +28,17 @@ void Goomba::updatePhysics(const std::vector<Rectangle>& statics) {
     }
 }
 
-void Goomba::update(const std::vector<Rectangle>& statics, Mario& marioObj, bool& marioIsDead, float& deathTimer) {
+void Goomba::update(const std::vector<Rectangle>& statics, Mario& marioObj, bool& marioIsDead, float& deathTimer, float cameraX) {
+    if (!isAlive) return;
+
+    if (!isActivated) {
+        if (pos.x < cameraX + 700) {
+            isActivated = true;
+        } else {
+            return;
+        }
+    }
+    
     if (isSquashed) {
         squashTimer -= GetFrameTime();
         if (squashTimer <= 0) isAlive = false;

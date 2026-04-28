@@ -12,6 +12,7 @@ private:
     float velY = 0.0f;
     bool isSquashed = false;
     bool isAlive = true;
+    bool isActivated = false;
     float squashTimer = 1.0f;
     
     Texture2D sprites;
@@ -23,7 +24,7 @@ public:
     void update(const std::vector<Rectangle>& statics, Rectangle marioRec, bool& marioIsDead, bool& marioIsBig, float& marioVelY, float& deathTimer);
     void draw();
     bool shouldRemove() const { return !isAlive; }
-    void update(const std::vector<Rectangle>& statics, Mario& marioObj, bool& marioIsDead, float& deathTimer);
+    void update(const std::vector<Rectangle>& statics, Mario& marioObj, bool& marioIsDead, float& deathTimer, float cameraX);
     void updatePhysics(const std::vector<Rectangle>& statics);
     void drawDebug();
 };

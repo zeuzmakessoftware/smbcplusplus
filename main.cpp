@@ -64,13 +64,13 @@ int main() {
         brickParticles.clear();
         collisionObjects.clear();
 
-        goombas.push_back(std::make_unique<Goomba>(800, 500, enemiesSheet));
+        goombas.push_back(std::make_unique<Goomba>(800, 600, enemiesSheet));
 
-        blocks.push_back(std::make_unique<BrickBlock>(500-(TILE_SIZE*8), 400, spriteSheet));
-        blocks.push_back(std::make_unique<PowerUpBlock>(542-(TILE_SIZE*8), 400, spriteSheet, mushroomSheet, "mushroom"));
-        blocks.push_back(std::make_unique<BrickBlock>(584-(TILE_SIZE*8), 400, spriteSheet));
-        blocks.push_back(std::make_unique<PowerUpBlock>(626-(TILE_SIZE*8), 400, spriteSheet, spriteSheet, "coin"));
-        blocks.push_back(std::make_unique<BrickBlock>(668-(TILE_SIZE*8), 400, spriteSheet));
+        blocks.push_back(std::make_unique<BrickBlock>(500, 400, spriteSheet));
+        blocks.push_back(std::make_unique<PowerUpBlock>(542, 400, spriteSheet, mushroomSheet, "mushroom"));
+        blocks.push_back(std::make_unique<BrickBlock>(584, 400, spriteSheet));
+        blocks.push_back(std::make_unique<PowerUpBlock>(626, 400, spriteSheet, spriteSheet, "coin"));
+        blocks.push_back(std::make_unique<BrickBlock>(668, 400, spriteSheet));
 
         collisionObjects.push_back(Ground1.returnRec());
         for (auto& block : blocks) {
@@ -118,7 +118,7 @@ int main() {
 
                 for (auto it = goombas.begin(); it != goombas.end(); ) {
                     if (!MarioObj.getIsTransforming()) {
-                        (*it)->update(collisionObjects, MarioObj, isDead, deathTimer);
+                        (*it)->update(collisionObjects, MarioObj, isDead, deathTimer, camera.target.x);
                     } 
 
                     if ((*it)->shouldRemove()) {
@@ -163,11 +163,11 @@ int main() {
                     for (auto& mush : activeMushrooms) mush->draw();
                     for (auto& goom : goombas) {
                         goom->draw();
-                        goom->drawDebug();
+                        //goom->drawDebug();
                     }
                     BrickBlock::drawParticles(brickParticles, spriteSheet);
                     MarioObj.draw();
-                    MarioObj.drawDebug();
+                    //MarioObj.drawDebug();
                 EndMode2D();
                 DrawText("swag bros", 50, 50, 36, WHITE);
 
