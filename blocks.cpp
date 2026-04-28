@@ -74,11 +74,6 @@ void PowerUpBlock::update(Rectangle marioRec, float marioVelY) {
         }
     }
 
-    printf("marioRec: x=%.2f, y=%.2f, w=%.2f, h=%.2f\n", 
-        marioRec.x, marioRec.y, marioRec.width, marioRec.height);
-    printf("getSensor(): x=%.2f, y=%.2f, w=%.2f, h=%.2f\n", 
-        getSensor().x, getSensor().y, getSensor().width, getSensor().height);
-
     if (!isSpent && !isBumping && CheckCollisionRecs(marioRec, getSensor())) {
         isBumping = true;
         bumpTimer = 0.1f;
