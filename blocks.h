@@ -100,6 +100,9 @@ private:
     bool itemActive = false;
     float itemX, itemY;
     float spawnTimer = 0.0f;
+
+    float coinTimer = 0.0f;
+    int coinFrame = 0;
     
     std::unique_ptr<Mushroom> releasedMushroom;
     std::unique_ptr<FireFlower> releasedFireFlower;

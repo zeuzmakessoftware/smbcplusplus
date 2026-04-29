@@ -4,7 +4,7 @@ all:
 
 texture:
 	g++ textureFinderDebug.cpp -o textureFinderDebug -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
-	./textureFinderDebug "50365.png"
+	./textureFinderDebug "52571.png"
 
 editor:
 	g++ levelEditorDebug.cpp backgroundProp.cpp blocks.cpp mushroom.cpp -o levelEditorDebug -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib

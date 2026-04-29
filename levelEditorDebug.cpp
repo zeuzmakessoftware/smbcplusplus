@@ -267,7 +267,7 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects) {
                 break;
             case ObjectType::CoinBlock:
                 std::cout << "blocks.push_back(std::make_unique<PowerUpBlock>(" << Expr(obj.x)
-                          << ", " << Expr(obj.y) << ", spriteSheet, spriteSheet, \"coin\"));\n";
+                          << ", " << Expr(obj.y) << ", spriteSheet, mushroomSheet, \"coin\"));\n";
                 break;
             case ObjectType::MushroomBlock:
                 std::cout << "blocks.push_back(std::make_unique<PowerUpBlock>(" << Expr(obj.x)

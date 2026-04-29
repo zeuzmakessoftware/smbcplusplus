@@ -163,7 +163,7 @@ void PowerUpBlock::update(Rectangle marioRec, float marioVelY, bool isBig) {
         itemActive = true;
         
         if (itemType == "coin") {
-            spawnTimer = 0.1f; 
+            spawnTimer = 0.3f;
         } else if (itemType == "mushroom" || itemType == "fireflower") {
             spawnTimer = 1.0f;
         }
@@ -182,11 +182,21 @@ void PowerUpBlock::update(Rectangle marioRec, float marioVelY, bool isBig) {
     if (itemActive) {
         if (itemType == "coin") {
             spawnTimer -= GetFrameTime();
-            itemY -= 15.0f;
+
+            float progress = (0.3f - spawnTimer) / 0.3f; 
+            float arc = sinf(progress * PI); 
+            itemY = (float)rectYPos - (arc * 100.0f);
+
+            coinTimer += GetFrameTime();
+            if (coinTimer > 0.05f) {
+                coinFrame = (coinFrame + 1) % 4;
+                coinTimer = 0;
+            }
+
             if (spawnTimer <= 0) {
                 itemActive = false;
             }
-        } 
+        }
         else if (itemType == "mushroom" || itemType == "fireflower") {
             if (spawnTimer > 0) {
                 spawnTimer -= GetFrameTime();
@@ -207,13 +217,26 @@ void PowerUpBlock::update(Rectangle marioRec, float marioVelY, bool isBig) {
 void PowerUpBlock::draw() {
     if (itemActive) {
         Rectangle src;
-        if (itemType == "coin") src = { 298.0f, 95.0f, 16.0f, 16.0f };
-        else if (itemType == "mushroom") src = { 0.0f, 8.0f, 16.0f, 16.0f };
-        else if (itemType == "fireflower") src = { 32.0f, 44.0f, 16.0f, 16.0f };
-
-        DrawTexturePro(itemTexture, src,
-            (Rectangle){ itemX, itemY, (float)TILE_SIZE, (float)TILE_SIZE },
-            {0,0}, 0.0f, WHITE);
+        if (itemType == "coin") {
+            float frameX = 180.0f + (coinFrame * 10.0f); 
+            src = (Rectangle){ frameX, 36.0f, 8.0f, 16.0f };
+            
+            DrawTexturePro(itemTexture, src,
+                (Rectangle){ (float)itemX + TILE_SIZE / 4, itemY, (float)TILE_SIZE / 2, (float)TILE_SIZE },
+                {0,0}, 0.0f, WHITE);
+        }
+        else if (itemType == "mushroom") {
+            src = { 0.0f, 8.0f, 16.0f, 16.0f };
+            DrawTexturePro(itemTexture, src,
+                (Rectangle){ itemX, itemY, (float)TILE_SIZE, (float)TILE_SIZE },
+                {0,0}, 0.0f, WHITE);
+        }
+        else if (itemType == "fireflower") {
+            src = { 32.0f, 44.0f, 16.0f, 16.0f };
+            DrawTexturePro(itemTexture, src,
+                (Rectangle){ itemX, itemY, (float)TILE_SIZE, (float)TILE_SIZE },
+                {0,0}, 0.0f, WHITE);
+        }
     }
 
     Rectangle blockSrc = isSpent ? (Rectangle){ 349.0f, 78.0f, 16.0f, 16.0f } 
