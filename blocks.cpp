@@ -37,6 +37,7 @@ Rectangle BrickBlock::getSensor() {
 
 void BrickBlock::update(Rectangle marioRec, float marioVelY, bool isBig) {
     if (!isBumping && CheckCollisionRecs(marioRec, getSensor())) {
+        wasHitThisFrame = true;
         if (isBig) {
             destroyed = true; 
         } else {
@@ -108,6 +109,14 @@ void BrickBlock::drawParticles(std::vector<Particle>& particles, Texture2D sprit
     }
 }
 
+bool BrickBlock::justBumped() { 
+    if (wasHitThisFrame) {
+        wasHitThisFrame = false;
+        return true;
+    }
+    return false;
+}
+
 EmptyBlock::EmptyBlock(int x, int y, Texture2D sprites) : Block(x, y, sprites) {}
 
 void EmptyBlock::draw() {
@@ -143,6 +152,7 @@ void PowerUpBlock::update(Rectangle marioRec, float marioVelY, bool isBig) {
     }
 
     if (!isSpent && !isBumping && CheckCollisionRecs(marioRec, getSensor())) {
+        wasHitThisFrame = true;
         isBumping = true;
         bumpTimer = 0.1f;
         isSpent = true;
@@ -208,6 +218,14 @@ void PowerUpBlock::draw() {
 void PowerUpBlock::drawDebug() {
     DrawRectangleLinesEx(returnRec(), 1.0f, BLUE);
     DrawRectangleLinesEx(getSensor(), 1.0f, RED);
+}
+
+bool PowerUpBlock::justBumped() {
+    if (wasHitThisFrame) {
+        wasHitThisFrame = false;
+        return true;
+    }
+    return false;
 }
 
 PipeBlock::PipeBlock(int x, int y, int width, int height, Texture2D sprites) 

@@ -48,6 +48,7 @@ public:
     virtual Rectangle returnRec();
     virtual void update(Rectangle marioRec, float marioVelY, bool isBig = false) = 0; 
     virtual void draw() = 0;
+    virtual bool justBumped() { return false; }
     
     int getRectX() { return rectXPos; }
     int getRectY() { return rectYPos; }
@@ -61,12 +62,14 @@ private:
     float bumpTimer = 0;
     bool isBumping = false;
     bool destroyed = false; 
+    bool wasHitThisFrame = false;
 
 public:
     BrickBlock(int x, int y, Texture2D sprites);
     Rectangle getSensor();
     void update(Rectangle marioRec, float marioVelY, bool isBig) override; 
     void draw() override;
+    bool justBumped() override;
     void drawDebug() override;
     bool isDestroyed() { return destroyed; }
     
@@ -88,6 +91,7 @@ private:
     float bumpTimer = 0;
     bool isBumping = false;
     bool isSpent = false;
+    bool wasHitThisFrame = false;
     float animTimer = 0;
     int frame = 0;
 
@@ -104,6 +108,7 @@ public:
     Rectangle getSensor();
     std::unique_ptr<Mushroom> takeMushroom(); 
     void update(Rectangle marioRec, float marioVelY, bool isBig) override; 
+    bool justBumped() override;
     void draw() override;
     void drawDebug() override;
 };

@@ -19,6 +19,9 @@ private:
     float frameTimer = 0.0f;
     int currentFrame = 0;
 
+    bool isFlipped = false;
+    float rotation = 0.0f;
+
 public:
     Goomba(float x, float y, Texture2D s);
     void update(const std::vector<Rectangle>& statics, Rectangle marioRec, bool& marioIsDead, bool& marioIsBig, float& marioVelY, float& deathTimer);
@@ -27,6 +30,14 @@ public:
     void update(const std::vector<Rectangle>& statics, Mario& marioObj, bool& marioIsDead, float& deathTimer, float cameraX);
     void updatePhysics(const std::vector<Rectangle>& statics);
     void drawDebug();
+    void flip() {
+        if (!isFlipped && !isSquashed) {
+            isFlipped = true;
+            velY = -15.0f;
+            velX = 2.0f;
+        }
+    }
+    Vector2 getPos() const { return pos; }
 };
 
 #endif

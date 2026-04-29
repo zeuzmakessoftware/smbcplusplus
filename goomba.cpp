@@ -7,6 +7,14 @@ void Goomba::updatePhysics(const std::vector<Rectangle>& statics) {
 
     velY += 0.97f; 
     pos.y += velY;
+
+    if (isFlipped) {
+        rotation += 10.0f;
+        if (pos.y > 800) isAlive = false;
+        pos.x += velX;
+        return; 
+    }
+
     for (const auto& rect : statics) {
         if (CheckCollisionRecs({pos.x, pos.y, 42, 42}, rect)) {
             if (velY > 0) { pos.y = rect.y - 42; velY = 0; }
@@ -68,24 +76,21 @@ void Goomba::update(const std::vector<Rectangle>& statics, Mario& marioObj, bool
 
 void Goomba::draw() {
     if (!isAlive) return;
-
+    
     const float normalSize = 42.0f;
-    const float squashedHeight = 21.0f;
-    const float yOffset = normalSize - squashedHeight; 
+    Rectangle source = (currentFrame == 0) ? 
+        (Rectangle){ 0.0f, 16.0f, 16.0f, 16.0f } : 
+        (Rectangle){ 18.0f, 16.0f, 16.0f, 16.0f };
 
     if (isSquashed) {
-        Rectangle source = { 36.0f, 24.0f, 16.0f, 8.0f };
-        Rectangle dest   = { pos.x, pos.y + yOffset, normalSize, squashedHeight }; 
-        
-        DrawTexturePro(sprites, source, dest, { 0, 0 }, 0.0f, WHITE);
+        source = { 36.0f, 24.0f, 16.0f, 8.0f };
+        DrawTexturePro(sprites, source, { pos.x, pos.y + 21.0f, 42, 21 }, { 0, 0 }, 0.0f, WHITE);
+    } else if (isFlipped) {
+        DrawTexturePro(sprites, source, 
+            { pos.x + 21, pos.y + 21, 42, 42 },
+            { 21, 21 }, rotation, WHITE);
     } else {
-        Rectangle source = (currentFrame == 0) ? 
-            (Rectangle){ 0.0f, 16.0f, 16.0f, 16.0f } : 
-            (Rectangle){ 18.0f, 16.0f, 16.0f, 16.0f };
-            
-        Rectangle dest = { pos.x, pos.y, normalSize, normalSize };
-        
-        DrawTexturePro(sprites, source, dest, { 0, 0 }, 0.0f, WHITE);
+        DrawTexturePro(sprites, source, { pos.x, pos.y, 42, 42 }, { 0, 0 }, 0.0f, WHITE);
     }
 }
 

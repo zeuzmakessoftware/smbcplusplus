@@ -92,6 +92,18 @@ int main() {
             if (!isDead) {
                 for (auto it = blocks.begin(); it != blocks.end(); ) {
                     (*it)->update(MarioObj.returnRec(), MarioObj.getVelY(), MarioObj.getIsBig());
+
+                    if ((*it)->justBumped()) {
+                        Rectangle blockRec = (*it)->returnRec();
+                        Rectangle hitArea = { blockRec.x, blockRec.y - 10, blockRec.width, 10 };
+
+                        for (auto& goom : goombas) {
+                            Rectangle goomRec = { goom->getPos().x, goom->getPos().y, 42, 42 };
+                            if (CheckCollisionRecs(hitArea, goomRec)) {
+                                goom->flip();
+                            }
+                        }
+                    }
                     
                     auto* brick = dynamic_cast<BrickBlock*>(it->get());
                     if (brick && brick->isDestroyed()) {
