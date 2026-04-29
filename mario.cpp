@@ -165,18 +165,15 @@ void Mario::draw() {
     float drawHeight = (float)TILE_SIZE;
     float drawY = posY;
 
-    // 1. Determine X Frame (Movement)
     if (!isGrounded) {
-        sourceX = 96.0f; // Jump frame
+        sourceX = 96.0f;
     } else if (std::abs(velX) > 0.1f) {
         sourceX = walkFrames[currentFrame];
     } else {
-        sourceX = 0.0f; // Idle
+        sourceX = 0.0f;
     }
 
-    // 2. Determine Y and Animation State
     if (isTransforming) {
-        // Growth logic (cycling small and big)
         bool toggle = (int)(transformationTimer * 15) % 2 == 0;
         sourceY = toggle ? 32.0f : 8.0f;
         sourceHeight = toggle ? 32.0f : 16.0f;

@@ -63,7 +63,7 @@ void Goomba::update(const std::vector<Rectangle>& statics, Mario& marioObj, bool
     if (CheckCollisionRecs({pos.x, pos.y, 42, 42}, marioRec)) {
         if (marioVelY > 0.0f && (marioRec.y + marioRec.height) < (pos.y + 20) && !marioObj.getIsTransforming()) {
             isSquashed = true;
-            marioObj.setVelY(-15.0f);
+            marioObj.setVelY(-5.0f);
         } 
         else if (!marioObj.getIsInvincible() && !marioObj.getIsTransforming()) {
             if (marioObj.getIsBig()) {
