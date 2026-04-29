@@ -1,6 +1,28 @@
 #include "blocks.h"
 #include <iostream>
 
+static std::vector<BlockDefinition>& MutableBlockDefinitions() {
+    static std::vector<BlockDefinition> blocks;
+    return blocks;
+}
+
+BlockRegistration::BlockRegistration(const char* displayName, const char* className, Rectangle source) {
+    MutableBlockDefinitions().push_back({displayName, className, source});
+}
+
+const std::vector<BlockDefinition>& GetBlockDefinitions() {
+    return MutableBlockDefinitions();
+}
+
+const BlockDefinition* FindBlockDefinitionByClassName(const std::string& className) {
+    for (const BlockDefinition& block : GetBlockDefinitions()) {
+        if (className == block.className) {
+            return &block;
+        }
+    }
+    return nullptr;
+}
+
 Block::Block(int x, int y, Texture2D sprites) : rectXPos(x), rectYPos(y), spriteSheet(sprites) {}
 
 Rectangle Block::returnRec() {
@@ -40,6 +62,8 @@ void BrickBlock::draw() {
         (Rectangle){ (float)rectXPos, (float)rectYPos + offsetY, (float)TILE_SIZE, (float)TILE_SIZE }, 
         (Vector2){ 0, 0 }, 0.0f, WHITE);
 }
+
+REGISTER_LEVEL_EDITOR_BLOCK(BrickBlock, (Rectangle){ 17.0f, 16.0f, 16.0f, 16.0f });
 
 void BrickBlock::drawDebug() {
     DrawRectangleLinesEx(returnRec(), 1.0f, BLUE);
@@ -92,6 +116,8 @@ void EmptyBlock::draw() {
         (Rectangle){ (float)rectXPos, (float)rectYPos, (float)TILE_SIZE, (float)TILE_SIZE }, 
         (Vector2){ 0, 0 }, 0.0f, WHITE);
 }
+
+REGISTER_LEVEL_EDITOR_BLOCK(EmptyBlock, (Rectangle){ 349.0f, 78.0f, 16.0f, 16.0f });
 
 PowerUpBlock::PowerUpBlock(int x, int y, Texture2D sprites, Texture2D itemTex, std::string type) 
     : Block(x, y, sprites), itemTexture(itemTex), itemType(type) {
@@ -215,3 +241,14 @@ void PipeBlock::draw() {
         }
     }
 }
+
+ShinyBlock::ShinyBlock(int x, int y, Texture2D sprites) : Block(x, y, sprites) {}
+
+void ShinyBlock::draw() {
+    DrawTexturePro(spriteSheet, 
+        (Rectangle){ 0.0f, 33.0f, 16.0f, 16.0f }, 
+        (Rectangle){ (float)rectXPos, (float)rectYPos, (float)TILE_SIZE, (float)TILE_SIZE }, 
+        (Vector2){ 0, 0 }, 0.0f, WHITE);
+}
+
+REGISTER_LEVEL_EDITOR_BLOCK(ShinyBlock, (Rectangle){ 0.0f, 33.0f, 16.0f, 16.0f });

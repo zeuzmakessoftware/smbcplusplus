@@ -16,6 +16,25 @@ struct Particle {
     bool active;
 };
 
+struct BlockDefinition {
+    const char* displayName;
+    const char* className;
+    Rectangle source;
+};
+
+const std::vector<BlockDefinition>& GetBlockDefinitions();
+const BlockDefinition* FindBlockDefinitionByClassName(const std::string& className);
+
+class BlockRegistration {
+public:
+    BlockRegistration(const char* displayName, const char* className, Rectangle source);
+};
+
+#define REGISTER_LEVEL_EDITOR_BLOCK(BLOCK_CLASS, ...) \
+    namespace { \
+        BlockRegistration BLOCK_CLASS##_registration(#BLOCK_CLASS, #BLOCK_CLASS, __VA_ARGS__); \
+    }
+
 class Block {
 protected:
     int rectXPos;
@@ -101,6 +120,13 @@ public:
     
     void update(Rectangle marioRec, float marioVelY, bool isBig) override {} 
     
+    void draw() override;
+};
+
+class ShinyBlock : public Block {
+public:
+    ShinyBlock(int x, int y, Texture2D sprites);
+    void update(Rectangle marioRec, float marioVelY, bool isBig) override {} 
     void draw() override;
 };
 
