@@ -9,10 +9,10 @@ void Goomba::updatePhysics(const std::vector<Rectangle>& statics) {
     pos.y += velY;
 
     if (isFlipped) {
-        rotation += 10.0f;
+        rotation = 180.0f; 
         if (pos.y > 800) isAlive = false;
         pos.x += velX;
-        return; 
+        return;
     }
 
     for (const auto& rect : statics) {
@@ -54,6 +54,8 @@ void Goomba::update(const std::vector<Rectangle>& statics, Mario& marioObj, bool
     }
 
     updatePhysics(statics);
+
+    if (isFlipped) return; 
 
     Rectangle marioRec = marioObj.returnRec();
     float marioVelY = marioObj.getVelY();
