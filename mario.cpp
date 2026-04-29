@@ -13,25 +13,26 @@ Vector2 Mario::getPos() {
     return (Vector2){ (float)posX, (float)posY };
 }
 
-void Mario::update(const std::vector<Rectangle>& statics, float cameraX, std::vector<std::unique_ptr<Mushroom>>& mushrooms) {
+void Mario::update(
+    const std::vector<Rectangle>& statics,
+    float cameraX,
+    std::vector<std::unique_ptr<Mushroom>>& mushrooms,
+    std::vector<std::unique_ptr<FireFlower>>& fireFlowers,
+    std::vector<std::unique_ptr<Fireball>>& fireballs,
+    Texture2D fireballSheet
+) {
     if (isInvincible) {
         invincibilityTimer -= GetFrameTime();
         if (invincibilityTimer <= 0) isInvincible = false;
     }
-
-    if (isTransforming) {
-        transformationTimer -= GetFrameTime();
-        if (transformationTimer <= 0) {
-            isTransforming = false;
-        }
-        return; 
-    }
     
-    if (isTransforming) {
+    if (isTransforming || isFireTransforming) {
         transformationTimer -= GetFrameTime();
-        if (transformationTimer <= 0) {
+        fireTransformTimer -= GetFrameTime();
+        
+        if (transformationTimer <= 0 && fireTransformTimer <= 0) {
             isTransforming = false;
-            isBig = true;
+            isFireTransforming = false;
         }
         return;
     }
@@ -81,6 +82,12 @@ void Mario::update(const std::vector<Rectangle>& statics, float cameraX, std::ve
         isGrounded = false;
     }
 
+    if (isFire && IsKeyPressed(KEY_F) && fireballs.size() < 2) {
+        float fireballX = facingRight ? posX + TILE_SIZE - 4.0f : posX - 14.0f;
+        float fireballY = posY + (isBig ? 24.0f : 12.0f);
+        fireballs.push_back(std::make_unique<Fireball>(fireballX, fireballY, facingRight, fireballSheet));
+    }
+
     posY += velY;
     isGrounded = false;
 
@@ -127,49 +134,70 @@ void Mario::update(const std::vector<Rectangle>& statics, float cameraX, std::ve
             ++it;
         }
     }
+
+    for (auto it = fireFlowers.begin(); it != fireFlowers.end(); ) {
+        if (CheckCollisionRecs(this->returnRec(), (*it)->returnRec())) {
+            if (!isFire) {
+                isFireTransforming = true;
+                fireTransformTimer = fireTransformDuration;
+                
+                if (!isBig) {
+                    isBig = true;
+                    posY -= TILE_SIZE; 
+                }
+                isFire = true;
+            }
+            it = fireFlowers.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 void Mario::draw() {
-    if (isInvincible && !isTransforming) {
+    if (isInvincible && !isTransforming && !isFireTransforming) {
         if ((int)(GetTime() * 15) % 2 == 0) return; 
     }
 
     float sourceX;
-    float sourceY = 8.0f;
+    float sourceY = 8.0f; 
     float sourceHeight = 16.0f;
     float drawHeight = (float)TILE_SIZE;
     float drawY = posY;
 
+    // 1. Determine X Frame (Movement)
     if (!isGrounded) {
-        sourceX = 96.0f;
-    } else if (velX > 0.1f || velX < -0.1f) {
+        sourceX = 96.0f; // Jump frame
+    } else if (std::abs(velX) > 0.1f) {
         sourceX = walkFrames[currentFrame];
     } else {
-        sourceX = 0.0f;
+        sourceX = 0.0f; // Idle
     }
 
+    // 2. Determine Y and Animation State
     if (isTransforming) {
+        // Growth logic (cycling small and big)
         bool toggle = (int)(transformationTimer * 15) % 2 == 0;
-        
-        if (toggle) {
-            sourceY = 32.0f; 
-            sourceHeight = 32.0f; 
-            drawHeight = (float)TILE_SIZE * 2;
-            drawY = isBig ? posY : posY - TILE_SIZE;
-        } else {
-            sourceY = 8.0f; 
-            sourceHeight = 16.0f; 
-            drawHeight = (float)TILE_SIZE;
-            drawY = isBig ? posY + TILE_SIZE : posY;
-        }
-    } else if (isBig) {
-        sourceY = 32.0f; 
-        sourceHeight = 32.0f; 
+        sourceY = toggle ? 32.0f : 8.0f;
+        sourceHeight = toggle ? 32.0f : 16.0f;
+        drawHeight = toggle ? (float)TILE_SIZE * 2 : (float)TILE_SIZE;
+        drawY = toggle ? (isBig ? posY : posY - TILE_SIZE) : (isBig ? posY + TILE_SIZE : posY);
+    } 
+    else if (isFireTransforming) {
+        bool toggle = (int)(fireTransformTimer * 20) % 2 == 0;
+        sourceY = toggle ? 140.0f : 32.0f;
+        sourceHeight = 32.0f;
         drawHeight = (float)TILE_SIZE * 2;
+        drawY = posY;
+    }
+    else if (isBig) {
+        sourceY = isFire ? 140.0f : 32.0f; 
+        sourceHeight = 32.0f;
+        drawHeight = (float)TILE_SIZE * 2;
+        drawY = posY;
     }
 
     Rectangle sourceRec = { sourceX, sourceY, 16.0f, sourceHeight };
-    
     if (!facingRight) sourceRec.width = -16.0f;
 
     DrawTexturePro(
@@ -178,7 +206,7 @@ void Mario::draw() {
         (Rectangle){ posX, drawY, (float)TILE_SIZE, drawHeight },
         (Vector2){ 0, 0 },
         0.0f,
-        WHITE
+        WHITE 
     );
 }
 
@@ -189,6 +217,7 @@ void Mario::reset(float x, float y) {
     velY = 0;
     isGrounded = false;
     isBig = false;
+    isFire = false;
     isTransforming = false;
     currentFrame = 0;
     frameTimer = 0.0f;
@@ -202,6 +231,7 @@ void Mario::drawDebug() {
 
 void Mario::startShrink() {
     if (!isTransforming && isBig) {
+        isFire = false;
         isBig = false;
         posY += TILE_SIZE;
 

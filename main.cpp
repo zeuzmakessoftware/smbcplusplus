@@ -8,6 +8,8 @@
 #include "backgroundProp.h"
 #include "blocks.h"
 #include "mushroom.h"
+#include "fireflower.h"
+#include "fireball.h"
 #include "goomba.h"
 #include "levelData.h"
 
@@ -44,6 +46,8 @@ int main() {
     std::vector<std::unique_ptr<Goomba>> goombas;
     std::vector<Rectangle> collisionObjects;
     std::vector<std::unique_ptr<Mushroom>> activeMushrooms;
+    std::vector<std::unique_ptr<FireFlower>> activeFireFlowers;
+    std::vector<std::unique_ptr<Fireball>> activeFireballs;
     std::vector<Particle> brickParticles;
     std::vector<BackgroundProp> levelProps;
 
@@ -62,6 +66,8 @@ int main() {
         blocks.clear();
         goombas.clear();
         activeMushrooms.clear();
+        activeFireFlowers.clear();
+        activeFireballs.clear();
         brickParticles.clear();
         collisionObjects.clear();
         levelProps.clear();
@@ -117,6 +123,8 @@ int main() {
                         if (pBlock) {
                             auto newMush = pBlock->takeMushroom();
                             if (newMush) activeMushrooms.push_back(std::move(newMush));
+                            auto newFlower = pBlock->takeFireFlower();
+                            if (newFlower) activeFireFlowers.push_back(std::move(newFlower));
                         }
                         ++it;
                     }
@@ -132,7 +140,25 @@ int main() {
 
                 BrickBlock::updateParticles(brickParticles);
                 for (auto& mush : activeMushrooms) mush->update(collisionObjects);
-                MarioObj.update(collisionObjects, camera.target.x, activeMushrooms);
+                for (auto& flower : activeFireFlowers) flower->update();
+                for (auto& fireball : activeFireballs) fireball->update(collisionObjects, camera.target.x);
+
+                for (auto& fireball : activeFireballs) {
+                    for (auto& goom : goombas) {
+                        Rectangle goomRec = { goom->getPos().x, goom->getPos().y, 42, 42 };
+                        if (CheckCollisionRecs(fireball->returnRec(), goomRec)) {
+                            goom->flip();
+                            fireball->destroy();
+                        }
+                    }
+                }
+
+                for (auto it = activeFireballs.begin(); it != activeFireballs.end(); ) {
+                    if ((*it)->shouldRemove()) it = activeFireballs.erase(it);
+                    else ++it;
+                }
+
+                MarioObj.update(collisionObjects, camera.target.x, activeMushrooms, activeFireFlowers, activeFireballs, mushroomSheet);
 
                 float scrollThreshold = screenWidth / 1.967f;
                 if (MarioObj.getPos().x > scrollThreshold) {
@@ -155,6 +181,8 @@ int main() {
                     for (auto& prop : levelProps) prop.draw();
                     for (auto& block : blocks) block->draw();
                     for (auto& mush : activeMushrooms) mush->draw();
+                    for (auto& flower : activeFireFlowers) flower->draw();
+                    for (auto& fireball : activeFireballs) fireball->draw();
                     for (auto& goom : goombas) goom->draw();
                     BrickBlock::drawParticles(brickParticles, spriteSheet);
                     MarioObj.draw();
@@ -172,6 +200,7 @@ int main() {
     UnloadTexture(spriteSheet);
     UnloadTexture(marioSheet);
     UnloadTexture(mushroomSheet);
+    UnloadTexture(enemiesSheet);
     CloseWindow();
     return 0;
 }

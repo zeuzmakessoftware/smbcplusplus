@@ -142,6 +142,10 @@ std::unique_ptr<Mushroom> PowerUpBlock::takeMushroom() {
     return std::move(releasedMushroom);
 }
 
+std::unique_ptr<FireFlower> PowerUpBlock::takeFireFlower() {
+    return std::move(releasedFireFlower);
+}
+
 void PowerUpBlock::update(Rectangle marioRec, float marioVelY, bool isBig) {
     if (!isSpent) {
         animTimer += GetFrameTime();
@@ -160,7 +164,7 @@ void PowerUpBlock::update(Rectangle marioRec, float marioVelY, bool isBig) {
         
         if (itemType == "coin") {
             spawnTimer = 0.1f; 
-        } else if (itemType == "mushroom") {
+        } else if (itemType == "mushroom" || itemType == "fireflower") {
             spawnTimer = 1.0f;
         }
     }
@@ -183,12 +187,16 @@ void PowerUpBlock::update(Rectangle marioRec, float marioVelY, bool isBig) {
                 itemActive = false;
             }
         } 
-        else if (itemType == "mushroom") {
+        else if (itemType == "mushroom" || itemType == "fireflower") {
             if (spawnTimer > 0) {
                 spawnTimer -= GetFrameTime();
                 itemY -= (TILE_SIZE * GetFrameTime());
                 if (spawnTimer <= 0) {
-                    releasedMushroom = std::make_unique<Mushroom>(itemX, itemY, itemTexture);
+                    if (itemType == "mushroom") {
+                        releasedMushroom = std::make_unique<Mushroom>(itemX, itemY, itemTexture);
+                    } else {
+                        releasedFireFlower = std::make_unique<FireFlower>(itemX, itemY, itemTexture);
+                    }
                     itemActive = false; 
                 }
             }
@@ -201,6 +209,7 @@ void PowerUpBlock::draw() {
         Rectangle src;
         if (itemType == "coin") src = { 298.0f, 95.0f, 16.0f, 16.0f };
         else if (itemType == "mushroom") src = { 0.0f, 8.0f, 16.0f, 16.0f };
+        else if (itemType == "fireflower") src = { 32.0f, 44.0f, 16.0f, 16.0f };
 
         DrawTexturePro(itemTexture, src,
             (Rectangle){ itemX, itemY, (float)TILE_SIZE, (float)TILE_SIZE },

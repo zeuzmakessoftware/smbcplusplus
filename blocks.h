@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include "mushroom.h"
+#include "fireflower.h"
 
 #define TILE_SIZE 42
 
@@ -101,12 +102,14 @@ private:
     float spawnTimer = 0.0f;
     
     std::unique_ptr<Mushroom> releasedMushroom;
+    std::unique_ptr<FireFlower> releasedFireFlower;
     Texture2D itemTexture;
 
 public:
     PowerUpBlock(int x, int y, Texture2D sprites, Texture2D itemTex, std::string type = "coin");
     Rectangle getSensor();
     std::unique_ptr<Mushroom> takeMushroom(); 
+    std::unique_ptr<FireFlower> takeFireFlower();
     void update(Rectangle marioRec, float marioVelY, bool isBig) override; 
     bool justBumped() override;
     void draw() override;
