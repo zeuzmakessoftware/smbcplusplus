@@ -224,23 +224,9 @@ static void DrawObject(const LevelObject& obj, Texture2D spriteSheet, Texture2D 
 
 static void LoadDefaultLevel(std::vector<LevelObject>& objects) {
     objects = {
-        MakePropObject(0, 0, 474),
-        MakePropObject(2, 460, 558),
-        MakePropObject(3, 320, 220),
-        MakePropObject(1, 670, 516),
-        MakePropObject(3, 1000, 220),
         {ObjectType::Goomba, 22 * TILE_SIZE, 14 * TILE_SIZE},
         {ObjectType::Goomba, 32 * TILE_SIZE, 14 * TILE_SIZE},
         {ObjectType::Ground, 0, 600, 2000, 80},
-        {ObjectType::CoinBlock, 16 * TILE_SIZE, 10 * TILE_SIZE + 12},
-        MakeBlockObject(0, 20 * TILE_SIZE, 10 * TILE_SIZE + 12),
-        {ObjectType::MushroomBlock, 21 * TILE_SIZE, 10 * TILE_SIZE + 12},
-        {ObjectType::CoinBlock, 22 * TILE_SIZE, 6 * TILE_SIZE + 12},
-        MakeBlockObject(0, 22 * TILE_SIZE, 10 * TILE_SIZE + 12),
-        {ObjectType::CoinBlock, 23 * TILE_SIZE, 10 * TILE_SIZE + 12},
-        MakeBlockObject(0, 24 * TILE_SIZE, 10 * TILE_SIZE + 12),
-        {ObjectType::Pipe, 28 * TILE_SIZE, 12 * TILE_SIZE + 12, TILE_SIZE, TILE_SIZE, 2, 2},
-        {ObjectType::Pipe, 38 * TILE_SIZE, 11 * TILE_SIZE + 12, TILE_SIZE, TILE_SIZE, 2, 3}
     };
 
 }
