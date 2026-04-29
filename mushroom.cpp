@@ -7,15 +7,27 @@ void Mushroom::update(const std::vector<Rectangle>& statics) {
     
     for (const auto& rect : statics) {
         if (CheckCollisionRecs(returnRec(), rect)) {
-            if (velY > 0) { pos.y = rect.y - 42; velY = 0; }
+            if (velY > 0) { 
+                pos.y = rect.y - 42; 
+                velY = 0; 
+            }
+            else if (velY < 0) {
+                pos.y = rect.y + rect.height;
+                velY = 0;
+            }
         }
     }
 
     pos.x += velX;
     for (const auto& rect : statics) {
         if (CheckCollisionRecs(returnRec(), rect)) {
-            velX *= -0.2;
-            pos.x += velX;
+            velX *= -1.0f; 
+            
+            if (velX > 0) {
+                pos.x = rect.x + rect.width;
+            } else {
+                pos.x = rect.x - 42;
+            }
         }
     }
 }
