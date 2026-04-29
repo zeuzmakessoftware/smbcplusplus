@@ -194,8 +194,19 @@ int main() {
                 DrawTextEx(nesFont, "swag bros", (Vector2){50, 50}, 36, 2, WHITE);
                 if (isDead) {
                     DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.6f));
-                    int textWidth = MeasureText("skull emoji", 60);
-                    DrawText("skull emoji", (screenWidth / 2) - (textWidth / 2), (screenHeight / 2) - 30, 60, RED);
+                    
+                    const char* deathText = "SKULL EMOJI";
+                    float fontSize = 30.0f;
+                    float spacing = 2.0f;
+
+                    Vector2 textSize = MeasureTextEx(nesFont, deathText, fontSize, spacing);
+
+                    Vector2 textPos = {
+                        (float)screenWidth/2 - textSize.x/2,
+                        (float)screenHeight/2 - textSize.y/2
+                    };
+
+                    DrawTextEx(nesFont, deathText, textPos, fontSize, spacing, RED);
                 }
             EndDrawing();
         }
