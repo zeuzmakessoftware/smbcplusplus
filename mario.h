@@ -14,9 +14,13 @@ class Mario {
         float velX = 0.0f;
         float velY = 0.0f;
 
-        const float acceleration = 0.3f;
+        const float walkAcceleration = 0.15f;
+        const float runAcceleration = 0.25f;
         const float friction = 0.25f;
-        const float maxSpeed = 6.0f;
+        
+        const float walkMaxSpeed = 5.0f;
+        const float runMaxSpeed = 7.6f;
+        
         const float gravity = 0.97f;
         const float jumpForce = -20.5f;
         const float terminalVelocity = 12.0f;

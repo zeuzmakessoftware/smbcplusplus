@@ -36,17 +36,30 @@ void Mario::update(const std::vector<Rectangle>& statics, float cameraX, std::ve
         return;
     }
 
+    bool isRunning = IsKeyDown(KEY_LEFT_SHIFT);
+    float currentMaxSpeed = isRunning ? runMaxSpeed : walkMaxSpeed;
+    float currentAccel = isRunning ? runAcceleration : walkAcceleration;
+
     bool moving = false;
-    if (IsKeyDown(KEY_D)) { velX += acceleration; facingRight = true; moving = true; }
-    if (IsKeyDown(KEY_A)) { velX -= acceleration; facingRight = false; moving = true; }
+    
+    if (IsKeyDown(KEY_D)) { 
+        velX += currentAccel; 
+        facingRight = true; 
+        moving = true; 
+    }
+    if (IsKeyDown(KEY_A)) { 
+        velX -= currentAccel; 
+        facingRight = false; 
+        moving = true; 
+    }
 
     if (!moving) {
         if (velX > 0) velX = (velX - friction < 0) ? 0 : velX - friction;
-        else if (velX < -0) velX = (velX + friction > 0) ? 0 : velX + friction;
+        else if (velX < 0) velX = (velX + friction > 0) ? 0 : velX + friction;
     }
 
-    if (velX > maxSpeed) velX = maxSpeed;
-    if (velX < -maxSpeed) velX = -maxSpeed;
+    if (velX > currentMaxSpeed) velX = currentMaxSpeed;
+    if (velX < -currentMaxSpeed) velX = -currentMaxSpeed;
 
     posX += velX;
     for (const auto& rect : statics) {
@@ -60,9 +73,11 @@ void Mario::update(const std::vector<Rectangle>& statics, float cameraX, std::ve
     velY += gravity;
     if (velY > terminalVelocity) velY = terminalVelocity;
 
-    if (IsKeyReleased(KEY_SPACE) && velY < -2.0f) velY = -2.0f;
+    if (IsKeyReleased(KEY_SPACE) && velY < -4.0f) velY = -4.0f; 
+    
     if (IsKeyPressed(KEY_SPACE) && isGrounded) {
-        velY = jumpForce;
+        float jumpBoost = (std::abs(velX) > walkMaxSpeed) ? -2.0f : 0.0f;
+        velY = jumpForce + jumpBoost;
         isGrounded = false;
     }
 
@@ -83,9 +98,10 @@ void Mario::update(const std::vector<Rectangle>& statics, float cameraX, std::ve
         }
     }
 
-    if (isGrounded && (velX > 0.1f || velX < -0.1f)) {
+    if (isGrounded && std::abs(velX) > 0.1f) {
         frameTimer += GetFrameTime();
-        if (frameTimer >= frameDuration) {
+        float dynamicFrameDuration = 0.15f - (std::abs(velX) / runMaxSpeed) * 0.1f;
+        if (frameTimer >= dynamicFrameDuration) {
             frameTimer = 0.0f;
             currentFrame = (currentFrame + 1) % 3;
         }
