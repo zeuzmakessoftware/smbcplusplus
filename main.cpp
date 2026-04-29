@@ -42,6 +42,9 @@ int main() {
     Texture2D enemiesSheet = LoadTextureFromImage(img4);
     UnloadImage(img4);
 
+    Font nesFont = LoadFontEx("super-mario-bros-nes.otf", 36, NULL, 0);
+    SetTextureFilter(nesFont.texture, TEXTURE_FILTER_POINT);
+
     std::vector<std::unique_ptr<Block>> blocks;
     std::vector<std::unique_ptr<Goomba>> goombas;
     std::vector<Rectangle> collisionObjects;
@@ -92,7 +95,7 @@ int main() {
             BeginDrawing();
                 if (IsKeyPressed(KEY_ENTER)) gameStarted = true;
                 ClearBackground(BLACK);
-                DrawText("press enter", 50, 50, 36, WHITE);
+                DrawTextEx(nesFont, "press enter", (Vector2){50, 50}, 36, 2, WHITE);
             EndDrawing();
         } else {
             if (!isDead) {
@@ -188,7 +191,7 @@ int main() {
                     MarioObj.draw();
                 EndMode2D();
                 
-                DrawText("swag bros", 50, 50, 36, WHITE);
+                DrawTextEx(nesFont, "swag bros", (Vector2){50, 50}, 36, 2, WHITE);
                 if (isDead) {
                     DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.6f));
                     int textWidth = MeasureText("skull emoji", 60);
@@ -201,6 +204,7 @@ int main() {
     UnloadTexture(marioSheet);
     UnloadTexture(mushroomSheet);
     UnloadTexture(enemiesSheet);
+    UnloadFont(nesFont);
     CloseWindow();
     return 0;
 }
