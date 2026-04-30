@@ -16,6 +16,7 @@ private:
         FacingRight,
         WalkingToCastle,
         ScoringTime,
+        RaiseFlag,
         Complete
     };
 
@@ -28,6 +29,7 @@ private:
     float marioX = 0.0f;
     float marioY = 0.0f;
     float flagY = 0.0f;
+    float castleFlagY = 0.0f;
     float stateTimer = 0.0f;
     float timePayoutTimer = 0.0f;
     bool bigMario = false;
@@ -40,6 +42,8 @@ private:
     float poleTopY() const;
     float poleBottomY() const;
     float castleDoorX() const;
+    float castleFlagTargetY() const;
+    float castleFlagHiddenY() const;
     Rectangle triggerRec() const;
     Rectangle marioDest() const;
     Rectangle invisibleCollisionRec() const;

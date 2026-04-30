@@ -10,6 +10,7 @@ CastleFlagpole::CastleFlagpole(float tileX, float groundY, Texture2D spriteSheet
 void CastleFlagpole::reset() {
     state = State::Waiting;
     flagY = poleTopY() + TILE_SIZE;
+    castleFlagY = castleFlagHiddenY();
     stateTimer = 0.0f;
     timePayoutTimer = 0.0f;
     marioVisible = true;
@@ -31,6 +32,14 @@ float CastleFlagpole::poleBottomY() const {
 
 float CastleFlagpole::castleDoorX() const {
     return (tileX + 5.85f) * TILE_SIZE;
+}
+
+float CastleFlagpole::castleFlagTargetY() const {
+    return groundY - TILE_SIZE * 6.0f;
+}
+
+float CastleFlagpole::castleFlagHiddenY() const {
+    return groundY - TILE_SIZE * 3.0f;
 }
 
 Rectangle CastleFlagpole::triggerRec() const {
@@ -130,16 +139,31 @@ void CastleFlagpole::update(Mario& mario, Scoreboard& scoreboard, bool& isDead) 
             state = State::ScoringTime;
             stateTimer = 0.0f;
         }
-        } else if (state == State::ScoringTime) {
-            timePayoutTimer += dt;
-            while (timePayoutTimer >= (2.0f / 60.0f) && state == State::ScoringTime) {
-                timePayoutTimer -= (2.0f / 60.0f);
-                if (!scoreboard.convertOneTimeTickToScore()) {
-                    state = State::Complete;
-                    levelFinished = true;
-                }
+    } else if (state == State::ScoringTime) {
+        timePayoutTimer += dt;
+        while (timePayoutTimer >= (2.0f / 60.0f) && state == State::ScoringTime) {
+            timePayoutTimer -= (2.0f / 60.0f);
+            if (!scoreboard.convertOneTimeTickToScore()) {
+                state = State::RaiseFlag;
+                stateTimer = 0.0f;
             }
         }
+    } else if (state == State::RaiseFlag) {
+        if (castleFlagY > castleFlagTargetY()) {
+            castleFlagY = std::max(castleFlagTargetY(), castleFlagY - (TILE_SIZE * 2.5f * dt));
+
+            if (castleFlagY <= castleFlagTargetY()) {
+                castleFlagY = castleFlagTargetY();
+                stateTimer = 0.0f; 
+            }
+        } 
+        else {
+            if (stateTimer >= 3.0f) {
+                state = State::Complete;
+                levelFinished = true;
+            }
+        }
+    }
 }
 
 void CastleFlagpole::drawMarioPlaceholder(Rectangle dest) const {
@@ -172,10 +196,8 @@ void CastleFlagpole::draw() const {
     DrawTexturePro(mushroomSheet, (Rectangle){ 92.0f, 90.0f, 16.0f, 16.0f },
         (Rectangle){ poleX() - TILE_SIZE * 0.50f, flagY, TILE_SIZE, TILE_SIZE }, (Vector2){ 0, 0 }, 0.0f, WHITE);
 
-    /*  FIX LATER THE MARIO FLAG
     DrawTexturePro(mushroomSheet, (Rectangle){ 110.0f, 90.0f, 16.0f, 16.0f },
-        (Rectangle){ poleX() + TILE_SIZE * 5.50f, groundY - TILE_SIZE * 5.0f, TILE_SIZE, TILE_SIZE }, (Vector2){ 0, 0 }, 0.0f, WHITE);
-    */
+        (Rectangle){ poleX() + TILE_SIZE * 6.0f, castleFlagY, TILE_SIZE, TILE_SIZE }, (Vector2){ 0, 0 }, 0.0f, WHITE); // THE FLAG
 
     DrawTexturePro(spriteSheet, (Rectangle){ 136.0f, 230.0f, 16.0f, 16.0f },
         (Rectangle){ poleX(), poleTopY(), TILE_SIZE, TILE_SIZE }, (Vector2){ 0, 0 }, 0.0f, WHITE);
