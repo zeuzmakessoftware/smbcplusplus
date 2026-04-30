@@ -90,7 +90,7 @@ int main() {
         MarioObj.reset(100, 0);
         castleFlagpole->reset();
         scoreboard.reset(400);
-        MarioObj.reset(7600, 0);
+        //MarioObj.reset(7600, 0);
         camera.target = (Vector2){ 0, 0 };
         isDead = false;
     };

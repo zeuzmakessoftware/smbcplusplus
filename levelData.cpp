@@ -11,7 +11,7 @@ void LoadLevel1(
     Texture2D& enemiesSheet,
     int tileSize
 ) {
-    castleFlagpole = std::make_unique<CastleFlagpole>(193.0f, 600.0f, spriteSheet, mushroomSheet, marioSheet);
+    castleFlagpole = std::make_unique<CastleFlagpole>(198.0f, 600.0f, spriteSheet, mushroomSheet, marioSheet);
 
     levelProps.push_back(BackgroundProp(0, 474, spriteSheet, HILL_LAYOUT));
     levelProps.push_back(BackgroundProp(460, 558, spriteSheet, GRASS_LAYOUT));
