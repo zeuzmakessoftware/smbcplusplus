@@ -21,6 +21,7 @@ private:
 
     bool isFlipped = false;
     float rotation = 0.0f;
+    bool defeatedThisFrame = false;
 
 public:
     Goomba(float x, float y, Texture2D s);
@@ -33,11 +34,13 @@ public:
     void flip() {
         if (!isFlipped && !isSquashed) {
             isFlipped = true;
+            defeatedThisFrame = true;
             velY = -15.0f;
             velX = 2.0f;
         }
     }
     Vector2 getPos() const { return pos; }
+    bool justDefeated();
 };
 
 #endif

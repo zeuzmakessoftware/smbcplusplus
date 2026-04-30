@@ -113,6 +113,7 @@ public:
     Rectangle getSensor();
     std::unique_ptr<Mushroom> takeMushroom(); 
     std::unique_ptr<FireFlower> takeFireFlower();
+    const std::string& getItemType() const { return itemType; }
     void update(Rectangle marioRec, float marioVelY, bool isBig) override; 
     bool justBumped() override;
     void draw() override;

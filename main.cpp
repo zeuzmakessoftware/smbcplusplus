@@ -12,6 +12,7 @@
 #include "fireball.h"
 #include "goomba.h"
 #include "levelData.h"
+#include "scoreboard.h"
 
 #define TILE_SIZE 42
 
@@ -55,6 +56,7 @@ int main() {
     std::vector<BackgroundProp> levelProps;
 
     Mario MarioObj(100, 0, marioSheet);
+    Scoreboard scoreboard(1, 1, 400);
 
     Camera2D camera = { 0 };
     camera.target = (Vector2){ 0, 0 };
@@ -82,6 +84,7 @@ int main() {
         }
 
         MarioObj.reset(100, 0);
+        scoreboard.reset(400);
         camera.target = (Vector2){ 0, 0 };
         isDead = false;
     };
@@ -99,10 +102,13 @@ int main() {
             EndDrawing();
         } else {
             if (!isDead) {
+                scoreboard.updateTimer(GetFrameTime());
+
                 for (auto it = blocks.begin(); it != blocks.end(); ) {
                     (*it)->update(MarioObj.returnRec(), MarioObj.getVelY(), MarioObj.getIsBig());
+                    bool bumped = (*it)->justBumped();
 
-                    if ((*it)->justBumped()) {
+                    if (bumped) {
                         Rectangle blockRec = (*it)->returnRec();
                         Rectangle hitArea = { blockRec.x, blockRec.y - 10, blockRec.width, 10 };
 
@@ -124,6 +130,9 @@ int main() {
                     } else {
                         auto* pBlock = dynamic_cast<PowerUpBlock*>(it->get());
                         if (pBlock) {
+                            if (bumped && pBlock->getItemType() == "coin") {
+                                scoreboard.addCoin();
+                            }
                             auto newMush = pBlock->takeMushroom();
                             if (newMush) activeMushrooms.push_back(std::move(newMush));
                             auto newFlower = pBlock->takeFireFlower();
@@ -137,6 +146,9 @@ int main() {
                     if (!MarioObj.getIsTransforming()) {
                         (*it)->update(collisionObjects, MarioObj, isDead, deathTimer, camera.target.x);
                     } 
+                    if ((*it)->justDefeated()) {
+                        scoreboard.addScore(100);
+                    }
                     if ((*it)->shouldRemove()) it = goombas.erase(it);
                     else ++it;
                 }
@@ -151,6 +163,9 @@ int main() {
                         Rectangle goomRec = { goom->getPos().x, goom->getPos().y, 42, 42 };
                         if (CheckCollisionRecs(fireball->returnRec(), goomRec)) {
                             goom->flip();
+                            if (goom->justDefeated()) {
+                                scoreboard.addScore(100);
+                            }
                             fireball->destroy();
                         }
                     }
@@ -161,7 +176,15 @@ int main() {
                     else ++it;
                 }
 
+                bool wasBig = MarioObj.getIsBig();
+                bool wasFire = MarioObj.getIsFire();
                 MarioObj.update(collisionObjects, camera.target.x, activeMushrooms, activeFireFlowers, activeFireballs, mushroomSheet);
+                if (!wasBig && MarioObj.getIsBig()) {
+                    scoreboard.addScore(1000);
+                }
+                if (!wasFire && MarioObj.getIsFire()) {
+                    scoreboard.addScore(1000);
+                }
 
                 float scrollThreshold = screenWidth / 1.967f;
                 if (MarioObj.getPos().x > scrollThreshold) {
@@ -170,6 +193,10 @@ int main() {
                 }
 
                 if (MarioObj.getPos().y > 700) {
+                    isDead = true;
+                    deathTimer = 4.0f;
+                }
+                if (scoreboard.isTimeUp()) {
                     isDead = true;
                     deathTimer = 4.0f;
                 }
@@ -191,7 +218,7 @@ int main() {
                     MarioObj.draw();
                 EndMode2D();
                 
-                DrawTextEx(nesFont, "swag bros", (Vector2){50, 50}, 36, 2, WHITE);
+                scoreboard.draw(nesFont, screenWidth);
                 if (isDead) {
                     DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.6f));
                     
