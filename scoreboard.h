@@ -26,6 +26,7 @@ public:
     void updateTimer(float frameTime);
     void addScore(int points);
     void addCoin();
+    bool convertOneTimeTickToScore(int pointsPerTick = 50);
     void setLevel(int worldNumber, int stageNumber);
     bool isTimeUp() const;
 

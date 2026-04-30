@@ -13,6 +13,7 @@
 #include "goomba.h"
 #include "levelData.h"
 #include "scoreboard.h"
+#include "castleFlagpole.h"
 
 #define TILE_SIZE 42
 
@@ -35,6 +36,7 @@ int main() {
 
     Image img3 = LoadImage("52569.png");
     ImageColorReplace(&img3, (Color){146, 144, 255, 255}, BLANK);
+    ImageColorReplace(&img3, (Color){108, 106, 255, 255}, BLANK);
     Texture2D mushroomSheet = LoadTextureFromImage(img3);
     UnloadImage(img3);
 
@@ -54,6 +56,7 @@ int main() {
     std::vector<std::unique_ptr<Fireball>> activeFireballs;
     std::vector<Particle> brickParticles;
     std::vector<BackgroundProp> levelProps;
+    std::unique_ptr<CastleFlagpole> castleFlagpole;
 
     Mario MarioObj(100, 0, marioSheet);
     Scoreboard scoreboard(1, 1, 400);
@@ -77,14 +80,17 @@ int main() {
         collisionObjects.clear();
         levelProps.clear();
 
-        LoadLevel1(blocks, goombas, levelProps, spriteSheet, mushroomSheet, enemiesSheet, TILE_SIZE);
+        LoadLevel1(blocks, goombas, levelProps, castleFlagpole, spriteSheet, mushroomSheet, marioSheet, enemiesSheet, TILE_SIZE);
 
         for (auto& block : blocks) {
             collisionObjects.push_back(block->returnRec());
         }
+        collisionObjects.push_back(castleFlagpole->returnCollisionRec());
 
         MarioObj.reset(100, 0);
+        castleFlagpole->reset();
         scoreboard.reset(400);
+        MarioObj.reset(7600, 0);
         camera.target = (Vector2){ 0, 0 };
         isDead = false;
     };
@@ -102,7 +108,9 @@ int main() {
             EndDrawing();
         } else {
             if (!isDead) {
-                scoreboard.updateTimer(GetFrameTime());
+                if (!castleFlagpole->isActive()) {
+                    scoreboard.updateTimer(GetFrameTime());
+                }
 
                 for (auto it = blocks.begin(); it != blocks.end(); ) {
                     (*it)->update(MarioObj.returnRec(), MarioObj.getVelY(), MarioObj.getIsBig());
@@ -127,6 +135,7 @@ int main() {
                         
                         collisionObjects.clear();
                         for (auto& b : blocks) collisionObjects.push_back(b->returnRec());
+                        collisionObjects.push_back(castleFlagpole->returnCollisionRec());
                     } else {
                         auto* pBlock = dynamic_cast<PowerUpBlock*>(it->get());
                         if (pBlock) {
@@ -176,15 +185,19 @@ int main() {
                     else ++it;
                 }
 
-                bool wasBig = MarioObj.getIsBig();
-                bool wasFire = MarioObj.getIsFire();
-                MarioObj.update(collisionObjects, camera.target.x, activeMushrooms, activeFireFlowers, activeFireballs, mushroomSheet);
-                if (!wasBig && MarioObj.getIsBig()) {
-                    scoreboard.addScore(1000);
+                if (!castleFlagpole->isActive()) {
+                    bool wasBig = MarioObj.getIsBig();
+                    bool wasFire = MarioObj.getIsFire();
+                    MarioObj.update(collisionObjects, camera.target.x, activeMushrooms, activeFireFlowers, activeFireballs, mushroomSheet);
+                    if (!wasBig && MarioObj.getIsBig()) {
+                        scoreboard.addScore(1000);
+                    }
+                    if (!wasFire && MarioObj.getIsFire()) {
+                        scoreboard.addScore(1000);
+                    }
                 }
-                if (!wasFire && MarioObj.getIsFire()) {
-                    scoreboard.addScore(1000);
-                }
+
+                castleFlagpole->update(MarioObj, scoreboard, isDead);
 
                 float scrollThreshold = screenWidth / 1.967f;
                 if (MarioObj.getPos().x > scrollThreshold) {
@@ -214,8 +227,13 @@ int main() {
                     for (auto& flower : activeFireFlowers) flower->draw();
                     for (auto& fireball : activeFireballs) fireball->draw();
                     for (auto& goom : goombas) goom->draw();
+
+                    castleFlagpole->draw();
+
                     BrickBlock::drawParticles(brickParticles, spriteSheet);
-                    MarioObj.draw();
+                    if (!castleFlagpole->isActive() && !castleFlagpole->isComplete()) {
+                        MarioObj.draw();
+                    }
                 EndMode2D();
                 
                 scoreboard.draw(nesFont, screenWidth);

@@ -39,6 +39,15 @@ void Scoreboard::addCoin() {
     }
 }
 
+bool Scoreboard::convertOneTimeTickToScore(int pointsPerTick) {
+    if (time <= 0) return false;
+
+    time--;
+    addScore(pointsPerTick);
+    timerAccumulator = 0.0f;
+    return true;
+}
+
 void Scoreboard::setLevel(int worldNumber, int stageNumber) {
     world = worldNumber;
     stage = stageNumber;

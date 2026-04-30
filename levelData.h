@@ -9,13 +9,16 @@
 #include "goomba.h"
 #include "mushroom.h"
 #include "drawTiledRect.h"
+#include "castleFlagpole.h"
 
 void LoadLevel1(
     std::vector<std::unique_ptr<Block>>& blocks,
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<BackgroundProp>& levelProps,
+    std::unique_ptr<CastleFlagpole>& castleFlagpole,
     Texture2D& spriteSheet,
     Texture2D& mushroomSheet,
+    Texture2D& marioSheet,
     Texture2D& enemiesSheet,
     int tileSize
 );

@@ -220,6 +220,15 @@ void Mario::reset(float x, float y) {
     frameTimer = 0.0f;
 }
 
+void Mario::setScriptedPose(float x, float y, bool faceRight) {
+    posX = x;
+    posY = y;
+    velX = 0.0f;
+    velY = 0.0f;
+    facingRight = faceRight;
+    isGrounded = true;
+}
+
 void Mario::drawDebug() {
     DrawRectangleLinesEx(returnRec(), 2.0f, GREEN);
     

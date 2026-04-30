@@ -4,11 +4,15 @@ void LoadLevel1(
     std::vector<std::unique_ptr<Block>>& blocks,
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<BackgroundProp>& levelProps,
+    std::unique_ptr<CastleFlagpole>& castleFlagpole,
     Texture2D& spriteSheet,
     Texture2D& mushroomSheet,
+    Texture2D& marioSheet,
     Texture2D& enemiesSheet,
     int tileSize
 ) {
+    castleFlagpole = std::make_unique<CastleFlagpole>(193.0f, 600.0f, spriteSheet, mushroomSheet, marioSheet);
+
     levelProps.push_back(BackgroundProp(0, 474, spriteSheet, HILL_LAYOUT));
     levelProps.push_back(BackgroundProp(460, 558, spriteSheet, GRASS_LAYOUT));
     levelProps.push_back(BackgroundProp(320, 220, spriteSheet, CLOUD_LAYOUT));
@@ -143,7 +147,7 @@ void LoadLevel1(
     blocks.push_back(std::make_unique<ShinyBlock>((152 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet));
     blocks.push_back(std::make_unique<ShinyBlock>((152 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet));
     blocks.push_back(std::make_unique<DrawTiledRect>(
-        6510, 600, 1470, 84, spriteSheet, (Rectangle){0, 16, 16, 16}, TILE_SIZE, TILE_SIZE
+        6510, 600, 2470, 84, spriteSheet, (Rectangle){0, 16, 16, 16}, TILE_SIZE, TILE_SIZE
     ));
     blocks.push_back(std::make_unique<ShinyBlock>((155 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet));
     blocks.push_back(std::make_unique<ShinyBlock>((155 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet));
