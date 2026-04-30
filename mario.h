@@ -72,6 +72,7 @@ class Mario {
         bool getIsFire() const { return isFire; }
         void setVelY(float y) { velY = y; }
         bool getIsTransforming() const { return isTransforming; }
+        bool getIsFireTransforming() const { return isFireTransforming; }
         void startShrink();
         bool getIsInvincible() const { return isInvincible; }
 };

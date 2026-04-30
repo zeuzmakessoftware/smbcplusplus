@@ -143,7 +143,7 @@ int main() {
                 }
 
                 for (auto it = goombas.begin(); it != goombas.end(); ) {
-                    if (!MarioObj.getIsTransforming()) {
+                    if (!MarioObj.getIsTransforming() && !MarioObj.getIsFireTransforming()) {
                         (*it)->update(collisionObjects, MarioObj, isDead, deathTimer, camera.target.x);
                     } 
                     if ((*it)->justDefeated()) {
