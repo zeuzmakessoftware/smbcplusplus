@@ -35,9 +35,12 @@ Rectangle BrickBlock::getSensor() {
     return {(float)rectXPos + 12, (float)rectYPos + TILE_SIZE - 2, (float)TILE_SIZE - 24, 10.0f};
 }
 
-void BrickBlock::update(Rectangle marioRec, float marioVelY, bool isBig) {
+void BrickBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
     if (!isBumping && CheckCollisionRecs(marioRec, getSensor())) {
         wasHitThisFrame = true;
+        if (marioVelY < 0.0f) {
+            marioVelY = 0.0f;
+        }
         if (isBig) {
             destroyed = true; 
         } else {
@@ -146,7 +149,7 @@ std::unique_ptr<FireFlower> PowerUpBlock::takeFireFlower() {
     return std::move(releasedFireFlower);
 }
 
-void PowerUpBlock::update(Rectangle marioRec, float marioVelY, bool isBig) {
+void PowerUpBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
     if (!isSpent) {
         animTimer += GetFrameTime();
         if (animTimer > 0.20f) {

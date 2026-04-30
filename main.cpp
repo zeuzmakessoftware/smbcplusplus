@@ -90,7 +90,6 @@ int main() {
         MarioObj.reset(100, 0);
         castleFlagpole->reset();
         scoreboard.reset(400);
-        MarioObj.reset(7600, 0);
         camera.target = (Vector2){ 0, 0 };
         isDead = false;
     };
@@ -113,7 +112,9 @@ int main() {
                 }
 
                 for (auto it = blocks.begin(); it != blocks.end(); ) {
-                    (*it)->update(MarioObj.returnRec(), MarioObj.getVelY(), MarioObj.getIsBig());
+                    float marioVelY = MarioObj.getVelY();
+                    (*it)->update(MarioObj.returnRec(), marioVelY, MarioObj.getIsBig());
+                    MarioObj.setVelY(marioVelY);
                     bool bumped = (*it)->justBumped();
 
                     if (bumped) {

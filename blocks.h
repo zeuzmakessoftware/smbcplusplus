@@ -47,7 +47,7 @@ public:
     virtual ~Block() {}
 
     virtual Rectangle returnRec();
-    virtual void update(Rectangle marioRec, float marioVelY, bool isBig = false) = 0; 
+    virtual void update(Rectangle marioRec, float& marioVelY, bool isBig = false) = 0; 
     virtual void draw() = 0;
     virtual bool justBumped() { return false; }
     
@@ -68,7 +68,7 @@ private:
 public:
     BrickBlock(int x, int y, Texture2D sprites);
     Rectangle getSensor();
-    void update(Rectangle marioRec, float marioVelY, bool isBig) override; 
+    void update(Rectangle marioRec, float& marioVelY, bool isBig) override; 
     void draw() override;
     bool justBumped() override;
     void drawDebug() override;
@@ -82,7 +82,7 @@ public:
 class EmptyBlock : public Block {
 public:
     EmptyBlock(int x, int y, Texture2D sprites);
-    void update(Rectangle marioRec, float marioVelY, bool isBig) override {} 
+    void update(Rectangle marioRec, float& marioVelY, bool isBig) override {} 
     void draw() override;
 };
 
@@ -114,7 +114,7 @@ public:
     std::unique_ptr<Mushroom> takeMushroom(); 
     std::unique_ptr<FireFlower> takeFireFlower();
     const std::string& getItemType() const { return itemType; }
-    void update(Rectangle marioRec, float marioVelY, bool isBig) override; 
+    void update(Rectangle marioRec, float& marioVelY, bool isBig) override; 
     bool justBumped() override;
     void draw() override;
     void drawDebug() override;
@@ -130,7 +130,7 @@ public:
     
     Rectangle returnRec() override;
     
-    void update(Rectangle marioRec, float marioVelY, bool isBig) override {} 
+    void update(Rectangle marioRec, float& marioVelY, bool isBig) override {} 
     
     void draw() override;
 };
@@ -138,7 +138,7 @@ public:
 class ShinyBlock : public Block {
 public:
     ShinyBlock(int x, int y, Texture2D sprites);
-    void update(Rectangle marioRec, float marioVelY, bool isBig) override {} 
+    void update(Rectangle marioRec, float& marioVelY, bool isBig) override {} 
     void draw() override;
 };
 

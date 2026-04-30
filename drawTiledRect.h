@@ -16,7 +16,7 @@ class DrawTiledRect : public Block {
             Rectangle textureLoc = {0, 0, 0, 0}, int tileW = TILE_SIZE, int tileH = TILE_SIZE);
 
         Rectangle returnRec() override;
-        void update(Rectangle marioRec, float marioVelY, bool isBig) override {}
+        void update(Rectangle marioRec, float& marioVelY, bool isBig) override {}
         void draw() override;
 };
 
