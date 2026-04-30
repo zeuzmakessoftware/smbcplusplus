@@ -14,6 +14,7 @@
 #include "levelData.h"
 #include "scoreboard.h"
 #include "castleFlagpole.h"
+#include "scorepopup.h"
 
 #define TILE_SIZE 42
 
@@ -57,6 +58,7 @@ int main() {
     std::vector<Particle> brickParticles;
     std::vector<BackgroundProp> levelProps;
     std::unique_ptr<CastleFlagpole> castleFlagpole;
+    ScorePopupManager scorePopups;
 
     Mario MarioObj(100, 0, marioSheet);
     Scoreboard scoreboard(1, 1, 400);
@@ -90,6 +92,7 @@ int main() {
         MarioObj.reset(100, 0);
         castleFlagpole->reset();
         scoreboard.reset(400);
+        scorePopups.clear();
         camera.target = (Vector2){ 0, 0 };
         isDead = false;
     };
@@ -110,6 +113,7 @@ int main() {
                 if (!castleFlagpole->isActive()) {
                     scoreboard.updateTimer(GetFrameTime());
                 }
+                scorePopups.update(GetFrameTime());
 
                 for (auto it = blocks.begin(); it != blocks.end(); ) {
                     float marioVelY = MarioObj.getVelY();
@@ -142,6 +146,7 @@ int main() {
                         if (pBlock) {
                             if (bumped && pBlock->getItemType() == "coin") {
                                 scoreboard.addCoin();
+                                scorePopups.spawn(200, { pBlock->returnRec().x, pBlock->returnRec().y - 8.0f });
                             }
                             auto newMush = pBlock->takeMushroom();
                             if (newMush) activeMushrooms.push_back(std::move(newMush));
@@ -158,6 +163,7 @@ int main() {
                     } 
                     if ((*it)->justDefeated()) {
                         scoreboard.addScore(100);
+                        scorePopups.spawn(100, { (*it)->getPos().x, (*it)->getPos().y - 10.0f });
                     }
                     if ((*it)->shouldRemove()) it = goombas.erase(it);
                     else ++it;
@@ -175,6 +181,7 @@ int main() {
                             goom->flip();
                             if (goom->justDefeated()) {
                                 scoreboard.addScore(100);
+                                scorePopups.spawn(100, { goom->getPos().x, goom->getPos().y - 10.0f });
                             }
                             fireball->destroy();
                         }
@@ -192,13 +199,15 @@ int main() {
                     MarioObj.update(collisionObjects, camera.target.x, activeMushrooms, activeFireFlowers, activeFireballs, mushroomSheet);
                     if (!wasBig && MarioObj.getIsBig()) {
                         scoreboard.addScore(1000);
+                        scorePopups.spawn(1000, { MarioObj.getPos().x, MarioObj.getPos().y - 20.0f });
                     }
                     if (!wasFire && MarioObj.getIsFire()) {
                         scoreboard.addScore(1000);
+                        scorePopups.spawn(1000, { MarioObj.getPos().x, MarioObj.getPos().y - 20.0f });
                     }
                 }
 
-                castleFlagpole->update(MarioObj, scoreboard, isDead);
+                castleFlagpole->update(MarioObj, scoreboard, scorePopups, isDead);
 
                 float scrollThreshold = screenWidth / 1.967f;
                 if (MarioObj.getPos().x > scrollThreshold) {
@@ -235,6 +244,7 @@ int main() {
                     castleFlagpole->draw();
 
                     BrickBlock::drawParticles(brickParticles, spriteSheet);
+                    scorePopups.draw(mushroomSheet);
                     if (!castleFlagpole->isActive() && !castleFlagpole->isComplete()) {
                         MarioObj.draw();
                     }

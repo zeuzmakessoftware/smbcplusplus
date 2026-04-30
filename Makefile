@@ -1,5 +1,5 @@
 all:
-	g++ main.cpp mario.cpp drawTiledRect.cpp backgroundProp.cpp blocks.cpp mushroom.cpp fireflower.cpp fireball.cpp goomba.cpp levelData.cpp scoreboard.cpp castleFlagpole.cpp -o main -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
+	g++ main.cpp mario.cpp drawTiledRect.cpp backgroundProp.cpp blocks.cpp mushroom.cpp fireflower.cpp fireball.cpp goomba.cpp levelData.cpp scoreboard.cpp scorepopup.cpp castleFlagpole.cpp -o main -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
 	./main
 
 texture:

@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include "mario.h"
 #include "scoreboard.h"
+#include "scorepopup.h"
 
 #define TILE_SIZE 42
 
@@ -54,7 +55,7 @@ public:
     CastleFlagpole(float tileX, float groundY, Texture2D spriteSheet, Texture2D mushroomSheet, Texture2D marioSheet);
 
     void reset();
-    void update(Mario& mario, Scoreboard& scoreboard, bool& isDead);
+    void update(Mario& mario, Scoreboard& scoreboard, ScorePopupManager& scorePopups, bool& isDead);
     void draw() const;
     Rectangle returnCollisionRec() const;
     bool isActive() const;

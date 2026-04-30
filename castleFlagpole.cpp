@@ -76,7 +76,7 @@ Rectangle CastleFlagpole::returnCollisionRec() const {
     return invisibleCollisionRec();
 }
 
-void CastleFlagpole::update(Mario& mario, Scoreboard& scoreboard, bool& isDead) {
+void CastleFlagpole::update(Mario& mario, Scoreboard& scoreboard, ScorePopupManager& scorePopups, bool& isDead) {
     if (state == State::Waiting) {
         if (!isDead && CheckCollisionRecs(mario.returnRec(), triggerRec())) {
             Rectangle marioRec = mario.returnRec();
@@ -87,6 +87,7 @@ void CastleFlagpole::update(Mario& mario, Scoreboard& scoreboard, bool& isDead) 
             flagY = poleTopY() + TILE_SIZE;
             poleBonusAwarded = poleBonusForCatchY(marioRec.y);
             scoreboard.addScore(poleBonusAwarded);
+            scorePopups.spawn(poleBonusAwarded, { marioRec.x, marioRec.y - 12.0f });
             mario.setScriptedPose(marioX, marioY, false);
             state = State::Sliding;
         }
