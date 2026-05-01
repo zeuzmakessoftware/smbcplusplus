@@ -169,14 +169,15 @@ void CastleFlagpole::update(Mario& mario, Scoreboard& scoreboard, ScorePopupMana
 
 void CastleFlagpole::drawMarioPlaceholder(Rectangle dest) const {
     float yOffset = fireMario ? 140.0f : (bigMario ? 32.0f : 8.0f);
+    const float poleYOffset = fireMario ? 139.0f : (bigMario ? 31.0f : yOffset);
     float spriteHeight = bigMario ? 32.0f : 16.0f;
     Rectangle source;
 
     if (state == State::Sliding || state == State::DroppingFlag) {
-        source = { 136.0f, yOffset, 16.0f, spriteHeight };
+        source = { 136.0f, poleYOffset, 16.0f, spriteHeight };
     } 
     else if (state == State::FacingRight) {
-        source = { 136.0f, yOffset, -16.0f, spriteHeight }; 
+        source = { 136.0f, poleYOffset, -16.0f, spriteHeight }; 
     } 
     else if (state == State::WalkingToCastle) {
         const int frame = ((int)(GetTime() * 10.0) % 3);
