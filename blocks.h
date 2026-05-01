@@ -7,6 +7,7 @@
 #include <memory>
 #include "mushroom.h"
 #include "fireflower.h"
+#include "sceneType.h"
 
 #define TILE_SIZE 42
 
@@ -41,9 +42,10 @@ protected:
     int rectXPos;
     int rectYPos;
     Texture2D spriteSheet;
+    const SceneType* scene;
 
 public:
-    Block(int x, int y, Texture2D sprites);
+    Block(int x, int y, Texture2D sprites, const SceneType& scene = GetSceneType(SceneKind::Overworld));
     virtual ~Block() {}
 
     virtual Rectangle returnRec();
@@ -66,7 +68,7 @@ private:
     bool wasHitThisFrame = false;
 
 public:
-    BrickBlock(int x, int y, Texture2D sprites);
+    BrickBlock(int x, int y, Texture2D sprites, const SceneType& scene = GetSceneType(SceneKind::Overworld));
     Rectangle getSensor();
     void update(Rectangle marioRec, float& marioVelY, bool isBig) override; 
     void draw() override;
@@ -75,13 +77,13 @@ public:
     bool isDestroyed() { return destroyed; }
     
     static void updateParticles(std::vector<Particle>& particles);
-    static void drawParticles(std::vector<Particle>& particles, Texture2D spriteSheet);
+    static void drawParticles(std::vector<Particle>& particles, Texture2D spriteSheet, const SceneType& scene = GetSceneType(SceneKind::Overworld));
     void SpawnBrickParticles(std::vector<Particle>& particles);
 };
 
 class EmptyBlock : public Block {
 public:
-    EmptyBlock(int x, int y, Texture2D sprites);
+    EmptyBlock(int x, int y, Texture2D sprites, const SceneType& scene = GetSceneType(SceneKind::Overworld));
     void update(Rectangle marioRec, float& marioVelY, bool isBig) override {} 
     void draw() override;
 };
@@ -109,7 +111,7 @@ private:
     Texture2D itemTexture;
 
 public:
-    PowerUpBlock(int x, int y, Texture2D sprites, Texture2D itemTex, std::string type = "coin");
+    PowerUpBlock(int x, int y, Texture2D sprites, Texture2D itemTex, std::string type = "coin", const SceneType& scene = GetSceneType(SceneKind::Overworld));
     Rectangle getSensor();
     std::unique_ptr<Mushroom> takeMushroom(); 
     std::unique_ptr<FireFlower> takeFireFlower();
@@ -126,7 +128,7 @@ private:
     int tilesHigh;
 
 public:
-    PipeBlock(int x, int y, int width, int height, Texture2D sprites);
+    PipeBlock(int x, int y, int width, int height, Texture2D sprites, const SceneType& scene = GetSceneType(SceneKind::Overworld));
     
     Rectangle returnRec() override;
     
@@ -137,7 +139,7 @@ public:
 
 class ShinyBlock : public Block {
 public:
-    ShinyBlock(int x, int y, Texture2D sprites);
+    ShinyBlock(int x, int y, Texture2D sprites, const SceneType& scene = GetSceneType(SceneKind::Overworld));
     void update(Rectangle marioRec, float& marioVelY, bool isBig) override {} 
     void draw() override;
 };

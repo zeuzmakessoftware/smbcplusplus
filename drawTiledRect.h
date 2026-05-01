@@ -13,7 +13,8 @@ class DrawTiledRect : public Block {
         Rectangle textureLocation;
     public:
         DrawTiledRect(int rectX, int rectY, int rectW, int rectH, Texture2D sprites, 
-            Rectangle textureLoc = {0, 0, 0, 0}, int tileW = TILE_SIZE, int tileH = TILE_SIZE);
+            Rectangle textureLoc = {0, 0, 0, 0}, int tileW = TILE_SIZE, int tileH = TILE_SIZE,
+            const SceneType& scene = GetSceneType(SceneKind::Overworld));
 
         Rectangle returnRec() override;
         void update(Rectangle marioRec, float& marioVelY, bool isBig) override {}

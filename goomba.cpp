@@ -1,6 +1,6 @@
 #include "goomba.h"
 
-Goomba::Goomba(float x, float y, Texture2D s) : pos({x, y}), sprites(s) {}
+Goomba::Goomba(float x, float y, Texture2D s, const SceneType& scene) : pos({x, y}), sprites(s), scene(&scene) {}
 
 void Goomba::updatePhysics(const std::vector<Rectangle>& statics) {
     if (isSquashed) return;
@@ -89,12 +89,10 @@ void Goomba::draw() {
     if (!isAlive) return;
     
     const float normalSize = 42.0f;
-    Rectangle source = (currentFrame == 0) ? 
-        (Rectangle){ 0.0f, 16.0f, 16.0f, 16.0f } : 
-        (Rectangle){ 18.0f, 16.0f, 16.0f, 16.0f };
+    Rectangle source = scene->goombaFrames[currentFrame];
 
     if (isSquashed) {
-        source = { 36.0f, 24.0f, 16.0f, 8.0f };
+        source = scene->goombaSquashed;
         DrawTexturePro(sprites, source, { pos.x, pos.y + 21.0f, 42, 21 }, { 0, 0 }, 0.0f, WHITE);
     } else if (isFlipped) {
         DrawTexturePro(sprites, source, 

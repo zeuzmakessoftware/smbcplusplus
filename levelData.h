@@ -10,6 +10,9 @@
 #include "mushroom.h"
 #include "drawTiledRect.h"
 #include "castleFlagpole.h"
+#include "sceneType.h"
+
+const SceneType& GetLevel1Scene();
 
 void LoadLevel1(
     std::vector<std::unique_ptr<Block>>& blocks,

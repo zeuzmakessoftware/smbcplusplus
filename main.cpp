@@ -232,7 +232,7 @@ int main() {
             }
 
             BeginDrawing();
-                ClearBackground(Color({91, 140, 255, 255}));
+                ClearBackground(GetLevel1Scene().backgroundColor);
                 BeginMode2D(camera);
                     for (auto& prop : levelProps) prop.draw();
                     for (auto& block : blocks) block->draw();
@@ -243,7 +243,7 @@ int main() {
 
                     castleFlagpole->draw();
 
-                    BrickBlock::drawParticles(brickParticles, spriteSheet);
+                    BrickBlock::drawParticles(brickParticles, spriteSheet, GetLevel1Scene());
                     scorePopups.draw(mushroomSheet);
                     if (!castleFlagpole->isActive() && !castleFlagpole->isComplete()) {
                         MarioObj.draw();

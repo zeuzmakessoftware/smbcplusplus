@@ -1,8 +1,8 @@
 #include "drawTiledRect.h"
 
 DrawTiledRect::DrawTiledRect(int rectX, int rectY, int rectW, int rectH, Texture2D sprites, 
-    Rectangle textureLoc, int tileW, int tileH) 
-    : Block(rectX, rectY, sprites),
+    Rectangle textureLoc, int tileW, int tileH, const SceneType& scene) 
+    : Block(rectX, rectY, sprites, scene),
       rectWidth(rectW), rectHeight(rectH), 
       textureLocation(textureLoc), tileWidth(tileW), tileHeight(tileH)
     {}

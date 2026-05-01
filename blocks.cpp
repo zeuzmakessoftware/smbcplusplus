@@ -23,13 +23,14 @@ const BlockDefinition* FindBlockDefinitionByClassName(const std::string& classNa
     return nullptr;
 }
 
-Block::Block(int x, int y, Texture2D sprites) : rectXPos(x), rectYPos(y), spriteSheet(sprites) {}
+Block::Block(int x, int y, Texture2D sprites, const SceneType& scene)
+    : rectXPos(x), rectYPos(y), spriteSheet(sprites), scene(&scene) {}
 
 Rectangle Block::returnRec() {
     return {(float)rectXPos + 4, (float)rectYPos, (float)TILE_SIZE - 8, (float)TILE_SIZE};
 }
 
-BrickBlock::BrickBlock(int x, int y, Texture2D sprites) : Block(x, y, sprites) {}
+BrickBlock::BrickBlock(int x, int y, Texture2D sprites, const SceneType& scene) : Block(x, y, sprites, scene) {}
 
 Rectangle BrickBlock::getSensor() {
     return {(float)rectXPos + 12, (float)rectYPos + TILE_SIZE - 2, (float)TILE_SIZE - 24, 10.0f};
@@ -62,7 +63,7 @@ void BrickBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
 
 void BrickBlock::draw() {
     DrawTexturePro(spriteSheet, 
-        (Rectangle){ 17.0f, 16.0f, 16.0f, 16.0f }, 
+        scene->brickBlock, 
         (Rectangle){ (float)rectXPos, (float)rectYPos + offsetY, (float)TILE_SIZE, (float)TILE_SIZE }, 
         (Vector2){ 0, 0 }, 0.0f, WHITE);
 }
@@ -103,10 +104,10 @@ void BrickBlock::updateParticles(std::vector<Particle>& particles) {
     }
 }
 
-void BrickBlock::drawParticles(std::vector<Particle>& particles, Texture2D spriteSheet) {
+void BrickBlock::drawParticles(std::vector<Particle>& particles, Texture2D spriteSheet, const SceneType& scene) {
     for (auto& p : particles) {
         DrawTexturePro(spriteSheet, 
-            (Rectangle){ 17.0f, 16.0f, 8.0f, 8.0f },
+            (Rectangle){ scene.brickBlock.x, scene.brickBlock.y, 8.0f, 8.0f },
             (Rectangle){ p.pos.x, p.pos.y, 20.0f, 20.0f }, 
             (Vector2){ 10, 10 }, p.rotation, WHITE);
     }
@@ -120,19 +121,19 @@ bool BrickBlock::justBumped() {
     return false;
 }
 
-EmptyBlock::EmptyBlock(int x, int y, Texture2D sprites) : Block(x, y, sprites) {}
+EmptyBlock::EmptyBlock(int x, int y, Texture2D sprites, const SceneType& scene) : Block(x, y, sprites, scene) {}
 
 void EmptyBlock::draw() {
     DrawTexturePro(spriteSheet, 
-        (Rectangle){ 349.0f, 78.0f, 16.0f, 16.0f }, 
+        scene->emptyBlock, 
         (Rectangle){ (float)rectXPos, (float)rectYPos, (float)TILE_SIZE, (float)TILE_SIZE }, 
         (Vector2){ 0, 0 }, 0.0f, WHITE);
 }
 
 REGISTER_LEVEL_EDITOR_BLOCK(EmptyBlock, (Rectangle){ 349.0f, 78.0f, 16.0f, 16.0f });
 
-PowerUpBlock::PowerUpBlock(int x, int y, Texture2D sprites, Texture2D itemTex, std::string type) 
-    : Block(x, y, sprites), itemTexture(itemTex), itemType(type) {
+PowerUpBlock::PowerUpBlock(int x, int y, Texture2D sprites, Texture2D itemTex, std::string type, const SceneType& scene) 
+    : Block(x, y, sprites, scene), itemTexture(itemTex), itemType(type) {
     itemX = (float)x;
     itemY = (float)y;
 }
@@ -242,8 +243,7 @@ void PowerUpBlock::draw() {
         }
     }
 
-    Rectangle blockSrc = isSpent ? (Rectangle){ 349.0f, 78.0f, 16.0f, 16.0f } 
-                                 : (Rectangle){ 298.0f + (frame * 17.0f), 78.0f, 16.0f, 16.0f };
+    Rectangle blockSrc = isSpent ? scene->emptyBlock : scene->questionBlockFrames[frame];
     
     DrawTexturePro(spriteSheet, blockSrc, 
         (Rectangle){ (float)rectXPos, (float)rectYPos + offsetY, (float)TILE_SIZE, (float)TILE_SIZE }, 
@@ -263,8 +263,8 @@ bool PowerUpBlock::justBumped() {
     return false;
 }
 
-PipeBlock::PipeBlock(int x, int y, int width, int height, Texture2D sprites) 
-    : Block(x, y, sprites), tilesWide(width), tilesHigh(height) {}
+PipeBlock::PipeBlock(int x, int y, int width, int height, Texture2D sprites, const SceneType& scene) 
+    : Block(x, y, sprites, scene), tilesWide(width), tilesHigh(height) {}
 
 Rectangle PipeBlock::returnRec() {
     return { (float)rectXPos, (float)rectYPos, (float)tilesWide * TILE_SIZE, (float)tilesHigh * TILE_SIZE };
@@ -276,11 +276,9 @@ void PipeBlock::draw() {
             Rectangle src;
 
             if (j == 0) { 
-                src = (i == 0) ? (Rectangle){ 119.0f, 196.0f, 16.0f, 16.0f }
-                               : (Rectangle){ 136.0f, 196.0f, 16.0f, 16.0f };
+                src = (i == 0) ? scene->pipeTopLeft : scene->pipeTopRight;
             } else { 
-                src = (i == 0) ? (Rectangle){ 119.0f, 213.0f, 16.0f, 16.0f }
-                               : (Rectangle){ 136.0f, 213.0f, 16.0f, 16.0f };
+                src = (i == 0) ? scene->pipeBodyLeft : scene->pipeBodyRight;
             }
 
             DrawTexturePro(spriteSheet, src,
@@ -295,11 +293,11 @@ void PipeBlock::draw() {
     }
 }
 
-ShinyBlock::ShinyBlock(int x, int y, Texture2D sprites) : Block(x, y, sprites) {}
+ShinyBlock::ShinyBlock(int x, int y, Texture2D sprites, const SceneType& scene) : Block(x, y, sprites, scene) {}
 
 void ShinyBlock::draw() {
     DrawTexturePro(spriteSheet, 
-        (Rectangle){ 0.0f, 33.0f, 16.0f, 16.0f }, 
+        scene->solidBlock, 
         (Rectangle){ (float)rectXPos, (float)rectYPos, (float)TILE_SIZE, (float)TILE_SIZE }, 
         (Vector2){ 0, 0 }, 0.0f, WHITE);
 }

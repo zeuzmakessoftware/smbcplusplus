@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include <vector>
 #include "mario.h"
+#include "sceneType.h"
 
 class Goomba {
 private:
@@ -16,6 +17,7 @@ private:
     float squashTimer = 1.0f;
     
     Texture2D sprites;
+    const SceneType* scene;
     float frameTimer = 0.0f;
     int currentFrame = 0;
 
@@ -24,7 +26,7 @@ private:
     bool defeatedThisFrame = false;
 
 public:
-    Goomba(float x, float y, Texture2D s);
+    Goomba(float x, float y, Texture2D s, const SceneType& scene = GetSceneType(SceneKind::Overworld));
     void update(const std::vector<Rectangle>& statics, Rectangle marioRec, bool& marioIsDead, bool& marioIsBig, float& marioVelY, float& deathTimer);
     void draw();
     bool shouldRemove() const { return !isAlive; }
