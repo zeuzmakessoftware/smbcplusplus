@@ -314,11 +314,11 @@ void PipeBlock::draw() {
                 bool useLeftSide = i == 0;
                 Rectangle src;
                 if (useLeftSide) {
-                    src = (j == 0) ? (Rectangle){85.0f, 230.0f, 16.0f, 16.0f}
-                                   : (Rectangle){85.0f, 247.0f, 16.0f, 16.0f};
+                    src = (j == 0) ? (Rectangle){164.0f + 85.0f, 230.0f, 16.0f, 16.0f}
+                                   : (Rectangle){164.0f + 85.0f, 247.0f, 16.0f, 16.0f};
                 } else {
-                    src = (j == 0) ? (Rectangle){102.0f, 230.0f, 16.0f, 16.0f}
-                                   : (Rectangle){102.0f, 247.0f, 16.0f, 16.0f};
+                    src = (j == 0) ? (Rectangle){164.0f + 102.0f, 230.0f, 16.0f, 16.0f}
+                                   : (Rectangle){164.0f + 102.0f, 247.0f, 16.0f, 16.0f};
                 }
                 float destX = (float)rectXPos + (i * TILE_SIZE);
                 if (orientation == PipeOrientation::HorizontalLeft) {
