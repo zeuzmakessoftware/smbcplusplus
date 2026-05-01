@@ -176,11 +176,12 @@ int main() {
         MarioObj.setScriptedPose(p.x, p.y, pipeTransition.faceRight);
 
         if (pipeTransition.timer >= pipeTransition.duration) {
+            Vector2 exitPosition = pipeTransition.exitPosition;
+            if (MarioObj.getIsBig()) exitPosition.y -= TILE_SIZE;
+
             if (pipeTransition.destination == WarpDestination::Level1Subarea) {
-                LoadArea(LevelArea::Subarea, pipeTransition.exitPosition);
+                LoadArea(LevelArea::Subarea, exitPosition);
             } else if (pipeTransition.destination == WarpDestination::Level1Overworld) {
-                Vector2 exitPosition = pipeTransition.exitPosition;
-                if (MarioObj.getIsBig()) exitPosition.y -= TILE_SIZE;
                 LoadArea(LevelArea::Overworld, exitPosition);
             }
         }
