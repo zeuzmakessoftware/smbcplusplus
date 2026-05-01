@@ -67,7 +67,7 @@ constexpr SceneType UNDERGROUND_SCENE = WithPipeSources(
     Rect(300.0f, 213.0f)
 );
 constexpr SceneType CASTLE_SCENE = MakeScene(
-    SceneKind::Castle, "Castle", NES_BLACK, 0.0f, 84.0f, 96.0f * 2, 74.0f * 2),
+    SceneKind::Castle, "Castle", NES_BLACK, 0.0f, 84.0f, 96.0f * 2, 74.0f * 2
 );
 constexpr SceneType UNDERWATER_SCENE = WithPipeSources(
     MakeScene(SceneKind::Underwater, "Underwater", NES_SKY_BLUE, 147.0f, 84.0f, 96.0f * 3, 74.0f * 3),
