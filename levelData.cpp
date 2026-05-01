@@ -1,7 +1,7 @@
 #include "levelData.h"
 
 namespace {
-constexpr SceneKind LEVEL1_SCENE_KIND = SceneKind::Underwater;
+constexpr SceneKind LEVEL1_SCENE_KIND = SceneKind::Overworld;
 }
 
 const SceneType& GetLevel1Scene() {
