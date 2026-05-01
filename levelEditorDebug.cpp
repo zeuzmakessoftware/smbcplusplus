@@ -15,8 +15,10 @@ enum class ObjectType {
     Block,
     Goomba,
     Ground,
+    Coin,
     CoinBlock,
     MushroomBlock,
+    FireFlowerBlock,
     Pipe
 };
 
@@ -37,17 +39,50 @@ static const int BLOCK_GRID_OFFSET_Y = 12;
 static const int BLOCK_GRID_DRAW_OFFSET_Y = OBJECT_GRID_OFFSET_Y + 12;
 static const float DRAG_START_DISTANCE = 2.0f;
 
+static constexpr SceneKind SCENE_KINDS[] = {
+    SceneKind::Overworld,
+    SceneKind::Underground,
+    SceneKind::Castle,
+    SceneKind::Underwater
+};
+
+static const int SCENE_KIND_COUNT = sizeof(SCENE_KINDS) / sizeof(SCENE_KINDS[0]);
+
 static const char* TypeName(ObjectType type) {
     switch (type) {
         case ObjectType::BackgroundProp: return "Background Prop";
         case ObjectType::Block: return "Block";
         case ObjectType::Goomba: return "Goomba";
         case ObjectType::Ground: return "Ground";
+        case ObjectType::Coin: return "Coin";
         case ObjectType::CoinBlock: return "Coin Block";
         case ObjectType::MushroomBlock: return "Mushroom Block";
+        case ObjectType::FireFlowerBlock: return "Fire Flower Block";
         case ObjectType::Pipe: return "Pipe";
     }
     return "Unknown";
+}
+
+static std::string SceneExpr(SceneKind kind) {
+    switch (kind) {
+        case SceneKind::Overworld: return "GetSceneType(SceneKind::Overworld)";
+        case SceneKind::Underground: return "GetSceneType(SceneKind::Underground)";
+        case SceneKind::Castle: return "GetSceneType(SceneKind::Castle)";
+        case SceneKind::Underwater: return "GetSceneType(SceneKind::Underwater)";
+    }
+    return "GetSceneType(SceneKind::Overworld)";
+}
+
+static int SceneIndex(SceneKind kind) {
+    for (int i = 0; i < SCENE_KIND_COUNT; i++) {
+        if (SCENE_KINDS[i] == kind) return i;
+    }
+    return 0;
+}
+
+static SceneKind NextSceneKind(SceneKind kind, int direction) {
+    int index = SceneIndex(kind);
+    return SCENE_KINDS[(index + direction + SCENE_KIND_COUNT) % SCENE_KIND_COUNT];
 }
 
 static const BackgroundPropDefinition& PropDefinitionFor(const LevelObject& obj) {
@@ -149,7 +184,8 @@ static int SnapYForType(ObjectType type, float value) {
         return Snap(value, TILE_SIZE);
     }
     if (type == ObjectType::Block || type == ObjectType::CoinBlock ||
-        type == ObjectType::MushroomBlock || type == ObjectType::Pipe) {
+        type == ObjectType::MushroomBlock || type == ObjectType::FireFlowerBlock ||
+        type == ObjectType::Pipe || type == ObjectType::Coin) {
         return SnapWithOffset(value, TILE_SIZE, BLOCK_GRID_OFFSET_Y);
     }
     return SnapWithOffset(value, TILE_SIZE, OBJECT_GRID_OFFSET_Y);
@@ -175,49 +211,64 @@ static void DrawProp(const LevelObject& obj, Texture2D spriteSheet) {
     }
 }
 
-static void DrawGround(const LevelObject& obj, Texture2D spriteSheet) {
+static Rectangle BlockSourceFor(const BlockDefinition& block, const SceneType& scene) {
+    std::string className = block.className;
+    if (className == "BrickBlock") return scene.brickBlock;
+    if (className == "EmptyBlock") return scene.emptyBlock;
+    if (className == "ShinyBlock") return scene.solidBlock;
+    return block.source;
+}
+
+static void DrawGround(const LevelObject& obj, Texture2D spriteSheet, const SceneType& scene) {
     for (int y = obj.y; y < obj.y + obj.h; y += TILE_SIZE) {
         for (int x = obj.x; x < obj.x + obj.w; x += TILE_SIZE) {
-            DrawSpritePart(spriteSheet, {0, 16, 16, 16}, {(float)x, (float)y, TILE_SIZE, TILE_SIZE});
+            DrawSpritePart(spriteSheet, scene.groundBlock, {(float)x, (float)y, TILE_SIZE, TILE_SIZE});
         }
     }
 }
 
-static void DrawPipe(const LevelObject& obj, Texture2D spriteSheet) {
+static void DrawPipe(const LevelObject& obj, Texture2D spriteSheet, const SceneType& scene) {
     for (int i = 0; i < obj.pipeWide; i++) {
         for (int j = 0; j < obj.pipeHigh; j++) {
             Rectangle src;
-            if (j == 0) src = (i == 0) ? (Rectangle){119, 196, 16, 16} : (Rectangle){136, 196, 16, 16};
-            else src = (i == 0) ? (Rectangle){119, 213, 16, 16} : (Rectangle){136, 213, 16, 16};
+            if (j == 0) src = (i == 0) ? scene.pipeTopLeft : scene.pipeTopRight;
+            else src = (i == 0) ? scene.pipeBodyLeft : scene.pipeBodyRight;
             DrawSpritePart(spriteSheet, src,
                 {(float)obj.x + i * TILE_SIZE, (float)obj.y + j * TILE_SIZE, TILE_SIZE, TILE_SIZE});
         }
     }
 }
 
-static void DrawObject(const LevelObject& obj, Texture2D spriteSheet, Texture2D mushroomSheet, Texture2D enemiesSheet) {
+static void DrawObject(const LevelObject& obj, Texture2D spriteSheet, Texture2D mushroomSheet, Texture2D enemiesSheet, const SceneType& scene) {
     switch (obj.type) {
         case ObjectType::BackgroundProp:
             DrawProp(obj, spriteSheet);
             break;
         case ObjectType::Goomba:
-            DrawSpritePart(enemiesSheet, {0, 16, 16, 16}, {(float)obj.x, (float)obj.y, TILE_SIZE, TILE_SIZE});
+            DrawSpritePart(enemiesSheet, scene.goombaFrames[0], {(float)obj.x, (float)obj.y, TILE_SIZE, TILE_SIZE});
             break;
         case ObjectType::Ground:
-            DrawGround(obj, spriteSheet);
+            DrawGround(obj, spriteSheet, scene);
+            break;
+        case ObjectType::Coin:
+            DrawSpritePart(mushroomSheet, {180, 36, 8, 16}, {(float)obj.x + 10, (float)obj.y, 22, TILE_SIZE});
             break;
         case ObjectType::Block:
-            DrawSpritePart(spriteSheet, BlockDefinitionFor(obj).source, {(float)obj.x, (float)obj.y, TILE_SIZE, TILE_SIZE});
+            DrawSpritePart(spriteSheet, BlockSourceFor(BlockDefinitionFor(obj), scene), {(float)obj.x, (float)obj.y, TILE_SIZE, TILE_SIZE});
             break;
         case ObjectType::CoinBlock:
-            DrawSpritePart(spriteSheet, {298, 78, 16, 16}, {(float)obj.x, (float)obj.y, TILE_SIZE, TILE_SIZE});
+            DrawSpritePart(spriteSheet, scene.questionBlockFrames[0], {(float)obj.x, (float)obj.y, TILE_SIZE, TILE_SIZE});
             break;
         case ObjectType::MushroomBlock:
-            DrawSpritePart(spriteSheet, {298, 78, 16, 16}, {(float)obj.x, (float)obj.y, TILE_SIZE, TILE_SIZE});
+            DrawSpritePart(spriteSheet, scene.questionBlockFrames[0], {(float)obj.x, (float)obj.y, TILE_SIZE, TILE_SIZE});
             DrawSpritePart(mushroomSheet, {0, 8, 16, 16}, {(float)obj.x + 9, (float)obj.y - 18, 24, 24});
             break;
+        case ObjectType::FireFlowerBlock:
+            DrawSpritePart(spriteSheet, scene.questionBlockFrames[0], {(float)obj.x, (float)obj.y, TILE_SIZE, TILE_SIZE});
+            DrawSpritePart(mushroomSheet, {32, 44, 16, 16}, {(float)obj.x + 9, (float)obj.y - 18, 24, 24});
+            break;
         case ObjectType::Pipe:
-            DrawPipe(obj, spriteSheet);
+            DrawPipe(obj, spriteSheet, scene);
             break;
     }
 }
@@ -238,7 +289,8 @@ static std::string Expr(int value) {
     return std::to_string(value);
 }
 
-static void PrintLevelCode(const std::vector<LevelObject>& objects) {
+static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sceneKind) {
+    const std::string sceneExpr = SceneExpr(sceneKind);
     std::cout << "\n// --- Level Editor Output ---\n";
     for (const LevelObject& obj : objects) {
         if (IsProp(obj.type)) {
@@ -250,7 +302,10 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects) {
     for (const LevelObject& obj : objects) {
         if (obj.type == ObjectType::Goomba) {
             std::cout << "goombas.push_back(std::make_unique<Goomba>(" << Expr(obj.x)
-                      << ", " << Expr(obj.y) << ", enemiesSheet));\n";
+                      << ", " << Expr(obj.y) << ", enemiesSheet, " << sceneExpr << "));\n";
+        } else if (obj.type == ObjectType::Coin) {
+            std::cout << "coins.emplace_back((float)" << Expr(obj.x)
+                      << ", (float)" << Expr(obj.y) << ", mushroomSheet);\n";
         }
     }
     std::cout << "\n";
@@ -259,24 +314,33 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects) {
             case ObjectType::Ground:
                 std::cout << "blocks.push_back(std::make_unique<DrawTiledRect>(\n"
                           << "    " << obj.x << ", " << obj.y << ", " << obj.w << ", " << obj.h
-                          << ", spriteSheet, (Rectangle){0, 16, 16, 16}, TILE_SIZE, TILE_SIZE\n));\n";
+                          << ", spriteSheet, " << sceneExpr << ".groundBlock, TILE_SIZE, TILE_SIZE, "
+                          << sceneExpr << "\n));\n";
                 break;
             case ObjectType::Block:
                 std::cout << "blocks.push_back(std::make_unique<" << BlockDefinitionFor(obj).className
-                          << ">(" << Expr(obj.x) << ", " << Expr(obj.y) << ", spriteSheet));\n";
+                          << ">(" << Expr(obj.x) << ", " << Expr(obj.y) << ", spriteSheet, "
+                          << sceneExpr << "));\n";
                 break;
             case ObjectType::CoinBlock:
                 std::cout << "blocks.push_back(std::make_unique<PowerUpBlock>(" << Expr(obj.x)
-                          << ", " << Expr(obj.y) << ", spriteSheet, mushroomSheet, \"coin\"));\n";
+                          << ", " << Expr(obj.y) << ", spriteSheet, mushroomSheet, \"coin\", "
+                          << sceneExpr << "));\n";
                 break;
             case ObjectType::MushroomBlock:
                 std::cout << "blocks.push_back(std::make_unique<PowerUpBlock>(" << Expr(obj.x)
-                          << ", " << Expr(obj.y) << ", spriteSheet, mushroomSheet, \"mushroom\"));\n";
+                          << ", " << Expr(obj.y) << ", spriteSheet, mushroomSheet, \"mushroom\", "
+                          << sceneExpr << "));\n";
+                break;
+            case ObjectType::FireFlowerBlock:
+                std::cout << "blocks.push_back(std::make_unique<PowerUpBlock>(" << Expr(obj.x)
+                          << ", " << Expr(obj.y) << ", spriteSheet, mushroomSheet, \"fireflower\", "
+                          << sceneExpr << "));\n";
                 break;
             case ObjectType::Pipe:
                 std::cout << "blocks.push_back(std::make_unique<PipeBlock>(" << Expr(obj.x)
                           << ", " << Expr(obj.y) << ", " << obj.pipeWide << ", " << obj.pipeHigh
-                          << ", spriteSheet));\n";
+                          << ", spriteSheet, " << sceneExpr << "));\n";
                 break;
             default:
                 break;
@@ -295,6 +359,14 @@ static int ReadExpr(const std::string& text) {
     }
     if (std::regex_search(text, match, std::regex(R"(-?\d+)"))) return std::stoi(match[0]);
     return 0;
+}
+
+static SceneKind ReadSceneKind(const std::string& text, SceneKind fallback) {
+    if (text.find("Underground") != std::string::npos) return SceneKind::Underground;
+    if (text.find("Castle") != std::string::npos) return SceneKind::Castle;
+    if (text.find("Underwater") != std::string::npos) return SceneKind::Underwater;
+    if (text.find("Overworld") != std::string::npos) return SceneKind::Overworld;
+    return fallback;
 }
 
 static std::vector<std::string> SplitTopLevelArgs(const std::string& args) {
@@ -361,13 +433,25 @@ static std::vector<std::string> LevelStatements(const std::string& code) {
     return statements;
 }
 
-static void ParseLevelCode(const std::string& code, std::vector<LevelObject>& objects) {
+static void ParseLevelCode(const std::string& code, std::vector<LevelObject>& objects, SceneKind& sceneKind) {
     objects.clear();
     for (const std::string& statement : LevelStatements(code)) {
+        sceneKind = ReadSceneKind(statement, sceneKind);
+
         if (statement.find("BackgroundProp") != std::string::npos) {
             std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, "BackgroundProp"));
             if (args.size() < 4) continue;
             objects.push_back(MakePropObject(PropIndexForLayoutName(args[3]), ReadExpr(args[0]), ReadExpr(args[1])));
+        } else if (statement.find("coins.emplace_back") != std::string::npos ||
+                   statement.find("coins.push_back") != std::string::npos) {
+            size_t callStart = statement.find("emplace_back");
+            std::string constructorName = "emplace_back";
+            if (callStart == std::string::npos) {
+                callStart = statement.find("push_back");
+                constructorName = "push_back";
+            }
+            std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, constructorName));
+            if (args.size() >= 2) objects.push_back({ObjectType::Coin, ReadExpr(args[0]), ReadExpr(args[1])});
         } else if (statement.find("Goomba") != std::string::npos) {
             std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, "Goomba"));
             if (args.size() >= 2) objects.push_back({ObjectType::Goomba, ReadExpr(args[0]), ReadExpr(args[1])});
@@ -392,7 +476,9 @@ static void ParseLevelCode(const std::string& code, std::vector<LevelObject>& ob
         } else if (statement.find("PowerUpBlock") != std::string::npos) {
             std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, "PowerUpBlock"));
             if (args.size() >= 5) {
-                ObjectType type = args[4].find("mushroom") != std::string::npos ? ObjectType::MushroomBlock : ObjectType::CoinBlock;
+                ObjectType type = ObjectType::CoinBlock;
+                if (args[4].find("fireflower") != std::string::npos) type = ObjectType::FireFlowerBlock;
+                else if (args[4].find("mushroom") != std::string::npos) type = ObjectType::MushroomBlock;
                 objects.push_back({type, ReadExpr(args[0]), ReadExpr(args[1])});
             }
         } else if (statement.find("PipeBlock") != std::string::npos) {
@@ -443,6 +529,7 @@ int main() {
 
     std::vector<LevelObject> objects;
     LoadDefaultLevel(objects);
+    SceneKind sceneKind = SceneKind::Overworld;
 
     Camera2D camera = {0};
     camera.offset = {0, 0};
@@ -465,7 +552,7 @@ int main() {
             bool commandDown = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL) ||
                                IsKeyDown(KEY_LEFT_SUPER) || IsKeyDown(KEY_RIGHT_SUPER);
             if (commandDown && IsKeyPressed(KEY_ENTER)) {
-                ParseLevelCode(pastedCode, objects);
+                ParseLevelCode(pastedCode, objects, sceneKind);
                 selected = objects.empty() ? -1 : 0;
                 pasteMode = false;
             } else if (IsKeyPressed(KEY_ESCAPE)) {
@@ -489,9 +576,11 @@ int main() {
             if (IsKeyPressed(KEY_ONE) && blocks.size() > 0) { addType = ObjectType::Block; addBlockIndex = 0; }
             if (IsKeyPressed(KEY_TWO)) addType = ObjectType::CoinBlock;
             if (IsKeyPressed(KEY_THREE)) addType = ObjectType::MushroomBlock;
-            if (IsKeyPressed(KEY_FOUR)) addType = ObjectType::Goomba;
-            if (IsKeyPressed(KEY_FIVE)) addType = ObjectType::Pipe;
-            if (IsKeyPressed(KEY_SIX)) addType = ObjectType::Ground;
+            if (IsKeyPressed(KEY_FOUR)) addType = ObjectType::FireFlowerBlock;
+            if (IsKeyPressed(KEY_FIVE)) addType = ObjectType::Coin;
+            if (IsKeyPressed(KEY_SIX)) addType = ObjectType::Goomba;
+            if (IsKeyPressed(KEY_SEVEN)) addType = ObjectType::Pipe;
+            if (IsKeyPressed(KEY_EIGHT)) addType = ObjectType::Ground;
             if (IsKeyPressed(KEY_COMMA) && !blocks.empty()) {
                 addType = ObjectType::Block;
                 addBlockIndex = (addBlockIndex + (int)blocks.size() - 1) % (int)blocks.size();
@@ -501,10 +590,8 @@ int main() {
                 addBlockIndex = (addBlockIndex + 1) % (int)blocks.size();
             }
             const std::vector<BackgroundPropDefinition>& props = GetBackgroundPropDefinitions();
-            if (IsKeyPressed(KEY_SEVEN) && props.size() > 0) { addType = ObjectType::BackgroundProp; addPropIndex = 0; }
-            if (IsKeyPressed(KEY_EIGHT) && props.size() > 1) { addType = ObjectType::BackgroundProp; addPropIndex = 1; }
-            if (IsKeyPressed(KEY_NINE) && props.size() > 2) { addType = ObjectType::BackgroundProp; addPropIndex = 2; }
-            if (IsKeyPressed(KEY_ZERO) && props.size() > 3) { addType = ObjectType::BackgroundProp; addPropIndex = 3; }
+            if (IsKeyPressed(KEY_NINE) && props.size() > 0) { addType = ObjectType::BackgroundProp; addPropIndex = 0; }
+            if (IsKeyPressed(KEY_ZERO) && props.size() > 1) { addType = ObjectType::BackgroundProp; addPropIndex = 1; }
             if (IsKeyPressed(KEY_LEFT_BRACKET) && !props.empty()) {
                 addType = ObjectType::BackgroundProp;
                 addPropIndex = (addPropIndex + (int)props.size() - 1) % (int)props.size();
@@ -513,7 +600,9 @@ int main() {
                 addType = ObjectType::BackgroundProp;
                 addPropIndex = (addPropIndex + 1) % (int)props.size();
             }
-            if (IsKeyPressed(KEY_P)) PrintLevelCode(objects);
+            if (IsKeyPressed(KEY_MINUS)) sceneKind = NextSceneKind(sceneKind, -1);
+            if (IsKeyPressed(KEY_EQUAL)) sceneKind = NextSceneKind(sceneKind, 1);
+            if (IsKeyPressed(KEY_P)) PrintLevelCode(objects, sceneKind);
             if (IsKeyPressed(KEY_I)) {
                 pastedCode.clear();
                 pasteMode = true;
@@ -593,8 +682,9 @@ int main() {
             }
         }
 
+        const SceneType& scene = GetSceneType(sceneKind);
         BeginDrawing();
-        ClearBackground({91, 140, 255, 255});
+        ClearBackground(scene.backgroundColor);
         BeginMode2D(camera);
             const int gridMinX = -2100;
             const int gridMaxX = 5200;
@@ -614,15 +704,16 @@ int main() {
             }
 
             for (int i = 0; i < (int)objects.size(); i++) {
-                DrawObject(objects[i], spriteSheet, mushroomSheet, enemiesSheet);
+                DrawObject(objects[i], spriteSheet, mushroomSheet, enemiesSheet, scene);
                 Rectangle bounds = ObjectBounds(objects[i]);
                 DrawRectangleLinesEx(bounds, (i == selected ? 3.0f : 1.0f) / camera.zoom, i == selected ? RED : Fade(BLACK, 0.45f));
             }
         EndMode2D();
 
-        DrawRectangle(0, 0, screenWidth, 136, Fade(BLACK, 0.78f));
+        DrawRectangle(0, 0, screenWidth, 160, Fade(BLACK, 0.78f));
         DrawText("LMB select/add/drag | RMB pan | Wheel zoom | P print code | I paste code | Delete remove | Arrows move | Shift+Arrows 1px", 12, 10, 18, RAYWHITE);
-        DrawText("1 block  2 Coin  3 Mushroom  4 Goomba  5 Pipe  6 Ground  7-0 props  ,/. cycle blocks  [/] cycle props", 12, 34, 18, RAYWHITE);
+        DrawText("1 block  2 ? Coin  3 ? Mushroom  4 ? Fire  5 Coin  6 Goomba  7 Pipe  8 Ground  9/0 props", 12, 34, 18, RAYWHITE);
+        DrawText("CTRL/Cmd+Enter loads paste | ,/. cycle blocks | [/] cycle props | -/= cycle scenes", 12, 58, 18, RAYWHITE);
         std::string blockList = "Blocks:";
         const std::vector<BlockDefinition>& blocks = GetBlockDefinitions();
         for (int i = 0; i < (int)blocks.size(); i++) {
@@ -632,13 +723,13 @@ int main() {
             blockList += blocks[i].displayName;
             if (addType == ObjectType::Block && i == addBlockIndex) blockList += "]";
         }
-        DrawText(blockList.c_str(), 12, 58, 18, RAYWHITE);
+        DrawText(blockList.c_str(), 12, 82, 18, RAYWHITE);
         std::string propList = "Props:";
         const std::vector<BackgroundPropDefinition>& props = GetBackgroundPropDefinitions();
-        const char* propKeys[] = {"7", "8", "9", "0"};
+        const char* propKeys[] = {"9", "0"};
         for (int i = 0; i < (int)props.size(); i++) {
             propList += " ";
-            if (i < 4) {
+            if (i < 2) {
                 propList += propKeys[i];
                 propList += "=";
             }
@@ -646,16 +737,17 @@ int main() {
             propList += props[i].displayName;
             if (addType == ObjectType::BackgroundProp && i == addPropIndex) propList += "]";
         }
-        DrawText(propList.c_str(), 12, 82, 18, RAYWHITE);
-        DrawText(TextFormat("Add: %s | Selected: %s | Objects: %d",
+        DrawText(propList.c_str(), 12, 106, 18, RAYWHITE);
+        DrawText(TextFormat("Scene: %s | Add: %s | Selected: %s | Objects: %d",
+                 scene.name,
                  addType == ObjectType::BackgroundProp ? props[addPropIndex].displayName :
                  addType == ObjectType::Block ? blocks[addBlockIndex].displayName : TypeName(addType),
                  selected >= 0 ? ObjectName(objects[selected]) : "None",
-                 (int)objects.size()), 12, 106, 18, YELLOW);
+                 (int)objects.size()), 12, 130, 18, YELLOW);
 
         if (selected >= 0 && selected < (int)objects.size() &&
             (objects[selected].type == ObjectType::Ground || objects[selected].type == ObjectType::Pipe)) {
-            DrawText("Selected size: W/A/S/D resize", 835, 106, 18, ORANGE);
+            DrawText("Selected size: W/A/S/D resize", 835, 130, 18, ORANGE);
         }
 
         if (pasteMode) {
