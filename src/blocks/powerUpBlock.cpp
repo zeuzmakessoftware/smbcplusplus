@@ -23,6 +23,7 @@ PowerUpBlock::PowerUpBlock(int x, int y, Texture2D sprites, Texture2D itemTex, s
     : Block(x, y, sprites, scene), itemTexture(itemTex), itemType(type) {
     itemX = (float)x;
     itemY = (float)y;
+    resolvedItemType = itemType;
 }
 
 Rectangle PowerUpBlock::getSensor() {
@@ -43,6 +44,10 @@ Rectangle PowerUpBlock::returnRec() {
     }
 
     return Block::returnRec();
+}
+
+const std::string& PowerUpBlock::activeItemType() const {
+    return resolvedItemType.empty() ? itemType : resolvedItemType;
 }
 
 void PowerUpBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
@@ -66,6 +71,10 @@ void PowerUpBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
         bumpTimer = 0.1f;
         isSpent = true;
         itemActive = true;
+        resolvedItemType = itemType;
+        if (itemType == "mushroom" || itemType == "fireflower") {
+            resolvedItemType = isBig ? "fireflower" : "mushroom";
+        }
 
         if (itemType == "coin") {
             spawnTimer = BLOCK_COIN_LIFETIME;
@@ -106,14 +115,14 @@ void PowerUpBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
                 coinAnimationFinishedThisFrame = true;
             }
         }
-        else if (itemType == "mushroom" || itemType == "fireflower" || itemType == "1up") {
+        else if (activeItemType() == "mushroom" || activeItemType() == "fireflower" || activeItemType() == "1up") {
             if (spawnTimer > 0) {
                 spawnTimer -= GetFrameTime();
                 itemY -= (TILE_SIZE * GetFrameTime());
                 if (spawnTimer <= 0) {
-                    if (itemType == "mushroom") {
+                    if (activeItemType() == "mushroom") {
                         releasedMushroom = std::make_unique<Mushroom>(itemX, itemY, itemTexture);
-                    } else if (itemType == "1up") {
+                    } else if (activeItemType() == "1up") {
                         releasedMushroom = std::make_unique<Mushroom>(
                             itemX,
                             itemY,
@@ -141,13 +150,13 @@ void PowerUpBlock::draw() {
                 (Rectangle){ itemX + ((TILE_SIZE - BLOCK_COIN_WIDTH) / 2.0f), itemY, BLOCK_COIN_WIDTH, (float)TILE_SIZE },
                 {0,0}, 0.0f, WHITE);
         }
-        else if (itemType == "mushroom" || itemType == "1up") {
-            src = itemType == "1up" ? (Rectangle){ 0.0f, 26.0f, 16.0f, 16.0f } : (Rectangle){ 0.0f, 8.0f, 16.0f, 16.0f };
+        else if (activeItemType() == "mushroom" || activeItemType() == "1up") {
+            src = activeItemType() == "1up" ? (Rectangle){ 0.0f, 26.0f, 16.0f, 16.0f } : (Rectangle){ 0.0f, 8.0f, 16.0f, 16.0f };
             DrawTexturePro(itemTexture, src,
                 (Rectangle){ itemX, itemY, (float)TILE_SIZE, (float)TILE_SIZE },
                 {0,0}, 0.0f, WHITE);
         }
-        else if (itemType == "fireflower") {
+        else if (activeItemType() == "fireflower") {
             src = { 32.0f, 44.0f, 16.0f, 16.0f };
             DrawTexturePro(itemTexture, src,
                 (Rectangle){ itemX, itemY, (float)TILE_SIZE, (float)TILE_SIZE },

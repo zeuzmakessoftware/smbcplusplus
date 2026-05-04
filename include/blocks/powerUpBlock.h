@@ -19,6 +19,7 @@ private:
     int frame = 0;
 
     std::string itemType;
+    std::string resolvedItemType;
     bool itemActive = false;
     float itemX, itemY;
     float spawnTimer = 0.0f;
@@ -29,6 +30,7 @@ private:
     std::unique_ptr<Mushroom> releasedMushroom;
     std::unique_ptr<FireFlower> releasedFireFlower;
     Texture2D itemTexture;
+    const std::string& activeItemType() const;
 
 public:
     PowerUpBlock(int x, int y, Texture2D sprites, Texture2D itemTex, std::string type = "coin", const SceneType& scene = GetSceneType(SceneKind::Overworld));
