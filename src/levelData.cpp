@@ -324,4 +324,7 @@ void LoadLevel1Subarea(
         WarpDestination::Level1Overworld, (Vector2){ 163.0f * TILE_SIZE, (12.0f * TILE_SIZE) + 12.0f - TILE_SIZE },
         scene, PipeOrientation::HorizontalRight
     ));
+    blocks.push_back(std::make_unique<PipeWallBlock>(
+        15 * TILE_SIZE, (3 * TILE_SIZE) + 12, 11, spriteSheet, scene
+    ));
 }

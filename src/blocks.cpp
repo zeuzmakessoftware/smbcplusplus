@@ -399,6 +399,39 @@ bool WarpPipeBlock::canEnter(Rectangle marioRec, bool downPressed, bool rightPre
     return leftPressed && alignedY && atMouth;
 }
 
+PipeWallBlock::PipeWallBlock(int x, int y, int height, Texture2D sprites, const SceneType& scene)
+    : Block(x, y, sprites, scene), tilesHigh(height) {}
+
+Rectangle PipeWallBlock::returnRec() {
+    return { (float)rectXPos, (float)rectYPos, (float)TILE_SIZE, (float)tilesHigh * TILE_SIZE };
+}
+
+void PipeWallBlock::draw() {
+    for (int j = 0; j < tilesHigh; j++) {
+        Rectangle src = (Rectangle){ 119.0f, 213.0f, 16.0f, 16.0f };
+
+        if (j == tilesHigh - 2) {
+            src = (Rectangle){ 119.0f, 230.0f, 16.0f, 16.0f };
+        } else if (j == tilesHigh - 1) {
+            src = (Rectangle){ 119.0f, 247.0f, 16.0f, 16.0f };
+        }
+
+        DrawTexturePro(
+            spriteSheet,
+            src,
+            (Rectangle){
+                (float)rectXPos,
+                (float)rectYPos + (j * TILE_SIZE),
+                (float)TILE_SIZE,
+                (float)TILE_SIZE
+            },
+            (Vector2){ 0, 0 },
+            0.0f,
+            WHITE
+        );
+    }
+}
+
 ShinyBlock::ShinyBlock(int x, int y, Texture2D sprites, const SceneType& scene) : Block(x, y, sprites, scene) {}
 
 void ShinyBlock::draw() {

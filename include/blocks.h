@@ -199,6 +199,17 @@ public:
     bool canEnter(Rectangle marioRec, bool downPressed, bool rightPressed, bool leftPressed) const;
 };
 
+class PipeWallBlock : public Block {
+private:
+    int tilesHigh;
+
+public:
+    PipeWallBlock(int x, int y, int height, Texture2D sprites, const SceneType& scene = GetSceneType(SceneKind::Underground));
+    Rectangle returnRec() override;
+    void update(Rectangle marioRec, float& marioVelY, bool isBig) override {}
+    void draw() override;
+};
+
 class ShinyBlock : public Block {
 public:
     ShinyBlock(int x, int y, Texture2D sprites, const SceneType& scene = GetSceneType(SceneKind::Overworld));
