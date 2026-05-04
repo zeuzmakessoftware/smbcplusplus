@@ -76,7 +76,7 @@ constexpr SceneType UNDERGROUND_SCENE = WithPipeSources(
         MakeScene(SceneKind::Underground, "Underground", NES_BLACK, 147.0f, 0.0f, 96.0f, 74.0f),
         Rect(147.0f, 16.0f),
         Rect(181.0f, 16.0f),
-        Rect(164.0f, 16.0f)
+        Rect(164.0f, 33.0f)
     ),
     Rect(283.0f, 196.0f),
     Rect(300.0f, 196.0f),
