@@ -50,6 +50,7 @@ class Mario {
         bool isInvincible = false;
         float invincibilityTimer = 0.0f;
         const float invincibilityDuration = 2.0f;
+        int collectedOneUps = 0;
 
     public:
         Mario(int x, int y, Texture2D sprites);
@@ -76,6 +77,7 @@ class Mario {
         bool getIsFireTransforming() const { return isFireTransforming; }
         void startShrink();
         bool getIsInvincible() const { return isInvincible; }
+        int takeCollectedOneUps();
 };
 
 #endif

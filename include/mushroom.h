@@ -9,10 +9,14 @@ private:
     float velX = 3.0f;
     float velY = 0;
     Texture2D sprites;
+    Rectangle source = { 0.0f, 8.0f, 16.0f, 16.0f };
+    bool oneUp = false;
 public:
     Mushroom(float x, float y, Texture2D s) : pos({x, y}), sprites(s) {}
+    Mushroom(float x, float y, Texture2D s, Rectangle src, bool isOneUp) : pos({x, y}), sprites(s), source(src), oneUp(isOneUp) {}
     void update(const std::vector<Rectangle>& statics);
     void draw();
     Rectangle returnRec() { return {pos.x, pos.y, 42, 42}; }
+    bool isOneUp() const { return oneUp; }
 };
 #endif

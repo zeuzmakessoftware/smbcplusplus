@@ -33,6 +33,6 @@ void Mushroom::update(const std::vector<Rectangle>& statics) {
 }
 
 void Mushroom::draw() {
-    DrawTexturePro(sprites, (Rectangle){ 0.0f, 8.0f, 16.0f, 16.0f },
+    DrawTexturePro(sprites, source,
         (Rectangle){ pos.x, pos.y, 42, 42 }, {0,0}, 0.0f, WHITE);
 }

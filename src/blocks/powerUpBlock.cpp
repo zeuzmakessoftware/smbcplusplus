@@ -37,6 +37,14 @@ std::unique_ptr<FireFlower> PowerUpBlock::takeFireFlower() {
     return std::move(releasedFireFlower);
 }
 
+Rectangle PowerUpBlock::returnRec() {
+    if (!hasCollision()) {
+        return { (float)rectXPos, (float)rectYPos, 0.0f, 0.0f };
+    }
+
+    return Block::returnRec();
+}
+
 void PowerUpBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
     coinAnimationFinishedThisFrame = false;
 
@@ -48,8 +56,12 @@ void PowerUpBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
         }
     }
 
-    if (!isSpent && !isBumping && CheckCollisionRecs(marioRec, getSensor())) {
+    bool hitFromBelow = CheckCollisionRecs(marioRec, getSensor()) && (!isHiddenBlock() || marioVelY < 0.0f);
+    if (!isSpent && !isBumping && hitFromBelow) {
         wasHitThisFrame = true;
+        if (marioVelY < 0.0f) {
+            marioVelY = 0.0f;
+        }
         isBumping = true;
         bumpTimer = 0.1f;
         isSpent = true;
@@ -59,7 +71,7 @@ void PowerUpBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
             spawnTimer = BLOCK_COIN_LIFETIME;
             coinTimer = 0.0f;
             coinFrame = 0;
-        } else if (itemType == "mushroom" || itemType == "fireflower") {
+        } else if (itemType == "mushroom" || itemType == "fireflower" || itemType == "1up") {
             spawnTimer = 1.0f;
         }
     }
@@ -94,13 +106,21 @@ void PowerUpBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
                 coinAnimationFinishedThisFrame = true;
             }
         }
-        else if (itemType == "mushroom" || itemType == "fireflower") {
+        else if (itemType == "mushroom" || itemType == "fireflower" || itemType == "1up") {
             if (spawnTimer > 0) {
                 spawnTimer -= GetFrameTime();
                 itemY -= (TILE_SIZE * GetFrameTime());
                 if (spawnTimer <= 0) {
                     if (itemType == "mushroom") {
                         releasedMushroom = std::make_unique<Mushroom>(itemX, itemY, itemTexture);
+                    } else if (itemType == "1up") {
+                        releasedMushroom = std::make_unique<Mushroom>(
+                            itemX,
+                            itemY,
+                            itemTexture,
+                            (Rectangle){ 0.0f, 26.0f, 16.0f, 16.0f },
+                            true
+                        );
                     } else {
                         releasedFireFlower = std::make_unique<FireFlower>(itemX, itemY, itemTexture);
                     }
@@ -121,8 +141,8 @@ void PowerUpBlock::draw() {
                 (Rectangle){ itemX + ((TILE_SIZE - BLOCK_COIN_WIDTH) / 2.0f), itemY, BLOCK_COIN_WIDTH, (float)TILE_SIZE },
                 {0,0}, 0.0f, WHITE);
         }
-        else if (itemType == "mushroom") {
-            src = { 0.0f, 8.0f, 16.0f, 16.0f };
+        else if (itemType == "mushroom" || itemType == "1up") {
+            src = itemType == "1up" ? (Rectangle){ 0.0f, 26.0f, 16.0f, 16.0f } : (Rectangle){ 0.0f, 8.0f, 16.0f, 16.0f };
             DrawTexturePro(itemTexture, src,
                 (Rectangle){ itemX, itemY, (float)TILE_SIZE, (float)TILE_SIZE },
                 {0,0}, 0.0f, WHITE);
@@ -137,9 +157,11 @@ void PowerUpBlock::draw() {
 
     Rectangle blockSrc = isSpent ? scene->emptyBlock : scene->questionBlockFrames[frame];
 
-    DrawTexturePro(spriteSheet, blockSrc,
-        (Rectangle){ (float)rectXPos, (float)rectYPos + offsetY, (float)TILE_SIZE, (float)TILE_SIZE },
-        {0,0}, 0.0f, WHITE);
+    if (!isHiddenBlock() || isSpent) {
+        DrawTexturePro(spriteSheet, blockSrc,
+            (Rectangle){ (float)rectXPos, (float)rectYPos + offsetY, (float)TILE_SIZE, (float)TILE_SIZE },
+            {0,0}, 0.0f, WHITE);
+    }
 }
 
 void PowerUpBlock::drawDebug() {

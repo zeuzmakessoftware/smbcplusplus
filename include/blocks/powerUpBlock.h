@@ -36,7 +36,10 @@ public:
     std::unique_ptr<Mushroom> takeMushroom();
     std::unique_ptr<FireFlower> takeFireFlower();
     const std::string& getItemType() const { return itemType; }
+    bool isHiddenBlock() const { return itemType == "1up"; }
+    bool hasCollision() const { return !isHiddenBlock() || isSpent; }
     void update(Rectangle marioRec, float& marioVelY, bool isBig) override;
+    Rectangle returnRec() override;
     bool justBumped() override;
     bool justFinishedCoinAnimation();
     void draw() override;

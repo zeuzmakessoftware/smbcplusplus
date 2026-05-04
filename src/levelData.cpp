@@ -99,6 +99,7 @@ void LoadLevel1(
         WarpDestination::Level1Subarea, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
         scene
     ));
+    blocks.push_back(std::make_unique<PowerUpBlock>((64 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "1up", scene));
     blocks.push_back(std::make_unique<DrawTiledRect>(
         2982, 600, 630, 84, spriteSheet, scene.groundBlock, TILE_SIZE, TILE_SIZE, scene
     ));

@@ -100,6 +100,10 @@ int main() {
     auto RebuildCollisionObjects = [&]() {
         collisionObjects.clear();
         for (auto& block : blocks) {
+            auto* pBlock = dynamic_cast<PowerUpBlock*>(block.get());
+            if (pBlock && !pBlock->hasCollision()) {
+                continue;
+            }
             collisionObjects.push_back(block->returnRec());
         }
         collisionObjects.push_back(castleFlagpole->returnCollisionRec());
@@ -240,6 +244,9 @@ int main() {
                     } else {
                         auto* pBlock = dynamic_cast<PowerUpBlock*>(it->get());
                         if (pBlock) {
+                            if (bumped && pBlock->isHiddenBlock()) {
+                                RebuildCollisionObjects();
+                            }
                             if (bumped && pBlock->getItemType() == "coin") {
                                 scoreboard.addCoin();
                             }
@@ -305,6 +312,10 @@ int main() {
                     bool wasBig = MarioObj.getIsBig();
                     bool wasFire = MarioObj.getIsFire();
                     MarioObj.update(collisionObjects, camera.target.x, activeMushrooms, activeFireFlowers, activeFireballs, mushroomSheet);
+                    int oneUps = MarioObj.takeCollectedOneUps();
+                    for (int i = 0; i < oneUps; i++) {
+                        scorePopups.spawn(1, { MarioObj.getPos().x, MarioObj.getPos().y - 20.0f });
+                    }
                     if (!wasBig && MarioObj.getIsBig()) {
                         scoreboard.addScore(1000);
                         scorePopups.spawn(1000, { MarioObj.getPos().x, MarioObj.getPos().y - 20.0f });

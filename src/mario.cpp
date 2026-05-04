@@ -123,7 +123,9 @@ void Mario::update(
 
     for (auto it = mushrooms.begin(); it != mushrooms.end(); ) {
         if (CheckCollisionRecs(this->returnRec(), (*it)->returnRec())) {
-            if (!isBig && !isTransforming) {
+            if ((*it)->isOneUp()) {
+                collectedOneUps++;
+            } else if (!isBig && !isTransforming) {
                 isBig = true;
                 isTransforming = true;
                 transformationTimer = transformationDuration;
@@ -152,6 +154,12 @@ void Mario::update(
             ++it;
         }
     }
+}
+
+int Mario::takeCollectedOneUps() {
+    int amount = collectedOneUps;
+    collectedOneUps = 0;
+    return amount;
 }
 
 void Mario::draw() {
@@ -218,6 +226,7 @@ void Mario::reset(float x, float y) {
     isTransforming = false;
     currentFrame = 0;
     frameTimer = 0.0f;
+    collectedOneUps = 0;
 }
 
 void Mario::setScriptedPose(float x, float y, bool faceRight) {
