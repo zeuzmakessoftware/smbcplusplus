@@ -56,11 +56,28 @@ constexpr SceneType WithPipeSources(
     return scene;
 }
 
+constexpr SceneType WithBlockSources(
+    SceneType scene,
+    Rectangle groundBlock,
+    Rectangle brickBlock,
+    Rectangle solidBlock
+) {
+    scene.groundBlock = groundBlock;
+    scene.brickBlock = brickBlock;
+    scene.solidBlock = solidBlock;
+    return scene;
+}
+
 constexpr SceneType OVERWORLD_SCENE = MakeScene(
     SceneKind::Overworld, "Overworld", NES_SKY_BLUE, 0.0f, 0.0f, 0.0f, 0.0f
 );
 constexpr SceneType UNDERGROUND_SCENE = WithPipeSources(
-    MakeScene(SceneKind::Underground, "Underground", NES_BLACK, 147.0f, 0.0f, 96.0f, 74.0f),
+    WithBlockSources(
+        MakeScene(SceneKind::Underground, "Underground", NES_BLACK, 147.0f, 0.0f, 96.0f, 74.0f),
+        Rect(147.0f, 16.0f),
+        Rect(181.0f, 16.0f),
+        Rect(164.0f, 16.0f)
+    ),
     Rect(283.0f, 196.0f),
     Rect(300.0f, 196.0f),
     Rect(283.0f, 213.0f),
