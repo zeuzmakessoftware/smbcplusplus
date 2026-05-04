@@ -149,7 +149,7 @@ int main() {
 
         if (orientation == PipeOrientation::Vertical) {
             pipeTransition.startPosition = {
-                pipeRec.x + pipeRec.width * 0.5f - marioRec.width * 0.5f,
+                marioRec.x,
                 marioRec.y
             };
             pipeTransition.faceRight = true;
