@@ -1,11 +1,49 @@
-all:
-	g++ main.cpp mario.cpp drawTiledRect.cpp backgroundProp.cpp blocks.cpp mushroom.cpp fireflower.cpp fireball.cpp goomba.cpp levelData.cpp sceneType.cpp scoreboard.cpp scorepopup.cpp castleFlagpole.cpp -o main -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
-	./main
+CXX = g++
+CXXFLAGS = -Iinclude -I/opt/homebrew/include -MMD -MP
+LDFLAGS = -L/opt/homebrew/lib -lraylib
 
-texture:
-	g++ textureFinderDebug.cpp -o textureFinderDebug -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
-	./textureFinderDebug "52571.png"
+COMMON_SRCS = src/backgroundProp.cpp src/blocks.cpp src/sceneType.cpp src/mushroom.cpp
+MAIN_SRCS = src/main.cpp src/mario.cpp src/drawTiledRect.cpp src/fireflower.cpp src/fireball.cpp \
+            src/goomba.cpp src/levelData.cpp src/scoreboard.cpp src/scorepopup.cpp src/castleFlagpole.cpp $(COMMON_SRCS)
+EDITOR_SRCS = tools/levelEditorDebug.cpp $(COMMON_SRCS)
+TEXTURE_SRCS = tools/textureFinderDebug.cpp
 
-editor:
-	g++ levelEditorDebug.cpp backgroundProp.cpp blocks.cpp sceneType.cpp mushroom.cpp -o levelEditorDebug -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
-	./levelEditorDebug
+MAIN_OBJS = $(MAIN_SRCS:%.cpp=build/%.o)
+EDITOR_OBJS = $(EDITOR_SRCS:%.cpp=build/%.o)
+TEXTURE_OBJS = $(TEXTURE_SRCS:%.cpp=build/%.o)
+
+DEPS = $(MAIN_OBJS:.o=.d) $(EDITOR_OBJS:.o=.d) $(TEXTURE_OBJS:.o=.d)
+
+.PHONY: all texture editor clean
+
+all: main
+	./bin/main
+
+main: bin/main
+
+bin/main: $(MAIN_OBJS) | bin
+	$(CXX) $(MAIN_OBJS) -o $@ $(LDFLAGS)
+
+texture: bin/textureFinderDebug
+	./bin/textureFinderDebug "assets/images/52571.png"
+
+bin/textureFinderDebug: $(TEXTURE_OBJS) | bin
+	$(CXX) $(TEXTURE_OBJS) -o $@ $(LDFLAGS)
+
+editor: bin/levelEditorDebug
+	./bin/levelEditorDebug
+
+bin/levelEditorDebug: $(EDITOR_OBJS) | bin
+	$(CXX) $(EDITOR_OBJS) -o $@ $(LDFLAGS)
+
+build/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+bin:
+	@mkdir -p $@
+
+-include $(DEPS)
+
+clean:
+	rm -rf build bin

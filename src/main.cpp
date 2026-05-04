@@ -41,28 +41,28 @@ int main() {
 
     bool gameStarted = false;
     
-    Image img1 = LoadImage("52571.png");
+    Image img1 = LoadImage("assets/images/52571.png");
     ImageColorReplace(&img1, (Color){148, 148, 255, 255}, BLANK);
     Texture2D spriteSheet = LoadTextureFromImage(img1);
     UnloadImage(img1);
 
-    Image img2 = LoadImage("50365.png");
+    Image img2 = LoadImage("assets/images/50365.png");
     ImageColorReplace(&img2, (Color){146, 144, 255, 255}, BLANK);
     Texture2D marioSheet = LoadTextureFromImage(img2);
     UnloadImage(img2);
 
-    Image img3 = LoadImage("52569.png");
+    Image img3 = LoadImage("assets/images/52569.png");
     ImageColorReplace(&img3, (Color){146, 144, 255, 255}, BLANK);
     ImageColorReplace(&img3, (Color){108, 106, 255, 255}, BLANK);
     Texture2D mushroomSheet = LoadTextureFromImage(img3);
     UnloadImage(img3);
 
-    Image img4 = LoadImage("52570.png");
+    Image img4 = LoadImage("assets/images/52570.png");
     ImageColorReplace(&img4, (Color){146, 144, 255, 255}, BLANK);
     Texture2D enemiesSheet = LoadTextureFromImage(img4);
     UnloadImage(img4);
 
-    Font nesFont = LoadFontEx("super-mario-bros-nes.otf", 36, NULL, 0);
+    Font nesFont = LoadFontEx("assets/fonts/super-mario-bros-nes.otf", 36, NULL, 0);
     SetTextureFilter(nesFont.texture, TEXTURE_FILTER_POINT);
 
     std::vector<std::unique_ptr<Block>> blocks;

@@ -3,7 +3,7 @@
 *.out
 *.app
 *.exe
+*.d
 
-main
-textureFinderDebug
-levelEditorDebug
+build/
+bin/

@@ -512,17 +512,17 @@ int main() {
     const int screenHeight = 760;
     InitWindow(screenWidth, screenHeight, "Level Editor Debug");
 
-    Image img1 = LoadImage("52571.png");
+    Image img1 = LoadImage("assets/images/52571.png");
     ImageColorReplace(&img1, (Color){148, 148, 255, 255}, BLANK);
     Texture2D spriteSheet = LoadTextureFromImage(img1);
     UnloadImage(img1);
 
-    Image img2 = LoadImage("52569.png");
+    Image img2 = LoadImage("assets/images/52569.png");
     ImageColorReplace(&img2, (Color){146, 144, 255, 255}, BLANK);
     Texture2D mushroomSheet = LoadTextureFromImage(img2);
     UnloadImage(img2);
 
-    Image img3 = LoadImage("52570.png");
+    Image img3 = LoadImage("assets/images/52570.png");
     ImageColorReplace(&img3, (Color){146, 144, 255, 255}, BLANK);
     Texture2D enemiesSheet = LoadTextureFromImage(img3);
     UnloadImage(img3);

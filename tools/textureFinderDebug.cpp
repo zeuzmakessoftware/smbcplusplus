@@ -6,7 +6,7 @@
 int main(int argc, char* argv[]) {
     const char *imageFile;
     if (argc == 1) {
-        imageFile = "52571.png";
+        imageFile = "assets/images/52571.png";
     } else {
         imageFile = argv[1];
     }
