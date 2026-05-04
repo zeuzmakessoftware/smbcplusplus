@@ -62,6 +62,11 @@ int main() {
     Texture2D enemiesSheet = LoadTextureFromImage(img4);
     UnloadImage(img4);
 
+    Image hudImg = LoadImage("assets/images/56929.png");
+    ImageColorReplace(&hudImg, (Color){148, 148, 255, 255}, BLANK);
+    Texture2D hudSheet = LoadTextureFromImage(hudImg);
+    UnloadImage(hudImg);
+
     Font nesFont = LoadFontEx("assets/fonts/super-mario-bros-nes.otf", 36, NULL, 0);
     SetTextureFilter(nesFont.texture, TEXTURE_FILTER_POINT);
 
@@ -377,7 +382,7 @@ int main() {
                     }
                 EndMode2D();
                 
-                scoreboard.draw(nesFont, screenWidth);
+                scoreboard.draw(nesFont, hudSheet, screenWidth);
                 if (isDead) {
                     DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.6f));
                     
@@ -401,6 +406,7 @@ int main() {
     UnloadTexture(marioSheet);
     UnloadTexture(mushroomSheet);
     UnloadTexture(enemiesSheet);
+    UnloadTexture(hudSheet);
     UnloadFont(nesFont);
     CloseWindow();
     return 0;

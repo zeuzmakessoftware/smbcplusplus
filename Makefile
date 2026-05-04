@@ -25,7 +25,7 @@ bin/main: $(MAIN_OBJS) | bin
 	$(CXX) $(MAIN_OBJS) -o $@ $(LDFLAGS)
 
 texture: bin/textureFinderDebug
-	./bin/textureFinderDebug "assets/images/52571.png"
+	./bin/textureFinderDebug "assets/images/56929.png"
 
 bin/textureFinderDebug: $(TEXTURE_OBJS) | bin
 	$(CXX) $(TEXTURE_OBJS) -o $@ $(LDFLAGS)
