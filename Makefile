@@ -2,7 +2,8 @@ CXX = g++
 CXXFLAGS = -Iinclude -I/opt/homebrew/include -MMD -MP
 LDFLAGS = -L/opt/homebrew/lib -lraylib
 
-COMMON_SRCS = src/backgroundProp.cpp src/blocks.cpp src/sceneType.cpp src/mushroom.cpp
+BLOCK_SRCS = $(wildcard src/blocks/*.cpp)
+COMMON_SRCS = src/backgroundProp.cpp $(BLOCK_SRCS) src/sceneType.cpp src/mushroom.cpp
 MAIN_SRCS = src/main.cpp src/mario.cpp src/drawTiledRect.cpp src/fireflower.cpp src/fireball.cpp \
             src/goomba.cpp src/levelData.cpp src/scoreboard.cpp src/scorepopup.cpp src/castleFlagpole.cpp $(COMMON_SRCS)
 EDITOR_SRCS = tools/levelEditorDebug.cpp $(COMMON_SRCS)
