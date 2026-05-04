@@ -14,6 +14,7 @@ private:
     bool isBumping = false;
     bool isSpent = false;
     bool wasHitThisFrame = false;
+    bool coinAnimationFinishedThisFrame = false;
     float animTimer = 0;
     int frame = 0;
 
@@ -37,6 +38,7 @@ public:
     const std::string& getItemType() const { return itemType; }
     void update(Rectangle marioRec, float& marioVelY, bool isBig) override;
     bool justBumped() override;
+    bool justFinishedCoinAnimation();
     void draw() override;
     void drawDebug() override;
 };

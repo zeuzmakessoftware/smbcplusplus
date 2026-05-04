@@ -242,6 +242,8 @@ int main() {
                         if (pBlock) {
                             if (bumped && pBlock->getItemType() == "coin") {
                                 scoreboard.addCoin();
+                            }
+                            if (pBlock->justFinishedCoinAnimation()) {
                                 scorePopups.spawn(200, { pBlock->returnRec().x, pBlock->returnRec().y - 8.0f });
                             }
                             auto newMush = pBlock->takeMushroom();

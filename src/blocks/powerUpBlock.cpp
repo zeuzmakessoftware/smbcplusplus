@@ -1,6 +1,23 @@
 #include "blocks/powerUpBlock.h"
 
-#include <cmath>
+namespace {
+constexpr float BLOCK_COIN_ARC_HEIGHT = 100.0f;
+constexpr float BLOCK_COIN_FRAME_TIME = 0.05f;
+constexpr float BLOCK_COIN_LIFETIME = 0.3f;
+constexpr float BLOCK_COIN_WIDTH = 22.0f;
+
+Rectangle BlockCoinSource(int frame) {
+    return {180.0f + (frame * 10.0f), 36.0f, 8.0f, 16.0f};
+}
+
+float BlockCoinOffsetY(float progress) {
+    if (progress < 0.5f) {
+        return progress * 2.0f * BLOCK_COIN_ARC_HEIGHT;
+    }
+
+    return (1.0f - progress) * 2.0f * BLOCK_COIN_ARC_HEIGHT;
+}
+}
 
 PowerUpBlock::PowerUpBlock(int x, int y, Texture2D sprites, Texture2D itemTex, std::string type, const SceneType& scene)
     : Block(x, y, sprites, scene), itemTexture(itemTex), itemType(type) {
@@ -21,6 +38,8 @@ std::unique_ptr<FireFlower> PowerUpBlock::takeFireFlower() {
 }
 
 void PowerUpBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
+    coinAnimationFinishedThisFrame = false;
+
     if (!isSpent) {
         animTimer += GetFrameTime();
         if (animTimer > 0.20f) {
@@ -37,7 +56,9 @@ void PowerUpBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
         itemActive = true;
 
         if (itemType == "coin") {
-            spawnTimer = 0.3f;
+            spawnTimer = BLOCK_COIN_LIFETIME;
+            coinTimer = 0.0f;
+            coinFrame = 0;
         } else if (itemType == "mushroom" || itemType == "fireflower") {
             spawnTimer = 1.0f;
         }
@@ -57,18 +78,20 @@ void PowerUpBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
         if (itemType == "coin") {
             spawnTimer -= GetFrameTime();
 
-            float progress = (0.3f - spawnTimer) / 0.3f;
-            float arc = sinf(progress * PI);
-            itemY = (float)rectYPos - (arc * 100.0f);
+            float progress = (BLOCK_COIN_LIFETIME - spawnTimer) / BLOCK_COIN_LIFETIME;
+            if (progress < 0.0f) progress = 0.0f;
+            if (progress > 1.0f) progress = 1.0f;
+            itemY = (float)rectYPos - BlockCoinOffsetY(progress);
 
             coinTimer += GetFrameTime();
-            if (coinTimer > 0.05f) {
+            if (coinTimer > BLOCK_COIN_FRAME_TIME) {
                 coinFrame = (coinFrame + 1) % 3;
                 coinTimer = 0;
             }
 
             if (spawnTimer <= 0) {
                 itemActive = false;
+                coinAnimationFinishedThisFrame = true;
             }
         }
         else if (itemType == "mushroom" || itemType == "fireflower") {
@@ -92,10 +115,10 @@ void PowerUpBlock::draw() {
     if (itemActive) {
         Rectangle src;
         if (itemType == "coin") {
-            src = scene->coinFrames[coinFrame];
+            src = BlockCoinSource(coinFrame);
 
-            DrawTexturePro(spriteSheet, src,
-                (Rectangle){ itemX, itemY, (float)TILE_SIZE, (float)TILE_SIZE },
+            DrawTexturePro(itemTexture, src,
+                (Rectangle){ itemX + ((TILE_SIZE - BLOCK_COIN_WIDTH) / 2.0f), itemY, BLOCK_COIN_WIDTH, (float)TILE_SIZE },
                 {0,0}, 0.0f, WHITE);
         }
         else if (itemType == "mushroom") {
@@ -127,6 +150,14 @@ void PowerUpBlock::drawDebug() {
 bool PowerUpBlock::justBumped() {
     if (wasHitThisFrame) {
         wasHitThisFrame = false;
+        return true;
+    }
+    return false;
+}
+
+bool PowerUpBlock::justFinishedCoinAnimation() {
+    if (coinAnimationFinishedThisFrame) {
+        coinAnimationFinishedThisFrame = false;
         return true;
     }
     return false;
