@@ -20,6 +20,7 @@ struct SceneType {
     Rectangle solidBlock;
     Rectangle emptyBlock;
     Rectangle questionBlockFrames[3];
+    Rectangle coinFrames[3];
 
     Rectangle pipeTopLeft;
     Rectangle pipeTopRight;

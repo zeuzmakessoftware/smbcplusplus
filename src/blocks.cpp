@@ -31,8 +31,8 @@ Rectangle Block::returnRec() {
     return {(float)rectXPos + 4, (float)rectYPos, (float)TILE_SIZE - 8, (float)TILE_SIZE};
 }
 
-Coin::Coin(float x, float y, Texture2D sprites)
-    : posX(x), posY(y), spriteSheet(sprites) {}
+Coin::Coin(float x, float y, Texture2D sprites, const SceneType& scene)
+    : posX(x), posY(y), spriteSheet(sprites), scene(&scene) {}
 
 Rectangle Coin::returnRec() const {
     return {posX + 8.0f, posY + 2.0f, (float)TILE_SIZE - 16.0f, (float)TILE_SIZE - 4.0f};
@@ -42,7 +42,7 @@ bool Coin::update(Rectangle marioRec) {
     animTimer += GetFrameTime();
     if (animTimer >= 0.08f) {
         animTimer = 0.0f;
-        frame = (frame + 1) % 4;
+        frame = (frame + 1) % 3;
     }
 
     if (!collected && CheckCollisionRecs(marioRec, returnRec())) {
@@ -56,11 +56,10 @@ bool Coin::update(Rectangle marioRec) {
 void Coin::draw() {
     if (collected) return;
 
-    float sourceX = 180.0f + (frame * 10.0f);
     DrawTexturePro(
         spriteSheet,
-        (Rectangle){ sourceX, 36.0f, 8.0f, 16.0f },
-        (Rectangle){ posX + 10.0f, posY, 22.0f, (float)TILE_SIZE },
+        scene->coinFrames[frame],
+        (Rectangle){ posX, posY, TILE_SIZE, TILE_SIZE },
         (Vector2){ 0, 0 },
         0.0f,
         WHITE
@@ -230,7 +229,7 @@ void PowerUpBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
 
             coinTimer += GetFrameTime();
             if (coinTimer > 0.05f) {
-                coinFrame = (coinFrame + 1) % 4;
+                coinFrame = (coinFrame + 1) % 3;
                 coinTimer = 0;
             }
 
@@ -259,11 +258,10 @@ void PowerUpBlock::draw() {
     if (itemActive) {
         Rectangle src;
         if (itemType == "coin") {
-            float frameX = 180.0f + (coinFrame * 10.0f); 
-            src = (Rectangle){ frameX, 36.0f, 8.0f, 16.0f };
+            src = scene->coinFrames[coinFrame];
             
-            DrawTexturePro(itemTexture, src,
-                (Rectangle){ (float)itemX + TILE_SIZE / 4, itemY, (float)TILE_SIZE / 2, (float)TILE_SIZE },
+            DrawTexturePro(spriteSheet, src,
+                (Rectangle){ itemX, itemY, (float)TILE_SIZE, (float)TILE_SIZE },
                 {0,0}, 0.0f, WHITE);
         }
         else if (itemType == "mushroom") {

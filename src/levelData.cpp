@@ -3,9 +3,9 @@
 namespace {
 constexpr SceneKind LEVEL1_SCENE_KIND = SceneKind::Overworld;
 
-void AddCoinRow(std::vector<Coin>& coins, Texture2D& mushroomSheet, int startTileX, int tileY, int count) {
+void AddCoinRow(std::vector<Coin>& coins, Texture2D& spriteSheet, const SceneType& scene, int startTileX, int tileY, int count) {
     for (int i = 0; i < count; i++) {
-        coins.emplace_back((float)((startTileX + i) * TILE_SIZE), (float)(tileY * TILE_SIZE + 12), mushroomSheet);
+        coins.emplace_back((float)((startTileX + i) * TILE_SIZE), (float)(tileY * TILE_SIZE + 12), spriteSheet, scene);
     }
 }
 }
@@ -257,25 +257,25 @@ void LoadLevel1Subarea(
 
     castleFlagpole = std::make_unique<CastleFlagpole>(5000.0f, 600.0f, spriteSheet, mushroomSheet, marioSheet);
 
-    coins.emplace_back((float)(4 * TILE_SIZE), (float)(10 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(5 * TILE_SIZE), (float)(10 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(6 * TILE_SIZE), (float)(10 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(7 * TILE_SIZE), (float)(10 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(8 * TILE_SIZE), (float)(10 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(9 * TILE_SIZE), (float)(10 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(10 * TILE_SIZE), (float)(10 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(10 * TILE_SIZE), (float)(8 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(9 * TILE_SIZE), (float)(8 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(8 * TILE_SIZE), (float)(8 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(7 * TILE_SIZE), (float)(8 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(6 * TILE_SIZE), (float)(8 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(5 * TILE_SIZE), (float)(8 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(4 * TILE_SIZE), (float)(8 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(5 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(7 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(6 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(8 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, mushroomSheet);
-    coins.emplace_back((float)(9 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, mushroomSheet);
+    coins.emplace_back((float)(4 * TILE_SIZE), (float)(10 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(5 * TILE_SIZE), (float)(10 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(6 * TILE_SIZE), (float)(10 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(7 * TILE_SIZE), (float)(10 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(8 * TILE_SIZE), (float)(10 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(9 * TILE_SIZE), (float)(10 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(10 * TILE_SIZE), (float)(10 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(10 * TILE_SIZE), (float)(8 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(9 * TILE_SIZE), (float)(8 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(8 * TILE_SIZE), (float)(8 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(7 * TILE_SIZE), (float)(8 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(6 * TILE_SIZE), (float)(8 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(5 * TILE_SIZE), (float)(8 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(4 * TILE_SIZE), (float)(8 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(5 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(7 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(6 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(8 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet, scene);
+    coins.emplace_back((float)(9 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet, scene);
 
     blocks.push_back(std::make_unique<DrawTiledRect>(
         0, 600, 672, 84, spriteSheet, GetSceneType(SceneKind::Underground).groundBlock, TILE_SIZE, TILE_SIZE, GetSceneType(SceneKind::Underground)

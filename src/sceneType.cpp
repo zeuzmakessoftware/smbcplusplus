@@ -30,6 +30,11 @@ constexpr SceneType MakeScene(
             Rect(315.0f + questionOffsetX, 78.0f),
             Rect(332.0f + questionOffsetX, 78.0f),
         },
+        {
+            Rect(298.0f + questionOffsetX, 95.0f),
+            Rect(315.0f + questionOffsetX, 95.0f),
+            Rect(332.0f + questionOffsetX, 95.0f),
+        },
         Rect(119.0f + tileOffsetX, 196.0f + tileOffsetY),
         Rect(136.0f + tileOffsetX, 196.0f + tileOffsetY),
         Rect(119.0f + tileOffsetX, 213.0f + tileOffsetY),
