@@ -9,6 +9,7 @@
 #include "blocks.h"
 #include "mushroom.h"
 #include "fireflower.h"
+#include "star.h"
 #include "fireball.h"
 #include "goomba.h"
 #include "levelData.h"
@@ -76,6 +77,7 @@ int main() {
     std::vector<Rectangle> collisionObjects;
     std::vector<std::unique_ptr<Mushroom>> activeMushrooms;
     std::vector<std::unique_ptr<FireFlower>> activeFireFlowers;
+    std::vector<std::unique_ptr<Star>> activeStars;
     std::vector<std::unique_ptr<Fireball>> activeFireballs;
     std::vector<Particle> brickParticles;
     std::vector<BackgroundProp> levelProps;
@@ -115,6 +117,7 @@ int main() {
         coins.clear();
         activeMushrooms.clear();
         activeFireFlowers.clear();
+        activeStars.clear();
         activeFireballs.clear();
         brickParticles.clear();
         levelProps.clear();
@@ -258,6 +261,11 @@ int main() {
                             auto newFlower = pBlock->takeFireFlower();
                             if (newFlower) activeFireFlowers.push_back(std::move(newFlower));
                         }
+                        auto* starBlock = dynamic_cast<StarBrickBlock*>(it->get());
+                        if (starBlock) {
+                            auto newStar = starBlock->takeStar();
+                            if (newStar) activeStars.push_back(std::move(newStar));
+                        }
                         ++it;
                     }
                 }
@@ -287,6 +295,7 @@ int main() {
                 BrickBlock::updateParticles(brickParticles);
                 for (auto& mush : activeMushrooms) mush->update(collisionObjects);
                 for (auto& flower : activeFireFlowers) flower->update();
+                for (auto& star : activeStars) star->update(collisionObjects);
                 for (auto& fireball : activeFireballs) fireball->update(collisionObjects, camera.target.x);
 
                 for (auto& fireball : activeFireballs) {
@@ -311,7 +320,8 @@ int main() {
                 if (currentArea == LevelArea::Subarea || !castleFlagpole->isActive()) {
                     bool wasBig = MarioObj.getIsBig();
                     bool wasFire = MarioObj.getIsFire();
-                    MarioObj.update(collisionObjects, camera.target.x, activeMushrooms, activeFireFlowers, activeFireballs, mushroomSheet);
+                    bool wasStarPowered = MarioObj.getIsStarPowered();
+                    MarioObj.update(collisionObjects, camera.target.x, activeMushrooms, activeFireFlowers, activeStars, activeFireballs, mushroomSheet);
                     int oneUps = MarioObj.takeCollectedOneUps();
                     for (int i = 0; i < oneUps; i++) {
                         scorePopups.spawn(1, { MarioObj.getPos().x, MarioObj.getPos().y - 20.0f });
@@ -321,6 +331,10 @@ int main() {
                         scorePopups.spawn(1000, { MarioObj.getPos().x, MarioObj.getPos().y - 20.0f });
                     }
                     if (!wasFire && MarioObj.getIsFire()) {
+                        scoreboard.addScore(1000);
+                        scorePopups.spawn(1000, { MarioObj.getPos().x, MarioObj.getPos().y - 20.0f });
+                    }
+                    if (!wasStarPowered && MarioObj.getIsStarPowered()) {
                         scoreboard.addScore(1000);
                         scorePopups.spawn(1000, { MarioObj.getPos().x, MarioObj.getPos().y - 20.0f });
                     }
@@ -382,6 +396,7 @@ int main() {
                     for (auto& coin : coins) coin.draw();
                     for (auto& mush : activeMushrooms) mush->draw();
                     for (auto& flower : activeFireFlowers) flower->draw();
+                    for (auto& star : activeStars) star->draw();
                     for (auto& fireball : activeFireballs) fireball->draw();
                     for (auto& goom : goombas) goom->draw();
 

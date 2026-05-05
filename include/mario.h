@@ -6,6 +6,7 @@
 #include <memory>
 #include "mushroom.h"
 #include "fireflower.h"
+#include "star.h"
 #include "fireball.h"
 
 #define TILE_SIZE 42 
@@ -50,6 +51,9 @@ class Mario {
         bool isInvincible = false;
         float invincibilityTimer = 0.0f;
         const float invincibilityDuration = 2.0f;
+        bool isStarPowered = false;
+        float starPowerTimer = 0.0f;
+        const float starPowerDuration = 10.0f;
         int collectedOneUps = 0;
 
     public:
@@ -61,6 +65,7 @@ class Mario {
             float cameraX,
             std::vector<std::unique_ptr<Mushroom>>& mushrooms,
             std::vector<std::unique_ptr<FireFlower>>& fireFlowers,
+            std::vector<std::unique_ptr<Star>>& stars,
             std::vector<std::unique_ptr<Fireball>>& fireballs,
             Texture2D fireballSheet
         );
@@ -77,6 +82,7 @@ class Mario {
         bool getIsFireTransforming() const { return isFireTransforming; }
         void startShrink();
         bool getIsInvincible() const { return isInvincible; }
+        bool getIsStarPowered() const { return isStarPowered; }
         int takeCollectedOneUps();
 };
 

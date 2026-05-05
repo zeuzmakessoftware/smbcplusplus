@@ -213,7 +213,7 @@ static void DrawProp(const LevelObject& obj, Texture2D spriteSheet) {
 
 static Rectangle BlockSourceFor(const BlockDefinition& block, const SceneType& scene) {
     std::string className = block.className;
-    if (className == "BrickBlock") return scene.brickBlock;
+    if (className == "BrickBlock" || className == "StarBrickBlock") return scene.brickBlock;
     if (className == "EmptyBlock") return scene.emptyBlock;
     if (className == "ShinyBlock") return scene.solidBlock;
     return block.source;
@@ -318,9 +318,15 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sc
                           << sceneExpr << "\n));\n";
                 break;
             case ObjectType::Block:
-                std::cout << "blocks.push_back(std::make_unique<" << BlockDefinitionFor(obj).className
-                          << ">(" << Expr(obj.x) << ", " << Expr(obj.y) << ", spriteSheet, "
-                          << sceneExpr << "));\n";
+                if (std::string(BlockDefinitionFor(obj).className) == "StarBrickBlock") {
+                    std::cout << "blocks.push_back(std::make_unique<StarBrickBlock>(" << Expr(obj.x)
+                              << ", " << Expr(obj.y) << ", spriteSheet, mushroomSheet, "
+                              << sceneExpr << "));\n";
+                } else {
+                    std::cout << "blocks.push_back(std::make_unique<" << BlockDefinitionFor(obj).className
+                              << ">(" << Expr(obj.x) << ", " << Expr(obj.y) << ", spriteSheet, "
+                              << sceneExpr << "));\n";
+                }
                 break;
             case ObjectType::CoinBlock:
                 std::cout << "blocks.push_back(std::make_unique<PowerUpBlock>(" << Expr(obj.x)

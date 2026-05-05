@@ -18,12 +18,18 @@ void Mario::update(
     float cameraX,
     std::vector<std::unique_ptr<Mushroom>>& mushrooms,
     std::vector<std::unique_ptr<FireFlower>>& fireFlowers,
+    std::vector<std::unique_ptr<Star>>& stars,
     std::vector<std::unique_ptr<Fireball>>& fireballs,
     Texture2D fireballSheet
 ) {
     if (isInvincible) {
         invincibilityTimer -= GetFrameTime();
         if (invincibilityTimer <= 0) isInvincible = false;
+    }
+
+    if (isStarPowered) {
+        starPowerTimer -= GetFrameTime();
+        if (starPowerTimer <= 0.0f) isStarPowered = false;
     }
     
     if (isTransforming || isFireTransforming) {
@@ -154,6 +160,16 @@ void Mario::update(
             ++it;
         }
     }
+
+    for (auto it = stars.begin(); it != stars.end(); ) {
+        if (CheckCollisionRecs(this->returnRec(), (*it)->returnRec())) {
+            isStarPowered = true;
+            starPowerTimer = starPowerDuration;
+            it = stars.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 int Mario::takeCollectedOneUps() {
@@ -163,7 +179,7 @@ int Mario::takeCollectedOneUps() {
 }
 
 void Mario::draw() {
-    if (isInvincible && !isTransforming && !isFireTransforming) {
+    if (isInvincible && !isStarPowered && !isTransforming && !isFireTransforming) {
         if ((int)(GetTime() * 15) % 2 == 0) return; 
     }
 
@@ -205,13 +221,27 @@ void Mario::draw() {
     Rectangle sourceRec = { sourceX, sourceY, 16.0f, sourceHeight };
     if (!facingRight) sourceRec.width = -16.0f;
 
+    Color tint = WHITE;
+    if (isStarPowered && !isTransforming && !isFireTransforming) {
+        int starFrame = ((int)(GetTime() * 12.0)) % 6;
+        Color starColors[6] = {
+            WHITE,
+            (Color){255, 224, 96, 255},
+            (Color){255, 128, 128, 255},
+            (Color){128, 255, 160, 255},
+            (Color){128, 208, 255, 255},
+            (Color){255, 160, 255, 255}
+        };
+        tint = starColors[starFrame];
+    }
+
     DrawTexturePro(
         sprites,
         sourceRec,
         (Rectangle){ posX, drawY, (float)TILE_SIZE, drawHeight },
         (Vector2){ 0, 0 },
         0.0f,
-        WHITE 
+        tint
     );
 }
 
@@ -224,6 +254,10 @@ void Mario::reset(float x, float y) {
     isBig = false;
     isFire = false;
     isTransforming = false;
+    isInvincible = false;
+    invincibilityTimer = 0.0f;
+    isStarPowered = false;
+    starPowerTimer = 0.0f;
     currentFrame = 0;
     frameTimer = 0.0f;
     collectedOneUps = 0;

@@ -6,6 +6,7 @@
 #include "blocks/brickBlock.h"
 #include "blocks/emptyBlock.h"
 #include "blocks/powerUpBlock.h"
+#include "blocks/starBrickBlock.h"
 #include "blocks/pipeBlock.h"
 #include "blocks/shinyBlock.h"
 

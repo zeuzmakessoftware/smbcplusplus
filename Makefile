@@ -3,7 +3,7 @@ CXXFLAGS = -Iinclude -I/opt/homebrew/include -MMD -MP
 LDFLAGS = -L/opt/homebrew/lib -lraylib
 
 BLOCK_SRCS = $(wildcard src/blocks/*.cpp)
-COMMON_SRCS = src/backgroundProp.cpp $(BLOCK_SRCS) src/sceneType.cpp src/mushroom.cpp
+COMMON_SRCS = src/backgroundProp.cpp $(BLOCK_SRCS) src/sceneType.cpp src/mushroom.cpp src/star.cpp
 MAIN_SRCS = src/main.cpp src/mario.cpp src/drawTiledRect.cpp src/fireflower.cpp src/fireball.cpp \
             src/goomba.cpp src/levelData.cpp src/scoreboard.cpp src/scorepopup.cpp src/castleFlagpole.cpp $(COMMON_SRCS)
 EDITOR_SRCS = tools/levelEditorDebug.cpp $(COMMON_SRCS)
@@ -26,7 +26,7 @@ bin/main: $(MAIN_OBJS) | bin
 	$(CXX) $(MAIN_OBJS) -o $@ $(LDFLAGS)
 
 texture: bin/textureFinderDebug
-	./bin/textureFinderDebug "assets/images/52569.png"
+	./bin/textureFinderDebug "assets/images/50365.png"
 
 bin/textureFinderDebug: $(TEXTURE_OBJS) | bin
 	$(CXX) $(TEXTURE_OBJS) -o $@ $(LDFLAGS)

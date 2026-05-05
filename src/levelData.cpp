@@ -121,7 +121,7 @@ void LoadLevel1(
     blocks.push_back(std::make_unique<BrickBlock>((92 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, scene));
     blocks.push_back(std::make_unique<BrickBlock>((93 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, scene));
     blocks.push_back(std::make_unique<PowerUpBlock>((94 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "coin", scene));
-    blocks.push_back(std::make_unique<BrickBlock>((100 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<StarBrickBlock>((100 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, scene));
     blocks.push_back(std::make_unique<PowerUpBlock>((106 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "coin", scene));
     blocks.push_back(std::make_unique<PowerUpBlock>((109 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "coin", scene));
     blocks.push_back(std::make_unique<PowerUpBlock>((112 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "coin", scene));
