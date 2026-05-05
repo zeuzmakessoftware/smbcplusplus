@@ -26,6 +26,8 @@ private:
 
     float coinTimer = 0.0f;
     int coinFrame = 0;
+    float itemAnimTimer = 0.0f;
+    int itemFrame = 0;
 
     std::unique_ptr<Mushroom> releasedMushroom;
     std::unique_ptr<FireFlower> releasedFireFlower;

@@ -2,7 +2,11 @@
 
 namespace {
 constexpr float STAR_SPAWN_TIME = 1.0f;
-constexpr Rectangle STAR_PREVIEW_SOURCE = {106.0f, 8.0f, 16.0f, 16.0f};
+constexpr float STAR_FRAME_TIME = 0.08f;
+
+Rectangle StarPreviewSource(int frame) {
+    return {106.0f + (frame * 18.0f), 8.0f, 16.0f, 16.0f};
+}
 }
 
 StarBrickBlock::StarBrickBlock(int x, int y, Texture2D sprites, Texture2D itemTex, const SceneType& scene)
@@ -36,6 +40,8 @@ void StarBrickBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
         spawnTimer = STAR_SPAWN_TIME;
         itemX = (float)rectXPos;
         itemY = (float)rectYPos;
+        itemAnimTimer = 0.0f;
+        itemFrame = 0;
     }
 
     if (isBumping) {
@@ -51,8 +57,15 @@ void StarBrickBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
     }
 
     if (itemActive && spawnTimer > 0.0f) {
-        spawnTimer -= GetFrameTime();
-        itemY -= (TILE_SIZE * GetFrameTime());
+        float dt = GetFrameTime();
+        spawnTimer -= dt;
+        itemY -= (TILE_SIZE * dt);
+
+        itemAnimTimer += dt;
+        if (itemAnimTimer >= STAR_FRAME_TIME) {
+            itemAnimTimer = 0.0f;
+            itemFrame = (itemFrame + 1) % 4;
+        }
 
         if (spawnTimer <= 0.0f) {
             releasedStar = std::make_unique<Star>(itemX, itemY, itemTexture);
@@ -65,7 +78,7 @@ void StarBrickBlock::draw() {
     if (itemActive) {
         DrawTexturePro(
             itemTexture,
-            STAR_PREVIEW_SOURCE,
+            StarPreviewSource(itemFrame),
             (Rectangle){ itemX, itemY, (float)TILE_SIZE, (float)TILE_SIZE },
             (Vector2){ 0.0f, 0.0f },
             0.0f,

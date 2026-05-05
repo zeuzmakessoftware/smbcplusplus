@@ -5,6 +5,7 @@ constexpr float BLOCK_COIN_ARC_HEIGHT = 100.0f;
 constexpr float BLOCK_COIN_FRAME_TIME = 0.05f;
 constexpr float BLOCK_COIN_LIFETIME = 0.3f;
 constexpr float BLOCK_COIN_WIDTH = 22.0f;
+constexpr float FIRE_FLOWER_FRAME_TIME = 0.18f;
 
 Rectangle BlockCoinSource(int frame) {
     return {180.0f + (frame * 10.0f), 36.0f, 8.0f, 16.0f};
@@ -82,6 +83,8 @@ void PowerUpBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
             coinFrame = 0;
         } else if (itemType == "mushroom" || itemType == "fireflower" || itemType == "1up") {
             spawnTimer = 1.0f;
+            itemAnimTimer = 0.0f;
+            itemFrame = 0;
         }
     }
 
@@ -117,8 +120,18 @@ void PowerUpBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
         }
         else if (activeItemType() == "mushroom" || activeItemType() == "fireflower" || activeItemType() == "1up") {
             if (spawnTimer > 0) {
-                spawnTimer -= GetFrameTime();
-                itemY -= (TILE_SIZE * GetFrameTime());
+                float dt = GetFrameTime();
+                spawnTimer -= dt;
+                itemY -= (TILE_SIZE * dt);
+
+                if (activeItemType() == "fireflower") {
+                    itemAnimTimer += dt;
+                    if (itemAnimTimer >= FIRE_FLOWER_FRAME_TIME) {
+                        itemAnimTimer = 0.0f;
+                        itemFrame = (itemFrame + 1) % 4;
+                    }
+                }
+
                 if (spawnTimer <= 0) {
                     if (activeItemType() == "mushroom") {
                         releasedMushroom = std::make_unique<Mushroom>(itemX, itemY, itemTexture);
@@ -157,7 +170,7 @@ void PowerUpBlock::draw() {
                 {0,0}, 0.0f, WHITE);
         }
         else if (activeItemType() == "fireflower") {
-            src = { 32.0f, 44.0f, 16.0f, 16.0f };
+            src = { 32.0f + (itemFrame * 18.0f), 44.0f, 16.0f, 16.0f };
             DrawTexturePro(itemTexture, src,
                 (Rectangle){ itemX, itemY, (float)TILE_SIZE, (float)TILE_SIZE },
                 {0,0}, 0.0f, WHITE);

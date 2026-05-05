@@ -16,6 +16,8 @@ private:
     float itemX = 0.0f;
     float itemY = 0.0f;
     float spawnTimer = 0.0f;
+    float itemAnimTimer = 0.0f;
+    int itemFrame = 0;
 
     Texture2D itemTexture;
     std::unique_ptr<Star> releasedStar;
