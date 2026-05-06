@@ -17,6 +17,36 @@ Rectangle Mario::returnRec() {
     return {(float)posX, (float)posY + topInset, (float)TILE_SIZE, visualHeight() - topInset};
 }
 
+bool Mario::isStandingOnPlatform(Rectangle platformRec) const {
+    float topInset = collisionTopInset();
+    Rectangle marioRec = {(float)posX, (float)posY + topInset, (float)TILE_SIZE, visualHeight() - topInset};
+    float marioBottom = marioRec.y + marioRec.height;
+    bool verticallyOnTop = marioBottom >= platformRec.y - 3.0f && marioBottom <= platformRec.y + 6.0f;
+    bool horizontallyOverlaps = marioRec.x + marioRec.width > platformRec.x + 2.0f &&
+        marioRec.x < platformRec.x + platformRec.width - 2.0f;
+    return verticallyOnTop && horizontallyOverlaps && velY >= 0.0f;
+}
+
+void Mario::moveByPlatformDelta(float dx, float dy, const std::vector<Rectangle>& statics, float cameraX) {
+    posX += dx;
+    for (const auto& rect : statics) {
+        if (CheckCollisionRecs(returnRec(), rect)) {
+            if (dx > 0.0f) posX = rect.x - TILE_SIZE;
+            else if (dx < 0.0f) posX = rect.x + rect.width;
+        }
+    }
+
+    posY += dy;
+    for (const auto& rect : statics) {
+        if (CheckCollisionRecs(returnRec(), rect)) {
+            if (dy > 0.0f) posY = rect.y - visualHeight();
+            else if (dy < 0.0f) posY = rect.y + rect.height - collisionTopInset();
+        }
+    }
+
+    if (posX < cameraX) posX = cameraX;
+}
+
 Vector2 Mario::getPos() {
     return (Vector2){ (float)posX, (float)posY };
 }

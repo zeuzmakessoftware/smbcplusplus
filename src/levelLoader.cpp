@@ -12,7 +12,7 @@ void LevelLoader::load(const LevelAreaId& nextArea, Vector2 marioStart, Mario& m
     area = config->id;
 
     config->load(
-        blocks, goombas, koopas, piranhaPlants, coins, levelProps, castleFlagpole, followCamera,
+        blocks, goombas, koopas, piranhaPlants, lifts, coins, levelProps, castleFlagpole, followCamera,
         resources.spriteSheet, resources.mushroomSheet, resources.marioSheet, resources.enemiesSheet, resources.tileSize
     );
     rebuildCollisionObjects();
@@ -41,6 +41,29 @@ void LevelLoader::rebuildCollisionObjects() {
     if (castleFlagpole) {
         collisionObjects.push_back(castleFlagpole->returnCollisionRec());
     }
+    for (auto& lift : lifts) {
+        collisionObjects.push_back(lift.returnRec());
+    }
+}
+
+void LevelLoader::updateLifts(Mario& mario, float cameraX) {
+    std::vector<Rectangle> solidObjects;
+    solidObjects.reserve(collisionObjects.size());
+    for (auto& block : blocks) {
+        auto* pBlock = dynamic_cast<PowerUpBlock*>(block.get());
+        if (pBlock && !pBlock->hasCollision()) {
+            continue;
+        }
+        solidObjects.push_back(block->returnRec());
+    }
+    if (castleFlagpole) {
+        solidObjects.push_back(castleFlagpole->returnCollisionRec());
+    }
+
+    for (auto& lift : lifts) {
+        lift.update(mario, solidObjects, cameraX);
+    }
+    rebuildCollisionObjects();
 }
 
 const LevelAreaId& LevelLoader::currentArea() const {
@@ -114,6 +137,7 @@ void LevelLoader::clearLevelEntities() {
     goombas.clear();
     koopas.clear();
     piranhaPlants.clear();
+    lifts.clear();
     coins.clear();
     collisionObjects.clear();
     levelProps.clear();

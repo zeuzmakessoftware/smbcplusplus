@@ -361,6 +361,8 @@ int main() {
                     else ++it;
                 }
 
+                levelLoader.updateLifts(MarioObj, camera.target.x);
+
                 for (auto it = levelLoader.goombas.begin(); it != levelLoader.goombas.end(); ) {
                     if (!MarioObj.getIsTransforming() && !MarioObj.getIsFireTransforming()) {
                         (*it)->update(levelLoader.collisionObjects, MarioObj, isDead, deathTimer, camera.target.x);
@@ -547,6 +549,7 @@ int main() {
                         MarioObj.draw();
                     }
                     for (auto& plant : levelLoader.piranhaPlants) plant->draw();
+                    for (auto& lift : levelLoader.lifts) lift.draw();
                     for (auto& block : levelLoader.blocks) block->draw();
                     for (auto& coin : levelLoader.coins) coin.draw();
                     for (auto& mush : activeMushrooms) mush->draw();

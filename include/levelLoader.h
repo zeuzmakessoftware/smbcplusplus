@@ -10,6 +10,7 @@
 #include "goomba.h"
 #include "koopa.h"
 #include "levelData.h"
+#include "lift.h"
 #include "mario.h"
 #include "piranhaPlant.h"
 #include "scorepopup.h"
@@ -29,6 +30,7 @@ public:
     std::vector<std::unique_ptr<Goomba>> goombas;
     std::vector<std::unique_ptr<Koopa>> koopas;
     std::vector<std::unique_ptr<PiranhaPlant>> piranhaPlants;
+    std::vector<Lift> lifts;
     std::vector<Coin> coins;
     std::vector<Rectangle> collisionObjects;
     std::vector<BackgroundProp> levelProps;
@@ -38,6 +40,7 @@ public:
 
     void load(const LevelAreaId& area, Vector2 marioStart, Mario& mario, Camera2D& camera, ScorePopupManager& scorePopups);
     void rebuildCollisionObjects();
+    void updateLifts(Mario& mario, float cameraX);
 
     Vector2 defaultMarioStart(const LevelAreaId& area) const;
     void scoreboardLevel(const LevelAreaId& area, int& world, int& level) const;

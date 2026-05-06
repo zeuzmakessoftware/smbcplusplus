@@ -19,6 +19,7 @@ void LoadLevel1(
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
+    std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
@@ -252,6 +253,7 @@ void LoadLevel1Subarea(
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
+    std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
@@ -350,6 +352,7 @@ void LoadLevel12EntranceCutscene(
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
+    std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
@@ -392,6 +395,7 @@ void LoadLevel12UndergroundStart(
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
+    std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
@@ -410,6 +414,13 @@ void LoadLevel12UndergroundStart(
     followCamera = true;
 
     castleFlagpole = std::make_unique<CastleFlagpole>(5000.0f, 600.0f, spriteSheet, mushroomSheet, marioSheet);
+
+    lifts.push_back(Lift::VerticalWrap(141.0f * TILE_SIZE, 650.0f, 132.0f, mushroomSheet, -32.0f, 680.0f, 72.0f, false));
+    lifts.push_back(Lift::VerticalWrap(146.0f * TILE_SIZE, -20.0f, 132.0f, mushroomSheet, -32.0f, 680.0f, 72.0f, true));
+    lifts.push_back(Lift::VerticalBounce(152.0f * TILE_SIZE, 430.0f, 132.0f, mushroomSheet, 250.0f, 500.0f, 64.0f, true));
+    lifts.push_back(Lift::HorizontalBounce(157.0f * TILE_SIZE, 390.0f, 132.0f, mushroomSheet, 157.0f * TILE_SIZE, 163.0f * TILE_SIZE, 68.0f, true));
+    lifts.push_back(Lift::VerticalWrap(164.0f * TILE_SIZE, 650.0f, 84.0f, mushroomSheet, -32.0f, 680.0f, 80.0f, false));
+    lifts.push_back(Lift::VerticalWrap(166.0f * TILE_SIZE, -20.0f, 84.0f, mushroomSheet, -32.0f, 680.0f, 80.0f, true));
 
     goombas.push_back(std::make_unique<Goomba>((16 * TILE_SIZE), (13 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
     goombas.push_back(std::make_unique<Goomba>((17 * TILE_SIZE), (12 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
@@ -824,6 +835,7 @@ void LoadLevel12Subarea(
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
+    std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
@@ -958,6 +970,7 @@ void LoadLevel12Final(
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
+    std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
