@@ -12,6 +12,7 @@
 #include "star.h"
 #include "fireball.h"
 #include "goomba.h"
+#include "koopa.h"
 #include "levelData.h"
 #include "scoreboard.h"
 #include "castleFlagpole.h"
@@ -60,6 +61,7 @@ int main() {
 
     Image img4 = LoadImage("assets/images/52570.png");
     ImageColorReplace(&img4, (Color){146, 144, 255, 255}, BLANK);
+    ImageColorReplace(&img4, (Color){0, 41, 140, 255}, BLANK);
     Texture2D enemiesSheet = LoadTextureFromImage(img4);
     UnloadImage(img4);
 
@@ -73,6 +75,7 @@ int main() {
 
     std::vector<std::unique_ptr<Block>> blocks;
     std::vector<std::unique_ptr<Goomba>> goombas;
+    std::vector<std::unique_ptr<Koopa>> koopas;
     std::vector<Coin> coins;
     std::vector<Rectangle> collisionObjects;
     std::vector<std::unique_ptr<Mushroom>> activeMushrooms;
@@ -114,6 +117,7 @@ int main() {
     auto LoadArea = [&](LevelArea area, Vector2 marioStart) {
         blocks.clear();
         goombas.clear();
+        koopas.clear();
         coins.clear();
         activeMushrooms.clear();
         activeFireFlowers.clear();
@@ -124,9 +128,9 @@ int main() {
         currentArea = area;
 
         if (area == LevelArea::Overworld) {
-            LoadLevel1(blocks, goombas, coins, levelProps, castleFlagpole, followCamera, spriteSheet, mushroomSheet, marioSheet, enemiesSheet, TILE_SIZE);
+            LoadLevel1(blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera, spriteSheet, mushroomSheet, marioSheet, enemiesSheet, TILE_SIZE);
         } else {
-            LoadLevel1Subarea(blocks, goombas, coins, levelProps, castleFlagpole, followCamera, spriteSheet, mushroomSheet, marioSheet, enemiesSheet, TILE_SIZE);
+            LoadLevel1Subarea(blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera, spriteSheet, mushroomSheet, marioSheet, enemiesSheet, TILE_SIZE);
         }
 
         RebuildCollisionObjects();
@@ -236,6 +240,11 @@ int main() {
                                 goom->flip();
                             }
                         }
+                        for (auto& koopa : koopas) {
+                            if (CheckCollisionRecs(hitArea, koopa->returnRec())) {
+                                koopa->flip();
+                            }
+                        }
                     }
                     
                     auto* brick = dynamic_cast<BrickBlock*>(it->get());
@@ -292,6 +301,42 @@ int main() {
                     else ++it;
                 }
 
+                for (auto it = koopas.begin(); it != koopas.end(); ) {
+                    if (!MarioObj.getIsTransforming() && !MarioObj.getIsFireTransforming()) {
+                        (*it)->update(collisionObjects, MarioObj, isDead, deathTimer, camera.target.x);
+                    }
+                    if ((*it)->justDefeated()) {
+                        scoreboard.addScore(100);
+                        scorePopups.spawn(100, { (*it)->getPos().x, (*it)->getPos().y - 10.0f });
+                    }
+                    if ((*it)->shouldRemove()) it = koopas.erase(it);
+                    else ++it;
+                }
+
+                for (auto& koopa : koopas) {
+                    if (!koopa->isMovingShell()) continue;
+
+                    for (auto& goom : goombas) {
+                        if (CheckCollisionRecs(koopa->returnRec(), { goom->getPos().x, goom->getPos().y, 42, 42 })) {
+                            goom->flip();
+                            if (goom->justDefeated()) {
+                                scoreboard.addScore(100);
+                                scorePopups.spawn(100, { goom->getPos().x, goom->getPos().y - 10.0f });
+                            }
+                        }
+                    }
+                    for (auto& otherKoopa : koopas) {
+                        if (otherKoopa.get() == koopa.get() || otherKoopa->isFlippedOrDead()) continue;
+                        if (CheckCollisionRecs(koopa->returnRec(), otherKoopa->returnRec())) {
+                            otherKoopa->hitByShell();
+                            if (otherKoopa->justDefeated()) {
+                                scoreboard.addScore(100);
+                                scorePopups.spawn(100, { otherKoopa->getPos().x, otherKoopa->getPos().y - 10.0f });
+                            }
+                        }
+                    }
+                }
+
                 BrickBlock::updateParticles(brickParticles);
                 for (auto& mush : activeMushrooms) mush->update(collisionObjects);
                 for (auto& flower : activeFireFlowers) flower->update();
@@ -306,6 +351,16 @@ int main() {
                             if (goom->justDefeated()) {
                                 scoreboard.addScore(100);
                                 scorePopups.spawn(100, { goom->getPos().x, goom->getPos().y - 10.0f });
+                            }
+                            fireball->destroy();
+                        }
+                    }
+                    for (auto& koopa : koopas) {
+                        if (CheckCollisionRecs(fireball->returnRec(), koopa->returnRec())) {
+                            koopa->flip();
+                            if (koopa->justDefeated()) {
+                                scoreboard.addScore(100);
+                                scorePopups.spawn(100, { koopa->getPos().x, koopa->getPos().y - 10.0f });
                             }
                             fireball->destroy();
                         }
@@ -399,6 +454,7 @@ int main() {
                     for (auto& star : activeStars) star->draw();
                     for (auto& fireball : activeFireballs) fireball->draw();
                     for (auto& goom : goombas) goom->draw();
+                    for (auto& koopa : koopas) koopa->draw();
 
                     if (currentArea == LevelArea::Overworld) castleFlagpole->draw();
 

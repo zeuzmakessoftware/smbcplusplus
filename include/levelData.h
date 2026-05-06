@@ -11,12 +11,14 @@
 #include "drawTiledRect.h"
 #include "castleFlagpole.h"
 #include "sceneType.h"
+#include "koopa.h"
 
 const SceneType& GetLevel1Scene();
 
 void LoadLevel1(
     std::vector<std::unique_ptr<Block>>& blocks,
     std::vector<std::unique_ptr<Goomba>>& goombas,
+    std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
@@ -31,6 +33,7 @@ void LoadLevel1(
 void LoadLevel1Subarea(
     std::vector<std::unique_ptr<Block>>& blocks,
     std::vector<std::unique_ptr<Goomba>>& goombas,
+    std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,

@@ -29,6 +29,9 @@ struct SceneType {
 
     Rectangle goombaFrames[2];
     Rectangle goombaSquashed;
+
+    Rectangle koopaFrames[2];
+    Rectangle koopaShellFrames[2];
 };
 
 const SceneType& GetSceneType(SceneKind kind);

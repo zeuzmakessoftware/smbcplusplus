@@ -15,7 +15,8 @@ constexpr SceneType MakeScene(
     float tileOffsetX,
     float tileOffsetY,
     float questionOffsetX,
-    float enemyOffsetX
+    float goombaOffsetX,
+    float koopaOffsetX
 ) {
     return {
         kind,
@@ -40,10 +41,18 @@ constexpr SceneType MakeScene(
         Rect(119.0f + tileOffsetX, 213.0f + tileOffsetY),
         Rect(136.0f + tileOffsetX, 213.0f + tileOffsetY),
         {
-            Rect(0.0f + enemyOffsetX, 16.0f),
-            Rect(18.0f + enemyOffsetX, 16.0f),
+            Rect(0.0f + goombaOffsetX, 16.0f),
+            Rect(18.0f + goombaOffsetX, 16.0f),
         },
-        Rect(36.0f + enemyOffsetX, 24.0f, 16.0f, 8.0f),
+        Rect(36.0f + goombaOffsetX, 24.0f, 16.0f, 8.0f),
+        {
+            Rect(0.0f + koopaOffsetX, 111.0f, 16.0f, 24.0f),
+            Rect(18.0f + koopaOffsetX, 111.0f, 16.0f, 24.0f),
+        },
+        {
+            Rect(72.0f + koopaOffsetX, 119.0f, 16.0f, 16.0f),
+            Rect(90.0f + koopaOffsetX, 119.0f, 16.0f, 16.0f),
+        },
     };
 }
 
@@ -74,11 +83,11 @@ constexpr SceneType WithBlockSources(
 }
 
 constexpr SceneType OVERWORLD_SCENE = MakeScene(
-    SceneKind::Overworld, "Overworld", NES_SKY_BLUE, 0.0f, 0.0f, 0.0f, 0.0f
+    SceneKind::Overworld, "Overworld", NES_SKY_BLUE, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
 );
 constexpr SceneType UNDERGROUND_SCENE = WithPipeSources(
     WithBlockSources(
-        MakeScene(SceneKind::Underground, "Underground", NES_BLACK, 147.0f, 0.0f, 96.0f, 74.0f),
+        MakeScene(SceneKind::Underground, "Underground", NES_BLACK, 147.0f, 0.0f, 96.0f, 74.0f, 145.0f),
         Rect(147.0f, 16.0f),
         Rect(181.0f, 16.0f),
         Rect(164.0f, 33.0f)
@@ -89,10 +98,10 @@ constexpr SceneType UNDERGROUND_SCENE = WithPipeSources(
     Rect(300.0f, 213.0f)
 );
 constexpr SceneType CASTLE_SCENE = MakeScene(
-    SceneKind::Castle, "Castle", NES_BLACK, 0.0f, 84.0f, 96.0f * 2, 74.0f * 2
+    SceneKind::Castle, "Castle", NES_BLACK, 0.0f, 84.0f, 96.0f * 2, 74.0f * 2, 145.0f
 );
 constexpr SceneType UNDERWATER_SCENE = WithPipeSources(
-    MakeScene(SceneKind::Underwater, "Underwater", NES_SKY_BLUE, 147.0f, 84.0f, 96.0f * 3, 74.0f * 3),
+    MakeScene(SceneKind::Underwater, "Underwater", NES_SKY_BLUE, 147.0f, 84.0f, 96.0f * 3, 74.0f * 3, 290.0f),
     Rect(283.0f, 280.0f),
     Rect(300.0f, 280.0f),
     Rect(283.0f, 297.0f),

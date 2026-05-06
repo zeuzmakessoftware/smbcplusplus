@@ -17,6 +17,7 @@ const SceneType& GetLevel1Scene() {
 void LoadLevel1(
     std::vector<std::unique_ptr<Block>>& blocks,
     std::vector<std::unique_ptr<Goomba>>& goombas,
+    std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
@@ -80,6 +81,10 @@ void LoadLevel1(
     goombas.push_back(std::make_unique<Goomba>((130 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet, scene));
     goombas.push_back(std::make_unique<Goomba>((174 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet, scene));
     goombas.push_back(std::make_unique<Goomba>((176 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet, scene));
+
+    koopas.push_back(std::make_unique<Koopa>((35 * TILE_SIZE), 537.0f, enemiesSheet, scene));
+    koopas.push_back(std::make_unique<Koopa>((97 * TILE_SIZE), 537.0f, enemiesSheet, scene));
+    koopas.push_back(std::make_unique<Koopa>((167 * TILE_SIZE), 537.0f, enemiesSheet, scene));
 
     blocks.push_back(std::make_unique<DrawTiledRect>(
         0, 600, 2882, 80, spriteSheet, scene.groundBlock, TILE_SIZE, TILE_SIZE, scene
@@ -239,6 +244,7 @@ void LoadLevel1(
 void LoadLevel1Subarea(
     std::vector<std::unique_ptr<Block>>& blocks,
     std::vector<std::unique_ptr<Goomba>>& goombas,
+    std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
@@ -251,6 +257,7 @@ void LoadLevel1Subarea(
 ) {
     const SceneType& scene = GetSceneType(SceneKind::Underground);
     (void)goombas;
+    (void)koopas;
     (void)levelProps;
     (void)enemiesSheet;
     (void)tileSize;
