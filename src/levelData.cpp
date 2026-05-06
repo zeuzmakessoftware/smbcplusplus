@@ -683,7 +683,7 @@ void LoadLevel12UndergroundStart(
     blocks.push_back(std::make_unique<BrickBlock>((100 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<WarpPipeBlock>(
         (102 * TILE_SIZE), (11 * TILE_SIZE) + 12, 2, 3, spriteSheet,
-        WarpDestination::Level1Subarea, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
+        WarpDestination::Level12Subarea, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
         GetSceneType(SceneKind::Underground)
     ));
     blocks.push_back(std::make_unique<PipeBlock>((108 * TILE_SIZE), (10 * TILE_SIZE) + 12, 2, 4, spriteSheet, GetSceneType(SceneKind::Underground)));
@@ -788,7 +788,7 @@ void LoadLevel12UndergroundStart(
     blocks.push_back(std::make_unique<BrickBlock>((168 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<WarpPipeBlock>(
         (167 * TILE_SIZE), (9 * TILE_SIZE) + 12, 2, 2, spriteSheet,
-        WarpDestination::Level1Subarea, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
+        WarpDestination::Level12Subarea, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
         GetSceneType(SceneKind::Underground), PipeOrientation::HorizontalRight
     ));
     blocks.push_back(std::make_unique<BrickBlock>((162 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
@@ -802,4 +802,136 @@ void LoadLevel12UndergroundStart(
     blocks.push_back(std::make_unique<BrickBlock>((169 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((169 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((169 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+}
+
+void LoadLevel12Subarea(
+    std::vector<std::unique_ptr<Block>>& blocks,
+    std::vector<std::unique_ptr<Goomba>>& goombas,
+    std::vector<std::unique_ptr<Koopa>>& koopas,
+    std::vector<Coin>& coins,
+    std::vector<BackgroundProp>& levelProps,
+    std::unique_ptr<CastleFlagpole>& castleFlagpole,
+    bool& followCamera,
+    Texture2D& spriteSheet,
+    Texture2D& mushroomSheet,
+    Texture2D& marioSheet,
+    Texture2D& enemiesSheet,
+    int tileSize
+) {
+    const SceneType& scene = GetSceneType(SceneKind::Underground);
+    (void)goombas;
+    (void)koopas;
+    (void)levelProps;
+    (void)enemiesSheet;
+    (void)tileSize;
+    followCamera = false;
+
+    castleFlagpole = std::make_unique<CastleFlagpole>(5000.0f, 600.0f, spriteSheet, mushroomSheet, marioSheet);
+
+    coins.emplace_back((float)(3 * TILE_SIZE), (float)(13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(4 * TILE_SIZE), (float)(13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(5 * TILE_SIZE), (float)(13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(6 * TILE_SIZE), (float)(13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(7 * TILE_SIZE), (float)(13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(8 * TILE_SIZE), (float)(13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(9 * TILE_SIZE), (float)(13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(10 * TILE_SIZE), (float)(13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(11 * TILE_SIZE), (float)(13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(4 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(5 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(6 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(7 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(8 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(9 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(10 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(11 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+
+    blocks.push_back(std::make_unique<DrawTiledRect>(
+        0, 600, 672, 84, spriteSheet, GetSceneType(SceneKind::Underground).groundBlock, TILE_SIZE, TILE_SIZE, GetSceneType(SceneKind::Underground)
+    ));
+    blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<WarpPipeBlock>(
+        (13 * TILE_SIZE), (12 * TILE_SIZE) + 12, 4, 2, spriteSheet,
+        WarpDestination::Level12Underground, (Vector2){ (114.0f * TILE_SIZE) + 4.0f, (11.0f * TILE_SIZE) + 4.0f },
+        GetSceneType(SceneKind::Underground), PipeOrientation::HorizontalRight
+    ));
+    blocks.push_back(std::make_unique<PipeWallBlock>((15 * TILE_SIZE), (3 * TILE_SIZE) + 12, 11, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((3 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((4 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((5 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((6 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((7 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((8 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((9 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((10 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((11 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<CoinBrickBlock>((12 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((13 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((14 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((13 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((14 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((13 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((14 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((13 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((14 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((13 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((14 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((3 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((4 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((5 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((6 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((7 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((8 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((9 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((10 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((11 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((12 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((13 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((14 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((3 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((4 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((5 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((6 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((7 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((8 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((9 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((10 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((11 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((12 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((13 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((14 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((3 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((4 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((5 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((6 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((7 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((8 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((9 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((10 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((11 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((12 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((13 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((14 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((3 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((4 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((5 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((6 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((7 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((8 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((9 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((10 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((11 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((12 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((13 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((14 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
 }

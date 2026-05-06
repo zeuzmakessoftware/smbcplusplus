@@ -51,6 +51,8 @@ Vector2 LevelLoader::defaultMarioStart(LevelArea requestedArea) const {
             return {126.0f, (13.0f * resources.tileSize) + 12.0f};
         case LevelArea::Level12Underground:
             return {(2.0f * resources.tileSize) + 4.0f, (2.0f * resources.tileSize) + 4.0f};
+        case LevelArea::Level12Subarea:
+            return {(2.0f * resources.tileSize) + 4.0f, (2.0f * resources.tileSize) + 4.0f};
     }
     return {100.0f, 0.0f};
 }
@@ -65,7 +67,7 @@ bool LevelLoader::shouldFollowCamera() const {
 }
 
 bool LevelLoader::isUnderground() const {
-    return area == LevelArea::Level11Subarea || area == LevelArea::Level12Underground;
+    return area == LevelArea::Level11Subarea || area == LevelArea::Level12Underground || area == LevelArea::Level12Subarea;
 }
 
 bool LevelLoader::isLevel11() const {
@@ -78,6 +80,9 @@ float LevelLoader::maxCameraX() const {
     }
     if (area == LevelArea::Level12Underground) {
         return 7140.0f - resources.screenWidth;
+    }
+    if (area == LevelArea::Level12Subarea) {
+        return (32 * resources.tileSize) - resources.screenWidth;
     }
     return -1.0f;
 }
@@ -117,6 +122,12 @@ void LevelLoader::loadLevelContents(LevelArea nextArea) {
             break;
         case LevelArea::Level12Underground:
             LoadLevel12UndergroundStart(
+                blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera,
+                resources.spriteSheet, resources.mushroomSheet, resources.marioSheet, resources.enemiesSheet, resources.tileSize
+            );
+            break;
+        case LevelArea::Level12Subarea:
+            LoadLevel12Subarea(
                 blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera,
                 resources.spriteSheet, resources.mushroomSheet, resources.marioSheet, resources.enemiesSheet, resources.tileSize
             );

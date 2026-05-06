@@ -215,6 +215,8 @@ int main() {
                 LoadArea(LevelArea::Level11, exitPosition);
             } else if (pipeTransition.destination == WarpDestination::Level12Underground) {
                 LoadArea(LevelArea::Level12Underground, exitPosition);
+            } else if (pipeTransition.destination == WarpDestination::Level12Subarea) {
+                LoadArea(LevelArea::Level12Subarea, exitPosition);
             }
         }
     };

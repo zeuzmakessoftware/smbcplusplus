@@ -13,7 +13,8 @@ enum class WarpDestination {
     None,
     Level1Subarea,
     Level1Overworld,
-    Level12Underground
+    Level12Underground,
+    Level12Subarea
 };
 
 class PipeBlock : public Block {

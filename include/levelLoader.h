@@ -16,7 +16,8 @@ enum class LevelArea {
     Level11,
     Level11Subarea,
     Level12Animation,
-    Level12Underground
+    Level12Underground,
+    Level12Subarea
 };
 
 struct LevelLoaderResources {
