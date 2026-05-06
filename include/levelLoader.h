@@ -42,8 +42,9 @@ public:
     const LevelAreaId& currentArea() const;
     bool shouldFollowCamera() const;
     bool isUnderground() const;
-    bool isLevel11() const;
+    bool hasFlagpole() const;
     bool isLevel12EntranceCutscene() const;
+    const LevelAreaId& flagpoleCompleteArea() const;
     float maxCameraX() const;
     const SceneType& drawScene() const;
 

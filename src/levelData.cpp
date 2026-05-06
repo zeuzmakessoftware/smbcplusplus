@@ -788,7 +788,7 @@ void LoadLevel12UndergroundStart(
     blocks.push_back(std::make_unique<BrickBlock>((168 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<WarpPipeBlock>(
         (167 * TILE_SIZE), (9 * TILE_SIZE) + 12, 2, 2, spriteSheet,
-        LevelAreaIds::Level12Subarea, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
+        LevelAreaIds::Level12Final, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
         GetSceneType(SceneKind::Underground), PipeOrientation::HorizontalRight
     ));
     blocks.push_back(std::make_unique<BrickBlock>((162 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
@@ -936,6 +936,89 @@ void LoadLevel12Subarea(
     blocks.push_back(std::make_unique<BrickBlock>((14 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
 }
 
+void LoadLevel12Final(
+    std::vector<std::unique_ptr<Block>>& blocks,
+    std::vector<std::unique_ptr<Goomba>>& goombas,
+    std::vector<std::unique_ptr<Koopa>>& koopas,
+    std::vector<Coin>& coins,
+    std::vector<BackgroundProp>& levelProps,
+    std::unique_ptr<CastleFlagpole>& castleFlagpole,
+    bool& followCamera,
+    Texture2D& spriteSheet,
+    Texture2D& mushroomSheet,
+    Texture2D& marioSheet,
+    Texture2D& enemiesSheet,
+    int tileSize
+) {
+    const SceneType& scene = GetSceneType(SceneKind::Underground);
+    (void)goombas;
+    (void)koopas;
+    (void)levelProps;
+    (void)enemiesSheet;
+    (void)tileSize;
+    followCamera = true;
+
+    castleFlagpole = std::make_unique<CastleFlagpole>(22.0f, 600.0f, spriteSheet, mushroomSheet, marioSheet);
+
+    levelProps.push_back(BackgroundProp(672, 474, spriteSheet, HILL_LAYOUT));
+    levelProps.push_back(BackgroundProp(1218, 558, spriteSheet, TINY_GRASS_LAYOUT));
+    levelProps.push_back(BackgroundProp(1344, 516, spriteSheet, SMALL_HILL_LAYOUT));
+    levelProps.push_back(BackgroundProp(1638, 558, spriteSheet, TINY_GRASS_LAYOUT));
+    levelProps.push_back(BackgroundProp(168, 96, spriteSheet, MEDIUM_CLOUD_LAYOUT));
+    levelProps.push_back(BackgroundProp(1008, 138, spriteSheet, CLOUD_LAYOUT));
+    levelProps.push_back(BackgroundProp(1470, 96, spriteSheet, CLOUD_LAYOUT));
+
+
+    blocks.push_back(std::make_unique<DrawTiledRect>(
+        0, 600, 2000, 80, spriteSheet, GetSceneType(SceneKind::Overworld).groundBlock, TILE_SIZE, TILE_SIZE, GetSceneType(SceneKind::Overworld)
+    ));
+    blocks.push_back(std::make_unique<PipeBlock>((3 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2, 2, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((5 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((6 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((6 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((7 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((7 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((7 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((8 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((8 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((8 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((8 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((9 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((9 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((9 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((9 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((9 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((10 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((10 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((10 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((10 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((10 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((10 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((11 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((11 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((11 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((11 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((11 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((11 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((11 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((12 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((12 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((12 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((12 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((12 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((12 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((12 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((12 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((13 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((13 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((13 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((13 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((13 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((13 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((13 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<ShinyBlock>((13 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+}
+
 const std::vector<LevelAreaConfig>& GetLevelAreaConfigs() {
     // Register new areas here after adding the loader function above.
     // Pipes can warp to the registered id directly.
@@ -949,6 +1032,7 @@ const std::vector<LevelAreaConfig>& GetLevelAreaConfigs() {
             false,
             true,
             false,
+            LevelAreaIds::Level12Animation,
             -1.0f
         },
         {
@@ -960,6 +1044,7 @@ const std::vector<LevelAreaConfig>& GetLevelAreaConfigs() {
             true,
             false,
             false,
+            "",
             32.0f * TILE_SIZE
         },
         {
@@ -971,6 +1056,7 @@ const std::vector<LevelAreaConfig>& GetLevelAreaConfigs() {
             false,
             false,
             true,
+            "",
             -1.0f
         },
         {
@@ -982,6 +1068,7 @@ const std::vector<LevelAreaConfig>& GetLevelAreaConfigs() {
             true,
             false,
             false,
+            "",
             7140.0f
         },
         {
@@ -993,6 +1080,19 @@ const std::vector<LevelAreaConfig>& GetLevelAreaConfigs() {
             true,
             false,
             false,
+            "",
+            32.0f * TILE_SIZE
+        },
+        {
+            LevelAreaIds::Level12Final,
+            LoadLevel12Final,
+            {(2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f},
+            1,
+            2,
+            false,
+            true,
+            false,
+            LevelAreaIds::Level11,
             32.0f * TILE_SIZE
         }
     };

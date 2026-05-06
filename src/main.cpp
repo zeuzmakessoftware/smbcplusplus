@@ -158,10 +158,13 @@ int main() {
         scoreboard.setLevel(world, level);
     };
 
-    auto StartLevel12Entrance = [&]() {
-        scoreboard.setLevel(1, 2);
+    auto StartAreaIntro = [&](const LevelAreaId& area) {
+        int world = 1;
+        int level = 1;
+        levelLoader.scoreboardLevel(area, world, level);
+        scoreboard.setLevel(world, level);
         scoreboard.setTime(400);
-        LoadArea(LevelAreaIds::Level12Animation, levelLoader.defaultMarioStart(LevelAreaIds::Level12Animation));
+        LoadArea(area, levelLoader.defaultMarioStart(area));
         levelIntro.start();
     };
 
@@ -272,7 +275,7 @@ int main() {
                 } else if (level12EntranceCutscene.active) {
                     UpdateLevel12EntranceCutscene();
                 } else {
-                if (!levelLoader.isLevel11() || !levelLoader.castleFlagpole->isActive()) {
+                if (!levelLoader.hasFlagpole() || !levelLoader.castleFlagpole->isActive()) {
                     scoreboard.updateTimer(GetFrameTime());
                 }
                 scorePopups.update(GetFrameTime());
@@ -440,7 +443,7 @@ int main() {
                     else ++it;
                 }
 
-                if (!levelLoader.isLevel11() || !levelLoader.castleFlagpole->isActive()) {
+                if (!levelLoader.hasFlagpole() || !levelLoader.castleFlagpole->isActive()) {
                     bool wasBig = MarioObj.getIsBig();
                     bool wasFire = MarioObj.getIsFire();
                     bool wasStarPowered = MarioObj.getIsStarPowered();
@@ -475,7 +478,7 @@ int main() {
                     }
                 }
 
-                if (levelLoader.isLevel11()) {
+                if (levelLoader.hasFlagpole()) {
                     levelLoader.castleFlagpole->update(MarioObj, scoreboard, scorePopups, isDead);
                 }
 
@@ -494,11 +497,11 @@ int main() {
                 if (MarioObj.getPos().y > 700) {
                     StartDeath();
                 }
-                if (levelLoader.isLevel11() && !levelLoader.castleFlagpole->isActive() && !levelLoader.castleFlagpole->isComplete() && scoreboard.isTimeUp()) {
+                if (levelLoader.hasFlagpole() && !levelLoader.castleFlagpole->isActive() && !levelLoader.castleFlagpole->isComplete() && scoreboard.isTimeUp()) {
                     StartDeath();
                 }
-                if (levelLoader.isLevel11() && levelLoader.castleFlagpole->isComplete()) {
-                    StartLevel12Entrance();
+                if (levelLoader.hasFlagpole() && levelLoader.castleFlagpole->isComplete() && !levelLoader.flagpoleCompleteArea().empty()) {
+                    StartAreaIntro(levelLoader.flagpoleCompleteArea());
                 }
                 }
             } else {
@@ -529,12 +532,12 @@ int main() {
                     for (auto& goom : levelLoader.goombas) goom->draw();
                     for (auto& koopa : levelLoader.koopas) koopa->draw();
 
-                    if (levelLoader.isLevel11()) levelLoader.castleFlagpole->draw();
+                    if (levelLoader.hasFlagpole()) levelLoader.castleFlagpole->draw();
 
                     BrickBlock::drawParticles(brickParticles, spriteSheet, drawScene);
                     scorePopups.draw(mushroomSheet);
                     if (!drawMarioBehindPipe &&
-                        (pipeTransition.active || !levelLoader.isLevel11() || (!levelLoader.castleFlagpole->isActive() && !levelLoader.castleFlagpole->isComplete()))) {
+                        (pipeTransition.active || !levelLoader.hasFlagpole() || (!levelLoader.castleFlagpole->isActive() && !levelLoader.castleFlagpole->isComplete()))) {
                         MarioObj.draw();
                     }
                 EndMode2D();

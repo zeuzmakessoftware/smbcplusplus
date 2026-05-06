@@ -22,6 +22,7 @@ namespace LevelAreaIds {
     static const char* const Level12Animation = "level_1_2_animation";
     static const char* const Level12Underground = "level_1_2_underground";
     static const char* const Level12Subarea = "level_1_2_subarea";
+    static const char* const Level12Final = "level_1_2_final";
 }
 
 using LevelLoadFunction = void (*)(
@@ -46,8 +47,9 @@ struct LevelAreaConfig {
     int scoreboardWorld;
     int scoreboardLevel;
     bool underground;
-    bool level11;
+    bool hasFlagpole;
     bool level12EntranceCutscene;
+    LevelAreaId flagpoleCompleteArea;
     float levelWidth;
 };
 

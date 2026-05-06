@@ -71,12 +71,16 @@ bool LevelLoader::isUnderground() const {
     return currentConfig().underground;
 }
 
-bool LevelLoader::isLevel11() const {
-    return currentConfig().level11;
+bool LevelLoader::hasFlagpole() const {
+    return currentConfig().hasFlagpole;
 }
 
 bool LevelLoader::isLevel12EntranceCutscene() const {
     return currentConfig().level12EntranceCutscene;
+}
+
+const LevelAreaId& LevelLoader::flagpoleCompleteArea() const {
+    return currentConfig().flagpoleCompleteArea;
 }
 
 float LevelLoader::maxCameraX() const {
