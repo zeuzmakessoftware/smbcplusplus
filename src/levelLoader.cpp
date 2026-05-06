@@ -1,14 +1,20 @@
 #include "levelLoader.h"
-#include "levelData.h"
 
 LevelLoader::LevelLoader(LevelLoaderResources resources)
     : resources(resources) {}
 
-void LevelLoader::load(LevelArea nextArea, Vector2 marioStart, Mario& mario, Camera2D& camera, ScorePopupManager& scorePopups) {
+void LevelLoader::load(const LevelAreaId& nextArea, Vector2 marioStart, Mario& mario, Camera2D& camera, ScorePopupManager& scorePopups) {
     clearLevelEntities();
-    area = nextArea;
+    const LevelAreaConfig* config = findConfig(nextArea);
+    if (!config) {
+        config = findConfig(LevelAreaIds::Level11);
+    }
+    area = config->id;
 
-    loadLevelContents(nextArea);
+    config->load(
+        blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera,
+        resources.spriteSheet, resources.mushroomSheet, resources.marioSheet, resources.enemiesSheet, resources.tileSize
+    );
     rebuildCollisionObjects();
 
     mario.setScriptedPose(marioStart.x, marioStart.y, true);
@@ -37,29 +43,24 @@ void LevelLoader::rebuildCollisionObjects() {
     }
 }
 
-LevelArea LevelLoader::currentArea() const {
+const LevelAreaId& LevelLoader::currentArea() const {
     return area;
 }
 
-Vector2 LevelLoader::defaultMarioStart(LevelArea requestedArea) const {
-    switch (requestedArea) {
-        case LevelArea::Level11:
-            return {100.0f, 0.0f};
-        case LevelArea::Level11Subarea:
-            return {(2.0f * resources.tileSize) + 4.0f, (2.0f * resources.tileSize) + 4.0f};
-        case LevelArea::Level12Animation:
-            return {126.0f, (13.0f * resources.tileSize) + 12.0f};
-        case LevelArea::Level12Underground:
-            return {(2.0f * resources.tileSize) + 4.0f, (2.0f * resources.tileSize) + 4.0f};
-        case LevelArea::Level12Subarea:
-            return {(2.0f * resources.tileSize) + 4.0f, (2.0f * resources.tileSize) + 4.0f};
-    }
-    return {100.0f, 0.0f};
+Vector2 LevelLoader::defaultMarioStart(const LevelAreaId& requestedArea) const {
+    const LevelAreaConfig* config = findConfig(requestedArea);
+    return config ? config->defaultMarioStart : Vector2{100.0f, 0.0f};
 }
 
-void LevelLoader::scoreboardLevel(LevelArea requestedArea, int& world, int& level) const {
-    world = 1;
-    level = requestedArea == LevelArea::Level11 || requestedArea == LevelArea::Level11Subarea ? 1 : 2;
+void LevelLoader::scoreboardLevel(const LevelAreaId& requestedArea, int& world, int& level) const {
+    const LevelAreaConfig* config = findConfig(requestedArea);
+    if (!config) {
+        world = 1;
+        level = 1;
+        return;
+    }
+    world = config->scoreboardWorld;
+    level = config->scoreboardLevel;
 }
 
 bool LevelLoader::shouldFollowCamera() const {
@@ -67,28 +68,41 @@ bool LevelLoader::shouldFollowCamera() const {
 }
 
 bool LevelLoader::isUnderground() const {
-    return area == LevelArea::Level11Subarea || area == LevelArea::Level12Underground || area == LevelArea::Level12Subarea;
+    return currentConfig().underground;
 }
 
 bool LevelLoader::isLevel11() const {
-    return area == LevelArea::Level11;
+    return currentConfig().level11;
+}
+
+bool LevelLoader::isLevel12EntranceCutscene() const {
+    return currentConfig().level12EntranceCutscene;
 }
 
 float LevelLoader::maxCameraX() const {
-    if (area == LevelArea::Level11Subarea) {
-        return (32 * resources.tileSize) - resources.screenWidth;
-    }
-    if (area == LevelArea::Level12Underground) {
-        return 7140.0f - resources.screenWidth;
-    }
-    if (area == LevelArea::Level12Subarea) {
-        return (32 * resources.tileSize) - resources.screenWidth;
-    }
-    return -1.0f;
+    float levelWidth = currentConfig().levelWidth;
+    return levelWidth < 0.0f ? -1.0f : levelWidth - resources.screenWidth;
 }
 
 const SceneType& LevelLoader::drawScene() const {
     return isUnderground() ? GetSceneType(SceneKind::Underground) : GetLevel1Scene();
+}
+
+const LevelAreaConfig* LevelLoader::findConfig(const LevelAreaId& requestedArea) const {
+    for (const LevelAreaConfig& config : GetLevelAreaConfigs()) {
+        if (config.id == requestedArea) {
+            return &config;
+        }
+    }
+    return nullptr;
+}
+
+const LevelAreaConfig& LevelLoader::currentConfig() const {
+    const LevelAreaConfig* config = findConfig(area);
+    if (config) {
+        return *config;
+    }
+    return GetLevelAreaConfigs().front();
 }
 
 void LevelLoader::clearLevelEntities() {
@@ -98,39 +112,4 @@ void LevelLoader::clearLevelEntities() {
     coins.clear();
     collisionObjects.clear();
     levelProps.clear();
-}
-
-void LevelLoader::loadLevelContents(LevelArea nextArea) {
-    switch (nextArea) {
-        case LevelArea::Level11:
-            LoadLevel1(
-                blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera,
-                resources.spriteSheet, resources.mushroomSheet, resources.marioSheet, resources.enemiesSheet, resources.tileSize
-            );
-            break;
-        case LevelArea::Level11Subarea:
-            LoadLevel1Subarea(
-                blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera,
-                resources.spriteSheet, resources.mushroomSheet, resources.marioSheet, resources.enemiesSheet, resources.tileSize
-            );
-            break;
-        case LevelArea::Level12Animation:
-            LoadLevel12EntranceCutscene(
-                blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera,
-                resources.spriteSheet, resources.mushroomSheet, resources.marioSheet, resources.enemiesSheet, resources.tileSize
-            );
-            break;
-        case LevelArea::Level12Underground:
-            LoadLevel12UndergroundStart(
-                blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera,
-                resources.spriteSheet, resources.mushroomSheet, resources.marioSheet, resources.enemiesSheet, resources.tileSize
-            );
-            break;
-        case LevelArea::Level12Subarea:
-            LoadLevel12Subarea(
-                blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera,
-                resources.spriteSheet, resources.mushroomSheet, resources.marioSheet, resources.enemiesSheet, resources.tileSize
-            );
-            break;
-    }
 }

@@ -1,6 +1,7 @@
 #ifndef BLOCKS_PIPE_BLOCK_H
 #define BLOCKS_PIPE_BLOCK_H
 
+#include <string>
 #include "blocks/base.h"
 
 enum class PipeOrientation {
@@ -9,13 +10,7 @@ enum class PipeOrientation {
     HorizontalLeft
 };
 
-enum class WarpDestination {
-    None,
-    Level1Subarea,
-    Level1Overworld,
-    Level12Underground,
-    Level12Subarea
-};
+using WarpDestination = std::string;
 
 class PipeBlock : public Block {
 private:
@@ -54,13 +49,13 @@ public:
         int width,
         int height,
         Texture2D sprites,
-        WarpDestination destination,
+        const WarpDestination& destination,
         Vector2 exitPosition,
         const SceneType& scene = GetSceneType(SceneKind::Overworld),
         PipeOrientation orientation = PipeOrientation::Vertical
     );
 
-    WarpDestination getDestination() const { return destination; }
+    const WarpDestination& getDestination() const { return destination; }
     Vector2 getExitPosition() const { return exitPosition; }
     bool canEnter(Rectangle marioRec, bool downPressed, bool rightPressed, bool leftPressed) const;
 };

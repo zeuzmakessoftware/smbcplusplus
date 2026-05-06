@@ -9,16 +9,9 @@
 #include "castleFlagpole.h"
 #include "goomba.h"
 #include "koopa.h"
+#include "levelData.h"
 #include "mario.h"
 #include "scorepopup.h"
-
-enum class LevelArea {
-    Level11,
-    Level11Subarea,
-    Level12Animation,
-    Level12Underground,
-    Level12Subarea
-};
 
 struct LevelLoaderResources {
     Texture2D& spriteSheet;
@@ -41,25 +34,27 @@ public:
 
     explicit LevelLoader(LevelLoaderResources resources);
 
-    void load(LevelArea area, Vector2 marioStart, Mario& mario, Camera2D& camera, ScorePopupManager& scorePopups);
+    void load(const LevelAreaId& area, Vector2 marioStart, Mario& mario, Camera2D& camera, ScorePopupManager& scorePopups);
     void rebuildCollisionObjects();
 
-    Vector2 defaultMarioStart(LevelArea area) const;
-    void scoreboardLevel(LevelArea area, int& world, int& level) const;
-    LevelArea currentArea() const;
+    Vector2 defaultMarioStart(const LevelAreaId& area) const;
+    void scoreboardLevel(const LevelAreaId& area, int& world, int& level) const;
+    const LevelAreaId& currentArea() const;
     bool shouldFollowCamera() const;
     bool isUnderground() const;
     bool isLevel11() const;
+    bool isLevel12EntranceCutscene() const;
     float maxCameraX() const;
     const SceneType& drawScene() const;
 
 private:
     LevelLoaderResources resources;
-    LevelArea area = LevelArea::Level11;
+    LevelAreaId area = LevelAreaIds::Level11;
     bool followCamera = true;
 
+    const LevelAreaConfig* findConfig(const LevelAreaId& requestedArea) const;
+    const LevelAreaConfig& currentConfig() const;
     void clearLevelEntities();
-    void loadLevelContents(LevelArea nextArea);
 };
 
 #endif

@@ -99,7 +99,7 @@ void LoadLevel1(
     blocks.push_back(std::make_unique<PipeBlock>((46 * TILE_SIZE), (10 * TILE_SIZE) + 12, 2, 4, spriteSheet, scene));
     blocks.push_back(std::make_unique<WarpPipeBlock>(
         (57 * TILE_SIZE), (10 * TILE_SIZE) + 12, 2, 4, spriteSheet,
-        WarpDestination::Level1Subarea, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
+        LevelAreaIds::Level11Subarea, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
         scene
     ));
     blocks.push_back(std::make_unique<PowerUpBlock>((64 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "1up", scene));
@@ -328,7 +328,7 @@ void LoadLevel1Subarea(
     blocks.push_back(std::make_unique<BrickBlock>((10 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<WarpPipeBlock>(
         13 * TILE_SIZE, (12 * TILE_SIZE) + 12, 4, 2, spriteSheet,
-        WarpDestination::Level1Overworld, (Vector2){ 163.0f * TILE_SIZE, (12.0f * TILE_SIZE) + 12.0f - TILE_SIZE },
+        LevelAreaIds::Level11, (Vector2){ 163.0f * TILE_SIZE, (12.0f * TILE_SIZE) + 12.0f - TILE_SIZE },
         scene, PipeOrientation::HorizontalRight
     ));
     blocks.push_back(std::make_unique<PipeWallBlock>(
@@ -369,7 +369,7 @@ void LoadLevel12EntranceCutscene(
     ));
     blocks.push_back(std::make_unique<WarpPipeBlock>(
         (10 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2, 2, spriteSheet,
-        WarpDestination::Level12Underground, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
+        LevelAreaIds::Level12Underground, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
         scene, PipeOrientation::HorizontalRight
     ));
     blocks.push_back(std::make_unique<PipeBlock>((12 * TILE_SIZE), (10 * TILE_SIZE) + 12, 2, 4, spriteSheet, scene));
@@ -683,7 +683,7 @@ void LoadLevel12UndergroundStart(
     blocks.push_back(std::make_unique<BrickBlock>((100 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<WarpPipeBlock>(
         (102 * TILE_SIZE), (11 * TILE_SIZE) + 12, 2, 3, spriteSheet,
-        WarpDestination::Level12Subarea, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
+        LevelAreaIds::Level12Subarea, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
         GetSceneType(SceneKind::Underground)
     ));
     blocks.push_back(std::make_unique<PipeBlock>((108 * TILE_SIZE), (10 * TILE_SIZE) + 12, 2, 4, spriteSheet, GetSceneType(SceneKind::Underground)));
@@ -788,7 +788,7 @@ void LoadLevel12UndergroundStart(
     blocks.push_back(std::make_unique<BrickBlock>((168 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<WarpPipeBlock>(
         (167 * TILE_SIZE), (9 * TILE_SIZE) + 12, 2, 2, spriteSheet,
-        WarpDestination::Level12Subarea, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
+        LevelAreaIds::Level12Subarea, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
         GetSceneType(SceneKind::Underground), PipeOrientation::HorizontalRight
     ));
     blocks.push_back(std::make_unique<BrickBlock>((162 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
@@ -862,7 +862,7 @@ void LoadLevel12Subarea(
     blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<WarpPipeBlock>(
         (13 * TILE_SIZE), (12 * TILE_SIZE) + 12, 4, 2, spriteSheet,
-        WarpDestination::Level12Underground, (Vector2){ (114.0f * TILE_SIZE) + 4.0f, (11.0f * TILE_SIZE) + 4.0f },
+        LevelAreaIds::Level12Underground, (Vector2){ (114.0f * TILE_SIZE) + 4.0f, (11.0f * TILE_SIZE) + 4.0f },
         GetSceneType(SceneKind::Underground), PipeOrientation::HorizontalRight
     ));
     blocks.push_back(std::make_unique<PipeWallBlock>((15 * TILE_SIZE), (3 * TILE_SIZE) + 12, 11, spriteSheet, GetSceneType(SceneKind::Underground)));
@@ -934,4 +934,68 @@ void LoadLevel12Subarea(
     blocks.push_back(std::make_unique<BrickBlock>((12 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((13 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((14 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+}
+
+const std::vector<LevelAreaConfig>& GetLevelAreaConfigs() {
+    // Register new areas here after adding the loader function above.
+    // Pipes can warp to the registered id directly.
+    static const std::vector<LevelAreaConfig> configs = {
+        {
+            LevelAreaIds::Level11,
+            LoadLevel1,
+            {100.0f, 0.0f},
+            1,
+            1,
+            false,
+            true,
+            false,
+            -1.0f
+        },
+        {
+            LevelAreaIds::Level11Subarea,
+            LoadLevel1Subarea,
+            {(2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f},
+            1,
+            1,
+            true,
+            false,
+            false,
+            32.0f * TILE_SIZE
+        },
+        {
+            LevelAreaIds::Level12Animation,
+            LoadLevel12EntranceCutscene,
+            {126.0f, (13.0f * TILE_SIZE) + 12.0f},
+            1,
+            2,
+            false,
+            false,
+            true,
+            -1.0f
+        },
+        {
+            LevelAreaIds::Level12Underground,
+            LoadLevel12UndergroundStart,
+            {(2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f},
+            1,
+            2,
+            true,
+            false,
+            false,
+            7140.0f
+        },
+        {
+            LevelAreaIds::Level12Subarea,
+            LoadLevel12Subarea,
+            {(2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f},
+            1,
+            2,
+            true,
+            false,
+            false,
+            32.0f * TILE_SIZE
+        }
+    };
+
+    return configs;
 }

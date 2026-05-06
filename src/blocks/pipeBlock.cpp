@@ -69,7 +69,7 @@ WarpPipeBlock::WarpPipeBlock(
     int width,
     int height,
     Texture2D sprites,
-    WarpDestination destination,
+    const WarpDestination& destination,
     Vector2 exitPosition,
     const SceneType& scene,
     PipeOrientation orientation
