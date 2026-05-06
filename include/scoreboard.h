@@ -36,7 +36,8 @@ public:
     int getStage() const { return stage; }
     int getTime() const { return time; }
 
-    void draw(Font font, Texture2D hudSheet, int screenWidth) const;
+    void draw(Font font, Texture2D hudSheet, int screenWidth, bool showTimeValue = true) const;
+    void drawLevelIntro(Font font, Texture2D hudSheet, int screenWidth, int lives) const;
 };
 
 #endif

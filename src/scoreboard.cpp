@@ -57,7 +57,7 @@ bool Scoreboard::isTimeUp() const {
     return time <= 0;
 }
 
-void Scoreboard::draw(Font font, Texture2D hudSheet, int screenWidth) const {
+void Scoreboard::draw(Font font, Texture2D hudSheet, int screenWidth, bool showTimeValue) const {
     const float fontSize = 22.0f;
     const float spacing = 0.67f;
     const float topY = 48.0f;
@@ -83,5 +83,38 @@ void Scoreboard::draw(Font font, Texture2D hudSheet, int screenWidth) const {
     DrawTextEx(font, levelText.c_str(), {worldX + 20.0f, valueY}, fontSize, spacing, WHITE);
 
     DrawTextEx(font, "TIME", {timeX, topY}, fontSize, spacing, WHITE);
-    DrawTextEx(font, PadNumber(time, 3).c_str(), {timeX + 20.0f, valueY}, fontSize, spacing, WHITE);
+    if (showTimeValue) {
+        DrawTextEx(font, PadNumber(time, 3).c_str(), {timeX + 20.0f, valueY}, fontSize, spacing, WHITE);
+    }
+}
+
+void Scoreboard::drawLevelIntro(Font font, Texture2D hudSheet, int screenWidth, int lives) const {
+    draw(font, hudSheet, screenWidth, false);
+
+    const float fontSize = 24.0f;
+    const float spacing = 0.67f;
+    const std::string levelText = std::to_string(world) + "-" + std::to_string(stage);
+    const std::string worldText = "WORLD  " + levelText;
+    const std::string livesText = "x  " + std::to_string(lives);
+
+    Vector2 worldSize = MeasureTextEx(font, worldText.c_str(), fontSize, spacing);
+    Vector2 worldPos = {(screenWidth - worldSize.x) / 2.0f, 238.0f};
+    DrawTextEx(font, worldText.c_str(), worldPos, fontSize, spacing, WHITE);
+
+    const Rectangle marioSource = {98.0f, 565.0f, 12.0f, 16.0f};
+    const float marioScale = 2.0f;
+    const float marioSize = 16.0f * marioScale;
+    const float groupWidth = marioSize + 26.0f + MeasureTextEx(font, livesText.c_str(), fontSize, spacing).x;
+    const float groupX = (screenWidth - groupWidth) / 2.0f;
+    const float groupY = 320.0f;
+
+    DrawTexturePro(
+        hudSheet,
+        marioSource,
+        {groupX, groupY - 5.0f, marioSize - 6.7f, marioSize},
+        {6.7f, 0.0f},
+        0.0f,
+        WHITE
+    );
+    DrawTextEx(font, livesText.c_str(), {groupX + marioSize + 26.0f, groupY}, fontSize, spacing, WHITE);
 }

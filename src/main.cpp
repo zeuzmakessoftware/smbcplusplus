@@ -42,6 +42,9 @@ int main() {
     InitWindow(screenWidth, screenHeight, "Swag Bros");
 
     bool gameStarted = false;
+    bool levelIntroActive = false;
+    float levelIntroTimer = 0.0f;
+    int marioLives = 3;
     
     Image img1 = LoadImage("assets/images/52571.png");
     ImageColorReplace(&img1, (Color){148, 148, 255, 255}, BLANK);
@@ -102,6 +105,12 @@ int main() {
 
     bool isDead = false;
     float deathTimer = 0.0f;
+
+    auto StartDeath = [&]() {
+        if (!isDead && marioLives > 0) marioLives--;
+        isDead = true;
+        deathTimer = 4.0f;
+    };
 
     auto RebuildCollisionObjects = [&]() {
         collisionObjects.clear();
@@ -211,12 +220,21 @@ int main() {
     while (!WindowShouldClose()) {
         if (!gameStarted) {
             BeginDrawing();
-                if (IsKeyPressed(KEY_ENTER)) gameStarted = true;
+                if (IsKeyPressed(KEY_ENTER)) {
+                    gameStarted = true;
+                    levelIntroActive = true;
+                    levelIntroTimer = 3.0f;
+                }
                 ClearBackground(BLACK);
                 DrawTextEx(nesFont, "press enter", (Vector2){50, 50}, 36, 2, WHITE);
             EndDrawing();
         } else {
-            if (!isDead) {
+            if (levelIntroActive) {
+                levelIntroTimer -= GetFrameTime();
+                if (levelIntroTimer <= 0.0f) {
+                    levelIntroActive = false;
+                }
+            } else if (!isDead) {
                 if (pipeTransition.active) {
                     UpdatePipeTransition();
                 } else {
@@ -379,6 +397,7 @@ int main() {
                     MarioObj.update(collisionObjects, camera.target.x, activeMushrooms, activeFireFlowers, activeStars, activeFireballs, mushroomSheet);
                     int oneUps = MarioObj.takeCollectedOneUps();
                     for (int i = 0; i < oneUps; i++) {
+                        marioLives++;
                         scorePopups.spawn(1, { MarioObj.getPos().x, MarioObj.getPos().y - 20.0f });
                     }
                     if (!wasBig && MarioObj.getIsBig()) {
@@ -422,12 +441,10 @@ int main() {
                 }
 
                 if (MarioObj.getPos().y > 700) {
-                    isDead = true;
-                    deathTimer = 4.0f;
+                    StartDeath();
                 }
                 if (currentArea == LevelArea::Overworld && !castleFlagpole->isActive() && !castleFlagpole->isComplete() && scoreboard.isTimeUp()) {
-                    isDead = true;
-                    deathTimer = 4.0f;
+                    StartDeath();
                 }
                 if (currentArea == LevelArea::Overworld && castleFlagpole->isComplete()) {
                     ResetLevel();
@@ -439,6 +456,10 @@ int main() {
             }
 
             BeginDrawing();
+            if (levelIntroActive) {
+                ClearBackground(BLACK);
+                scoreboard.drawLevelIntro(nesFont, hudSheet, screenWidth, marioLives);
+            } else {
                 const SceneType& drawScene = currentArea == LevelArea::Subarea ? GetSceneType(SceneKind::Underground) : GetLevel1Scene();
                 ClearBackground(drawScene.backgroundColor);
                 BeginMode2D(camera);
@@ -483,6 +504,7 @@ int main() {
 
                     DrawTextEx(nesFont, deathText, textPos, fontSize, spacing, RED);
                 }
+            }
             EndDrawing();
         }
     }
