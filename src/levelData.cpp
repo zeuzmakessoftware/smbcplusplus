@@ -82,9 +82,7 @@ void LoadLevel1(
     goombas.push_back(std::make_unique<Goomba>((174 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet, scene));
     goombas.push_back(std::make_unique<Goomba>((176 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet, scene));
 
-    koopas.push_back(std::make_unique<Koopa>((35 * TILE_SIZE), 537.0f, enemiesSheet, scene));
-    koopas.push_back(std::make_unique<Koopa>((97 * TILE_SIZE), 537.0f, enemiesSheet, scene));
-    koopas.push_back(std::make_unique<Koopa>((167 * TILE_SIZE), 537.0f, enemiesSheet, scene));
+    koopas.push_back(std::make_unique<Koopa>((106 * TILE_SIZE), 537.0f, enemiesSheet, scene));
 
     blocks.push_back(std::make_unique<DrawTiledRect>(
         0, 600, 2882, 80, spriteSheet, scene.groundBlock, TILE_SIZE, TILE_SIZE, scene
