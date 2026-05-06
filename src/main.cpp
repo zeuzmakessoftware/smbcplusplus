@@ -13,19 +13,12 @@
 #include "fireball.h"
 #include "goomba.h"
 #include "koopa.h"
-#include "levelData.h"
+#include "levelLoader.h"
 #include "scoreboard.h"
 #include "castleFlagpole.h"
 #include "scorepopup.h"
 
 #define TILE_SIZE 42
-
-enum class LevelArea {
-    Overworld,
-    Level1Subarea,
-    Level12Entrance,
-    Level12Underground
-};
 
 struct PipeTransition {
     bool active = false;
@@ -104,26 +97,27 @@ int main() {
     Font nesFont = LoadFontEx("assets/fonts/super-mario-bros-nes.otf", 36, NULL, 0);
     SetTextureFilter(nesFont.texture, TEXTURE_FILTER_POINT);
 
-    std::vector<std::unique_ptr<Block>> blocks;
-    std::vector<std::unique_ptr<Goomba>> goombas;
-    std::vector<std::unique_ptr<Koopa>> koopas;
-    std::vector<Coin> coins;
-    std::vector<Rectangle> collisionObjects;
     std::vector<std::unique_ptr<Mushroom>> activeMushrooms;
     std::vector<std::unique_ptr<FireFlower>> activeFireFlowers;
     std::vector<std::unique_ptr<Star>> activeStars;
     std::vector<std::unique_ptr<Fireball>> activeFireballs;
     std::vector<Particle> brickParticles;
-    std::vector<BackgroundProp> levelProps;
-    std::unique_ptr<CastleFlagpole> castleFlagpole;
     ScorePopupManager scorePopups;
-    LevelArea currentArea = LevelArea::Overworld;
     PipeTransition pipeTransition;
     Level12EntranceCutscene level12EntranceCutscene;
-    bool followCamera = true;
 
     Mario MarioObj(100, 0, marioSheet);
     Scoreboard scoreboard(1, 1, 400);
+    LevelLoader levelLoader({
+        spriteSheet,
+        mushroomSheet,
+        marioSheet,
+        enemiesSheet,
+        TILE_SIZE,
+        screenWidth
+    });
+    // Change this to LevelArea::Level12Animation or LevelArea::Level12Underground to boot into 1-2.
+    LevelArea startingArea = LevelArea::Level11;
 
     Camera2D camera = { 0 };
     camera.target = (Vector2){ 0, 0 };
@@ -140,70 +134,34 @@ int main() {
         deathTimer = 4.0f;
     };
 
-    auto RebuildCollisionObjects = [&]() {
-        collisionObjects.clear();
-        for (auto& block : blocks) {
-            auto* pBlock = dynamic_cast<PowerUpBlock*>(block.get());
-            if (pBlock && !pBlock->hasCollision()) {
-                continue;
-            }
-            collisionObjects.push_back(block->returnRec());
-        }
-        collisionObjects.push_back(castleFlagpole->returnCollisionRec());
-    };
-
     auto LoadArea = [&](LevelArea area, Vector2 marioStart) {
-        blocks.clear();
-        goombas.clear();
-        koopas.clear();
-        coins.clear();
         activeMushrooms.clear();
         activeFireFlowers.clear();
         activeStars.clear();
         activeFireballs.clear();
         brickParticles.clear();
-        levelProps.clear();
-        currentArea = area;
 
-        switch (area) {
-            case LevelArea::Overworld:
-                LoadLevel1(blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera, spriteSheet, mushroomSheet, marioSheet, enemiesSheet, TILE_SIZE);
-                break;
-            case LevelArea::Level1Subarea:
-                LoadLevel1Subarea(blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera, spriteSheet, mushroomSheet, marioSheet, enemiesSheet, TILE_SIZE);
-                break;
-            case LevelArea::Level12Entrance:
-                LoadLevel12EntranceCutscene(blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera, spriteSheet, mushroomSheet, marioSheet, enemiesSheet, TILE_SIZE);
-                break;
-            case LevelArea::Level12Underground:
-                LoadLevel12UndergroundStart(blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera, spriteSheet, mushroomSheet, marioSheet, enemiesSheet, TILE_SIZE);
-                break;
-        }
-
-        RebuildCollisionObjects();
-        MarioObj.setScriptedPose(marioStart.x, marioStart.y, true);
-        castleFlagpole->reset();
-        scorePopups.clear();
-        camera.target = (Vector2){
-            followCamera && marioStart.x > screenWidth / 2.0f ? marioStart.x - screenWidth / 2.0f : 0.0f,
-            0.0f
-        };
+        levelLoader.load(area, marioStart, MarioObj, camera, scorePopups);
         isDead = false;
         pipeTransition.active = false;
-        level12EntranceCutscene.active = area == LevelArea::Level12Entrance;
+        level12EntranceCutscene.active = area == LevelArea::Level12Animation;
     };
 
     auto ResetLevel = [&]() {
-        LoadArea(LevelArea::Overworld, (Vector2){100.0f, 0.0f});
-        MarioObj.reset(100.0f, 0.0f);
+        Vector2 startPosition = levelLoader.defaultMarioStart(startingArea);
+        MarioObj.reset(startPosition.x, startPosition.y);
+        LoadArea(startingArea, startPosition);
         scoreboard.reset(400);
-        scoreboard.setLevel(1, 1);
+        int world = 1;
+        int level = 1;
+        levelLoader.scoreboardLevel(startingArea, world, level);
+        scoreboard.setLevel(world, level);
     };
 
     auto StartLevel12Entrance = [&]() {
         scoreboard.setLevel(1, 2);
         scoreboard.setTime(400);
-        LoadArea(LevelArea::Level12Entrance, (Vector2){126.0f, level12EntranceCutscene.marioY});
+        LoadArea(LevelArea::Level12Animation, levelLoader.defaultMarioStart(LevelArea::Level12Animation));
         levelIntro.start();
     };
 
@@ -252,9 +210,9 @@ int main() {
             if (MarioObj.getIsBig()) exitPosition.y -= TILE_SIZE;
 
             if (pipeTransition.destination == WarpDestination::Level1Subarea) {
-                LoadArea(LevelArea::Level1Subarea, exitPosition);
+                LoadArea(LevelArea::Level11Subarea, exitPosition);
             } else if (pipeTransition.destination == WarpDestination::Level1Overworld) {
-                LoadArea(LevelArea::Overworld, exitPosition);
+                LoadArea(LevelArea::Level11, exitPosition);
             } else if (pipeTransition.destination == WarpDestination::Level12Underground) {
                 LoadArea(LevelArea::Level12Underground, exitPosition);
             }
@@ -271,7 +229,7 @@ int main() {
             MarioObj.setScriptedPose(pos.x, level12EntranceCutscene.marioY, true);
             level12EntranceCutscene.active = false;
 
-            for (auto& block : blocks) {
+            for (auto& block : levelLoader.blocks) {
                 auto* warpPipe = dynamic_cast<WarpPipeBlock*>(block.get());
                 if (warpPipe && warpPipe->getDestination() == WarpDestination::Level12Underground) {
                     StartPipeTransition(warpPipe);
@@ -318,12 +276,12 @@ int main() {
                 } else if (level12EntranceCutscene.active) {
                     UpdateLevel12EntranceCutscene();
                 } else {
-                if (currentArea != LevelArea::Overworld || !castleFlagpole->isActive()) {
+                if (levelLoader.currentArea() != LevelArea::Level11 || !levelLoader.castleFlagpole->isActive()) {
                     scoreboard.updateTimer(GetFrameTime());
                 }
                 scorePopups.update(GetFrameTime());
 
-                for (auto it = blocks.begin(); it != blocks.end(); ) {
+                for (auto it = levelLoader.blocks.begin(); it != levelLoader.blocks.end(); ) {
                     float marioVelY = MarioObj.getVelY();
                     (*it)->update(MarioObj.returnRec(), marioVelY, MarioObj.getIsBig());
                     MarioObj.setVelY(marioVelY);
@@ -333,13 +291,13 @@ int main() {
                         Rectangle blockRec = (*it)->returnRec();
                         Rectangle hitArea = { blockRec.x, blockRec.y - 10, blockRec.width, 10 };
 
-                        for (auto& goom : goombas) {
+                        for (auto& goom : levelLoader.goombas) {
                             Rectangle goomRec = { goom->getPos().x, goom->getPos().y, 42, 42 };
                             if (CheckCollisionRecs(hitArea, goomRec)) {
                                 goom->flip();
                             }
                         }
-                        for (auto& koopa : koopas) {
+                        for (auto& koopa : levelLoader.koopas) {
                             if (CheckCollisionRecs(hitArea, koopa->returnRec())) {
                                 koopa->flip();
                             }
@@ -349,14 +307,14 @@ int main() {
                     auto* brick = dynamic_cast<BrickBlock*>(it->get());
                     if (brick && brick->isDestroyed()) {
                         brick->SpawnBrickParticles(brickParticles);
-                        it = blocks.erase(it);
+                        it = levelLoader.blocks.erase(it);
                         
-                        RebuildCollisionObjects();
+                        levelLoader.rebuildCollisionObjects();
                     } else {
                         auto* pBlock = dynamic_cast<PowerUpBlock*>(it->get());
                         if (pBlock) {
                             if (bumped && pBlock->isHiddenBlock()) {
-                                RebuildCollisionObjects();
+                                levelLoader.rebuildCollisionObjects();
                             }
                             if (bumped && pBlock->getItemType() == "coin") {
                                 scoreboard.addCoin();
@@ -378,43 +336,43 @@ int main() {
                     }
                 }
 
-                for (auto it = coins.begin(); it != coins.end(); ) {
+                for (auto it = levelLoader.coins.begin(); it != levelLoader.coins.end(); ) {
                     if (it->update(MarioObj.returnRec())) {
                         scoreboard.addCoin();
                         scoreboard.addScore(200);
                     }
-                    if (it->isCollected()) it = coins.erase(it);
+                    if (it->isCollected()) it = levelLoader.coins.erase(it);
                     else ++it;
                 }
 
-                for (auto it = goombas.begin(); it != goombas.end(); ) {
+                for (auto it = levelLoader.goombas.begin(); it != levelLoader.goombas.end(); ) {
                     if (!MarioObj.getIsTransforming() && !MarioObj.getIsFireTransforming()) {
-                        (*it)->update(collisionObjects, MarioObj, isDead, deathTimer, camera.target.x);
+                        (*it)->update(levelLoader.collisionObjects, MarioObj, isDead, deathTimer, camera.target.x);
                     } 
                     if ((*it)->justDefeated()) {
                         scoreboard.addScore(100);
                         scorePopups.spawn(100, { (*it)->getPos().x, (*it)->getPos().y - 10.0f });
                     }
-                    if ((*it)->shouldRemove()) it = goombas.erase(it);
+                    if ((*it)->shouldRemove()) it = levelLoader.goombas.erase(it);
                     else ++it;
                 }
 
-                for (auto it = koopas.begin(); it != koopas.end(); ) {
+                for (auto it = levelLoader.koopas.begin(); it != levelLoader.koopas.end(); ) {
                     if (!MarioObj.getIsTransforming() && !MarioObj.getIsFireTransforming()) {
-                        (*it)->update(collisionObjects, MarioObj, isDead, deathTimer, camera.target.x);
+                        (*it)->update(levelLoader.collisionObjects, MarioObj, isDead, deathTimer, camera.target.x);
                     }
                     if ((*it)->justDefeated()) {
                         scoreboard.addScore(100);
                         scorePopups.spawn(100, { (*it)->getPos().x, (*it)->getPos().y - 10.0f });
                     }
-                    if ((*it)->shouldRemove()) it = koopas.erase(it);
+                    if ((*it)->shouldRemove()) it = levelLoader.koopas.erase(it);
                     else ++it;
                 }
 
-                for (auto& koopa : koopas) {
+                for (auto& koopa : levelLoader.koopas) {
                     if (!koopa->isMovingShell()) continue;
 
-                    for (auto& goom : goombas) {
+                    for (auto& goom : levelLoader.goombas) {
                         if (CheckCollisionRecs(koopa->returnRec(), { goom->getPos().x, goom->getPos().y, 42, 42 })) {
                             goom->flip();
                             if (goom->justDefeated()) {
@@ -423,7 +381,7 @@ int main() {
                             }
                         }
                     }
-                    for (auto& otherKoopa : koopas) {
+                    for (auto& otherKoopa : levelLoader.koopas) {
                         if (otherKoopa.get() == koopa.get() || otherKoopa->isFlippedOrDead()) continue;
                         if (CheckCollisionRecs(koopa->returnRec(), otherKoopa->returnRec())) {
                             otherKoopa->hitByShell();
@@ -436,13 +394,13 @@ int main() {
                 }
 
                 BrickBlock::updateParticles(brickParticles);
-                for (auto& mush : activeMushrooms) mush->update(collisionObjects);
+                for (auto& mush : activeMushrooms) mush->update(levelLoader.collisionObjects);
                 for (auto& flower : activeFireFlowers) flower->update();
-                for (auto& star : activeStars) star->update(collisionObjects);
-                for (auto& fireball : activeFireballs) fireball->update(collisionObjects, camera.target.x);
+                for (auto& star : activeStars) star->update(levelLoader.collisionObjects);
+                for (auto& fireball : activeFireballs) fireball->update(levelLoader.collisionObjects, camera.target.x);
 
                 for (auto& fireball : activeFireballs) {
-                    for (auto& goom : goombas) {
+                    for (auto& goom : levelLoader.goombas) {
                         Rectangle goomRec = { goom->getPos().x, goom->getPos().y, 42, 42 };
                         if (CheckCollisionRecs(fireball->returnRec(), goomRec)) {
                             goom->flip();
@@ -453,7 +411,7 @@ int main() {
                             fireball->destroy();
                         }
                     }
-                    for (auto& koopa : koopas) {
+                    for (auto& koopa : levelLoader.koopas) {
                         if (CheckCollisionRecs(fireball->returnRec(), koopa->returnRec())) {
                             koopa->flip();
                             if (koopa->justDefeated()) {
@@ -470,11 +428,11 @@ int main() {
                     else ++it;
                 }
 
-                if (currentArea != LevelArea::Overworld || !castleFlagpole->isActive()) {
+                if (levelLoader.currentArea() != LevelArea::Level11 || !levelLoader.castleFlagpole->isActive()) {
                     bool wasBig = MarioObj.getIsBig();
                     bool wasFire = MarioObj.getIsFire();
                     bool wasStarPowered = MarioObj.getIsStarPowered();
-                    MarioObj.update(collisionObjects, camera.target.x, activeMushrooms, activeFireFlowers, activeStars, activeFireballs, mushroomSheet);
+                    MarioObj.update(levelLoader.collisionObjects, camera.target.x, activeMushrooms, activeFireFlowers, activeStars, activeFireballs, mushroomSheet);
                     int oneUps = MarioObj.takeCollectedOneUps();
                     for (int i = 0; i < oneUps; i++) {
                         marioLives++;
@@ -497,7 +455,7 @@ int main() {
                 bool wantsDown = IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S);
                 bool wantsRight = IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D);
                 bool wantsLeft = IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A);
-                for (auto& block : blocks) {
+                for (auto& block : levelLoader.blocks) {
                     auto* warpPipe = dynamic_cast<WarpPipeBlock*>(block.get());
                     if (warpPipe && warpPipe->canEnter(MarioObj.returnRec(), wantsDown, wantsRight, wantsLeft)) {
                         StartPipeTransition(warpPipe);
@@ -505,18 +463,17 @@ int main() {
                     }
                 }
 
-                if (currentArea == LevelArea::Overworld) {
-                    castleFlagpole->update(MarioObj, scoreboard, scorePopups, isDead);
+                if (levelLoader.currentArea() == LevelArea::Level11) {
+                    levelLoader.castleFlagpole->update(MarioObj, scoreboard, scorePopups, isDead);
                 }
 
-                if (followCamera) {
+                if (levelLoader.shouldFollowCamera()) {
                     float scrollThreshold = screenWidth / 1.967f;
                     if (MarioObj.getPos().x > scrollThreshold) {
                         float targetX = MarioObj.getPos().x - scrollThreshold;
-                        if (currentArea == LevelArea::Level1Subarea && targetX > (32 * TILE_SIZE) - screenWidth) {
-                            targetX = (32 * TILE_SIZE) - screenWidth;
-                        } else if (currentArea == LevelArea::Level12Underground && targetX > 2000.0f - screenWidth) {
-                            targetX = 2000.0f - screenWidth;
+                        float maxCameraX = levelLoader.maxCameraX();
+                        if (maxCameraX >= 0.0f && targetX > maxCameraX) {
+                            targetX = maxCameraX;
                         }
                         if (targetX > camera.target.x) camera.target.x = targetX;
                     }
@@ -525,10 +482,10 @@ int main() {
                 if (MarioObj.getPos().y > 700) {
                     StartDeath();
                 }
-                if (currentArea == LevelArea::Overworld && !castleFlagpole->isActive() && !castleFlagpole->isComplete() && scoreboard.isTimeUp()) {
+                if (levelLoader.currentArea() == LevelArea::Level11 && !levelLoader.castleFlagpole->isActive() && !levelLoader.castleFlagpole->isComplete() && scoreboard.isTimeUp()) {
                     StartDeath();
                 }
-                if (currentArea == LevelArea::Overworld && castleFlagpole->isComplete()) {
+                if (levelLoader.currentArea() == LevelArea::Level11 && levelLoader.castleFlagpole->isComplete()) {
                     StartLevel12Entrance();
                 }
                 }
@@ -542,31 +499,30 @@ int main() {
                 ClearBackground(BLACK);
                 scoreboard.drawLevelIntro(nesFont, hudSheet, screenWidth, marioLives);
             } else {
-                const bool undergroundScene = currentArea == LevelArea::Level1Subarea || currentArea == LevelArea::Level12Underground;
-                const SceneType& drawScene = undergroundScene ? GetSceneType(SceneKind::Underground) : GetLevel1Scene();
+                const SceneType& drawScene = levelLoader.drawScene();
                 ClearBackground(drawScene.backgroundColor);
                 BeginMode2D(camera);
-                    for (auto& prop : levelProps) prop.draw();
-                    if (currentArea == LevelArea::Level12Entrance) DrawLevel12EntranceCastle();
+                    for (auto& prop : levelLoader.levelProps) prop.draw();
+                    if (levelLoader.currentArea() == LevelArea::Level12Animation) DrawLevel12EntranceCastle();
                     bool drawMarioBehindPipe = pipeTransition.active;
                     if (drawMarioBehindPipe) {
                         MarioObj.draw();
                     }
-                    for (auto& block : blocks) block->draw();
-                    for (auto& coin : coins) coin.draw();
+                    for (auto& block : levelLoader.blocks) block->draw();
+                    for (auto& coin : levelLoader.coins) coin.draw();
                     for (auto& mush : activeMushrooms) mush->draw();
                     for (auto& flower : activeFireFlowers) flower->draw();
                     for (auto& star : activeStars) star->draw();
                     for (auto& fireball : activeFireballs) fireball->draw();
-                    for (auto& goom : goombas) goom->draw();
-                    for (auto& koopa : koopas) koopa->draw();
+                    for (auto& goom : levelLoader.goombas) goom->draw();
+                    for (auto& koopa : levelLoader.koopas) koopa->draw();
 
-                    if (currentArea == LevelArea::Overworld) castleFlagpole->draw();
+                    if (levelLoader.currentArea() == LevelArea::Level11) levelLoader.castleFlagpole->draw();
 
                     BrickBlock::drawParticles(brickParticles, spriteSheet, drawScene);
                     scorePopups.draw(mushroomSheet);
                     if (!drawMarioBehindPipe &&
-                        (pipeTransition.active || currentArea != LevelArea::Overworld || (!castleFlagpole->isActive() && !castleFlagpole->isComplete()))) {
+                        (pipeTransition.active || levelLoader.currentArea() != LevelArea::Level11 || (!levelLoader.castleFlagpole->isActive() && !levelLoader.castleFlagpole->isComplete()))) {
                         MarioObj.draw();
                     }
                 EndMode2D();
