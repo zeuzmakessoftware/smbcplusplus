@@ -4,9 +4,17 @@
 
 Mario::Mario(int x, int y, Texture2D sprites) : posX((float)x), posY((float)y), sprites(sprites) {}
 
+float Mario::visualHeight() const {
+    return isBig ? (float)TILE_SIZE * 2.0f : (float)TILE_SIZE;
+}
+
+float Mario::collisionTopInset() const {
+    return isBig ? 12.0f : 6.0f;
+}
+
 Rectangle Mario::returnRec() {
-    float height = isBig ? (float)TILE_SIZE * 2 : (float)TILE_SIZE;
-    return {(float)posX, (float)posY, (float)TILE_SIZE, height};
+    float topInset = collisionTopInset();
+    return {(float)posX, (float)posY + topInset, (float)TILE_SIZE, visualHeight() - topInset};
 }
 
 Vector2 Mario::getPos() {
@@ -99,13 +107,12 @@ void Mario::update(
 
     for (const auto& rect : statics) {
         if (CheckCollisionRecs(returnRec(), rect)) {
-            float height = isBig ? (float)TILE_SIZE * 2 : (float)TILE_SIZE;
             if (velY > 0) {
-                posY = rect.y - height;
+                posY = rect.y - visualHeight();
                 velY = 0;
                 isGrounded = true;
             } else if (velY < 0) {
-                posY = rect.y + rect.height;
+                posY = rect.y + rect.height - collisionTopInset();
                 velY = 0;
             }
         }

@@ -62,12 +62,12 @@ void PowerUpBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
         }
     }
 
-    bool hitFromBelow = CheckCollisionRecs(marioRec, getSensor()) && (!isHiddenBlock() || marioVelY < 0.0f);
+    Rectangle sensor = getSensor();
+    bool headReachedUnderside = marioRec.y <= sensor.y + 3.0f;
+    bool hitFromBelow = CheckCollisionRecs(marioRec, sensor) && (marioVelY < 0.0f || headReachedUnderside);
     if (!isSpent && !isBumping && hitFromBelow) {
         wasHitThisFrame = true;
-        if (marioVelY < 0.0f) {
-            marioVelY = 0.0f;
-        }
+        marioVelY = 0.0f;
         isBumping = true;
         bumpTimer = 0.1f;
         isSpent = true;

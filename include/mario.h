@@ -56,6 +56,9 @@ class Mario {
         const float starPowerDuration = 10.0f;
         int collectedOneUps = 0;
 
+        float visualHeight() const;
+        float collisionTopInset() const;
+
     public:
         Mario(int x, int y, Texture2D sprites);
         Rectangle returnRec();

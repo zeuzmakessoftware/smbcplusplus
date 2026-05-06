@@ -33,14 +33,14 @@ void CoinBrickBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
     (void)isBig;
     coinAnimationFinishedThisFrame = false;
 
-    bool hitFromBelow = CheckCollisionRecs(marioRec, getSensor());
+    Rectangle sensor = getSensor();
+    bool headReachedUnderside = marioRec.y <= sensor.y + 3.0f;
+    bool hitFromBelow = CheckCollisionRecs(marioRec, sensor) && (marioVelY < 0.0f || headReachedUnderside);
     if (!isSpent && !isBumping && hitFromBelow) {
         wasHitThisFrame = true;
         coinsUsed++;
 
-        if (marioVelY < 0.0f) {
-            marioVelY = 0.0f;
-        }
+        marioVelY = 0.0f;
 
         isBumping = true;
         bumpTimer = 0.1f;

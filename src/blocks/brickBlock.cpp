@@ -7,11 +7,11 @@ Rectangle BrickBlock::getSensor() {
 }
 
 void BrickBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
-    if (!isBumping && CheckCollisionRecs(marioRec, getSensor())) {
+    Rectangle sensor = getSensor();
+    bool headReachedUnderside = marioRec.y <= sensor.y + 3.0f;
+    if (!isBumping && CheckCollisionRecs(marioRec, sensor) && (marioVelY < 0.0f || headReachedUnderside)) {
         wasHitThisFrame = true;
-        if (marioVelY < 0.0f) {
-            marioVelY = 0.0f;
-        }
+        marioVelY = 0.0f;
         if (isBig) {
             destroyed = true;
         } else {

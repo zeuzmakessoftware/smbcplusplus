@@ -26,12 +26,12 @@ std::unique_ptr<Star> StarBrickBlock::takeStar() {
 void StarBrickBlock::update(Rectangle marioRec, float& marioVelY, bool isBig) {
     (void)isBig;
 
-    bool hitFromBelow = CheckCollisionRecs(marioRec, getSensor());
+    Rectangle sensor = getSensor();
+    bool headReachedUnderside = marioRec.y <= sensor.y + 3.0f;
+    bool hitFromBelow = CheckCollisionRecs(marioRec, sensor) && (marioVelY < 0.0f || headReachedUnderside);
     if (!isSpent && !isBumping && hitFromBelow) {
         wasHitThisFrame = true;
-        if (marioVelY < 0.0f) {
-            marioVelY = 0.0f;
-        }
+        marioVelY = 0.0f;
 
         isBumping = true;
         bumpTimer = 0.1f;
