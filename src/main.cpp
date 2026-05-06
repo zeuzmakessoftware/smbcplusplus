@@ -117,7 +117,7 @@ int main() {
         screenWidth
     });
     // Change this to LevelArea::Level12Animation or LevelArea::Level12Underground to boot into 1-2.
-    LevelArea startingArea = LevelArea::Level11;
+    LevelArea startingArea = LevelArea::Level12Underground;
 
     Camera2D camera = { 0 };
     camera.target = (Vector2){ 0, 0 };

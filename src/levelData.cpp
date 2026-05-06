@@ -454,6 +454,7 @@ void LoadLevel12UndergroundStart(
     blocks.push_back(std::make_unique<ShinyBlock>((27 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<ShinyBlock>((27 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<ShinyBlock>((27 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<CoinBrickBlock>((29 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
@@ -620,9 +621,9 @@ void LoadLevel12UndergroundStart(
     blocks.push_back(std::make_unique<BrickBlock>((70 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((71 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((72 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<CoinBrickBlock>((73 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((73 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((73 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
-    blocks.push_back(std::make_unique<BrickBlock>((73 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((73 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((73 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((73 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
