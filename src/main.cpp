@@ -341,6 +341,13 @@ int main() {
                             auto newStar = starBlock->takeStar();
                             if (newStar) activeStars.push_back(std::move(newStar));
                         }
+                        auto* mushroomBrick = dynamic_cast<MushroomBrickBlock*>(it->get());
+                        if (mushroomBrick) {
+                            auto newMush = mushroomBrick->takeMushroom();
+                            if (newMush) activeMushrooms.push_back(std::move(newMush));
+                            auto newFlower = mushroomBrick->takeFireFlower();
+                            if (newFlower) activeFireFlowers.push_back(std::move(newFlower));
+                        }
                         ++it;
                     }
                 }

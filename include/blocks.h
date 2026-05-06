@@ -7,6 +7,7 @@
 #include "blocks/coinBrickBlock.h"
 #include "blocks/emptyBlock.h"
 #include "blocks/powerUpBlock.h"
+#include "blocks/mushroomBrickBlock.h"
 #include "blocks/starBrickBlock.h"
 #include "blocks/pipeBlock.h"
 #include "blocks/shinyBlock.h"

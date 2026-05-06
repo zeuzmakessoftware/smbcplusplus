@@ -612,7 +612,7 @@ void LoadLevel12UndergroundStart(
     blocks.push_back(std::make_unique<BrickBlock>((69 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((69 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((69 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
-    blocks.push_back(std::make_unique<PowerUpBlock>((69 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "1up", GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<MushroomBrickBlock>((69 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, scene));
     blocks.push_back(std::make_unique<BrickBlock>((72 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((72 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((72 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
@@ -758,7 +758,7 @@ void LoadLevel12UndergroundStart(
     blocks.push_back(std::make_unique<BrickBlock>((147 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((148 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((149 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
-    blocks.push_back(std::make_unique<PowerUpBlock>((150 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "mushroom", GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<MushroomBrickBlock>((150 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, scene));
     blocks.push_back(std::make_unique<DrawTiledRect>(
         6762, 600, 378, 84, spriteSheet, GetSceneType(SceneKind::Underground).groundBlock, TILE_SIZE, TILE_SIZE, GetSceneType(SceneKind::Underground)
     ));
