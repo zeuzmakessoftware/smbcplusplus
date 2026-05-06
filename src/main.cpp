@@ -284,7 +284,6 @@ int main() {
                     if (it->update(MarioObj.returnRec())) {
                         scoreboard.addCoin();
                         scoreboard.addScore(200);
-                        scorePopups.spawn(200, { it->returnRec().x, it->returnRec().y - 8.0f });
                     }
                     if (it->isCollected()) it = coins.erase(it);
                     else ++it;
