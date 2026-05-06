@@ -77,7 +77,7 @@ float LevelLoader::maxCameraX() const {
         return (32 * resources.tileSize) - resources.screenWidth;
     }
     if (area == LevelArea::Level12Underground) {
-        return 2000.0f - resources.screenWidth;
+        return 7140.0f - resources.screenWidth;
     }
     return -1.0f;
 }
