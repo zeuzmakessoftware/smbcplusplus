@@ -28,6 +28,7 @@ public:
     void addCoin();
     bool convertOneTimeTickToScore(int pointsPerTick = 50);
     void setLevel(int worldNumber, int stageNumber);
+    void setTime(int startTime);
     bool isTimeUp() const;
 
     int getScore() const { return score; }

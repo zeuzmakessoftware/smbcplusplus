@@ -334,3 +334,97 @@ void LoadLevel1Subarea(
         15 * TILE_SIZE, (3 * TILE_SIZE) + 12, 11, spriteSheet, scene
     ));
 }
+
+void LoadLevel12EntranceCutscene(
+    std::vector<std::unique_ptr<Block>>& blocks,
+    std::vector<std::unique_ptr<Goomba>>& goombas,
+    std::vector<std::unique_ptr<Koopa>>& koopas,
+    std::vector<Coin>& coins,
+    std::vector<BackgroundProp>& levelProps,
+    std::unique_ptr<CastleFlagpole>& castleFlagpole,
+    bool& followCamera,
+    Texture2D& spriteSheet,
+    Texture2D& mushroomSheet,
+    Texture2D& marioSheet,
+    Texture2D& enemiesSheet,
+    int tileSize
+) {
+    const SceneType& scene = GetSceneType(SceneKind::Overworld);
+    (void)goombas;
+    (void)koopas;
+    (void)coins;
+    (void)enemiesSheet;
+    (void)tileSize;
+    followCamera = false;
+
+    castleFlagpole = std::make_unique<CastleFlagpole>(5000.0f, 600.0f, spriteSheet, mushroomSheet, marioSheet);
+
+    levelProps.push_back(BackgroundProp(168, 180, spriteSheet, MEDIUM_CLOUD_LAYOUT));
+    levelProps.push_back(BackgroundProp(378, 348, spriteSheet, CLOUD_LAYOUT));
+    levelProps.push_back(BackgroundProp(798, 138, spriteSheet, MEDIUM_CLOUD_LAYOUT));
+
+    blocks.push_back(std::make_unique<DrawTiledRect>(
+        0, 600, 992, 80, spriteSheet, scene.groundBlock, TILE_SIZE, TILE_SIZE, scene
+    ));
+    blocks.push_back(std::make_unique<WarpPipeBlock>(
+        (10 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2, 2, spriteSheet,
+        WarpDestination::Level12Underground, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
+        scene, PipeOrientation::HorizontalRight
+    ));
+    blocks.push_back(std::make_unique<PipeBlock>((12 * TILE_SIZE), (10 * TILE_SIZE) + 12, 2, 4, spriteSheet, scene));
+    blocks.push_back(std::make_unique<PipeWallBlock>((12 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2, spriteSheet, scene));
+}
+
+void LoadLevel12UndergroundStart(
+    std::vector<std::unique_ptr<Block>>& blocks,
+    std::vector<std::unique_ptr<Goomba>>& goombas,
+    std::vector<std::unique_ptr<Koopa>>& koopas,
+    std::vector<Coin>& coins,
+    std::vector<BackgroundProp>& levelProps,
+    std::unique_ptr<CastleFlagpole>& castleFlagpole,
+    bool& followCamera,
+    Texture2D& spriteSheet,
+    Texture2D& mushroomSheet,
+    Texture2D& marioSheet,
+    Texture2D& enemiesSheet,
+    int tileSize
+) {
+    const SceneType& scene = GetSceneType(SceneKind::Underground);
+    (void)koopas;
+    (void)coins;
+    (void)levelProps;
+    (void)tileSize;
+    followCamera = true;
+
+    castleFlagpole = std::make_unique<CastleFlagpole>(5000.0f, 600.0f, spriteSheet, mushroomSheet, marioSheet);
+
+    goombas.push_back(std::make_unique<Goomba>((16 * TILE_SIZE), (13 * TILE_SIZE), enemiesSheet, scene));
+    goombas.push_back(std::make_unique<Goomba>((17 * TILE_SIZE), (12 * TILE_SIZE), enemiesSheet, scene));
+    goombas.push_back(std::make_unique<Goomba>((29 * TILE_SIZE), (13 * TILE_SIZE), enemiesSheet, scene));
+
+    blocks.push_back(std::make_unique<DrawTiledRect>(
+        0, 600, 2000, 80, spriteSheet, scene.groundBlock, TILE_SIZE, TILE_SIZE, scene
+    ));
+    blocks.push_back(std::make_unique<PowerUpBlock>((10 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "mushroom", scene));
+    blocks.push_back(std::make_unique<PowerUpBlock>((11 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "coin", scene));
+    blocks.push_back(std::make_unique<PowerUpBlock>((12 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "coin", scene));
+    blocks.push_back(std::make_unique<PowerUpBlock>((13 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "coin", scene));
+    blocks.push_back(std::make_unique<PowerUpBlock>((14 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "coin", scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((17 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((19 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((19 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((21 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((21 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((21 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((23 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((23 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((23 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((23 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((25 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((25 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((25 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((25 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((27 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((27 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, scene));
+    blocks.push_back(std::make_unique<ShinyBlock>((27 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, scene));
+}

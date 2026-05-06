@@ -22,7 +22,9 @@
 
 enum class LevelArea {
     Overworld,
-    Subarea
+    Level1Subarea,
+    Level12Entrance,
+    Level12Underground
 };
 
 struct PipeTransition {
@@ -36,14 +38,39 @@ struct PipeTransition {
     float duration = 0.72f;
 };
 
+struct Level12EntranceCutscene {
+    bool active = false;
+    float walkSpeed = 84.0f;
+    float marioY = (13.0f * TILE_SIZE) + 12.0f;
+};
+
+struct LevelIntro {
+    bool active = false;
+    float timer = 0.0f;
+    float duration = 3.0f;
+
+    void start() {
+        active = true;
+        timer = duration;
+    }
+
+    void update(float dt) {
+        if (!active) return;
+
+        timer -= dt;
+        if (timer <= 0.0f) {
+            active = false;
+        }
+    }
+};
+
 int main() {
     int screenWidth = 670;
     int screenHeight = 670;
     InitWindow(screenWidth, screenHeight, "Swag Bros");
 
     bool gameStarted = false;
-    bool levelIntroActive = false;
-    float levelIntroTimer = 0.0f;
+    LevelIntro levelIntro;
     int marioLives = 3;
     
     Image img1 = LoadImage("assets/images/52571.png");
@@ -92,6 +119,7 @@ int main() {
     ScorePopupManager scorePopups;
     LevelArea currentArea = LevelArea::Overworld;
     PipeTransition pipeTransition;
+    Level12EntranceCutscene level12EntranceCutscene;
     bool followCamera = true;
 
     Mario MarioObj(100, 0, marioSheet);
@@ -137,10 +165,19 @@ int main() {
         levelProps.clear();
         currentArea = area;
 
-        if (area == LevelArea::Overworld) {
-            LoadLevel1(blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera, spriteSheet, mushroomSheet, marioSheet, enemiesSheet, TILE_SIZE);
-        } else {
-            LoadLevel1Subarea(blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera, spriteSheet, mushroomSheet, marioSheet, enemiesSheet, TILE_SIZE);
+        switch (area) {
+            case LevelArea::Overworld:
+                LoadLevel1(blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera, spriteSheet, mushroomSheet, marioSheet, enemiesSheet, TILE_SIZE);
+                break;
+            case LevelArea::Level1Subarea:
+                LoadLevel1Subarea(blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera, spriteSheet, mushroomSheet, marioSheet, enemiesSheet, TILE_SIZE);
+                break;
+            case LevelArea::Level12Entrance:
+                LoadLevel12EntranceCutscene(blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera, spriteSheet, mushroomSheet, marioSheet, enemiesSheet, TILE_SIZE);
+                break;
+            case LevelArea::Level12Underground:
+                LoadLevel12UndergroundStart(blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera, spriteSheet, mushroomSheet, marioSheet, enemiesSheet, TILE_SIZE);
+                break;
         }
 
         RebuildCollisionObjects();
@@ -153,12 +190,21 @@ int main() {
         };
         isDead = false;
         pipeTransition.active = false;
+        level12EntranceCutscene.active = area == LevelArea::Level12Entrance;
     };
 
     auto ResetLevel = [&]() {
         LoadArea(LevelArea::Overworld, (Vector2){100.0f, 0.0f});
         MarioObj.reset(100.0f, 0.0f);
         scoreboard.reset(400);
+        scoreboard.setLevel(1, 1);
+    };
+
+    auto StartLevel12Entrance = [&]() {
+        scoreboard.setLevel(1, 2);
+        scoreboard.setTime(400);
+        LoadArea(LevelArea::Level12Entrance, (Vector2){126.0f, level12EntranceCutscene.marioY});
+        levelIntro.start();
     };
 
     auto StartPipeTransition = [&](WarpPipeBlock* warpPipe) {
@@ -206,11 +252,47 @@ int main() {
             if (MarioObj.getIsBig()) exitPosition.y -= TILE_SIZE;
 
             if (pipeTransition.destination == WarpDestination::Level1Subarea) {
-                LoadArea(LevelArea::Subarea, exitPosition);
+                LoadArea(LevelArea::Level1Subarea, exitPosition);
             } else if (pipeTransition.destination == WarpDestination::Level1Overworld) {
                 LoadArea(LevelArea::Overworld, exitPosition);
+            } else if (pipeTransition.destination == WarpDestination::Level12Underground) {
+                LoadArea(LevelArea::Level12Underground, exitPosition);
             }
         }
+    };
+
+    auto UpdateLevel12EntranceCutscene = [&]() {
+        Vector2 pos = MarioObj.getPos();
+        const float pipeMouthX = (10.0f * TILE_SIZE) - TILE_SIZE;
+        pos.x += level12EntranceCutscene.walkSpeed * GetFrameTime();
+
+        if (pos.x >= pipeMouthX) {
+            pos.x = pipeMouthX;
+            MarioObj.setScriptedPose(pos.x, level12EntranceCutscene.marioY, true);
+            level12EntranceCutscene.active = false;
+
+            for (auto& block : blocks) {
+                auto* warpPipe = dynamic_cast<WarpPipeBlock*>(block.get());
+                if (warpPipe && warpPipe->getDestination() == WarpDestination::Level12Underground) {
+                    StartPipeTransition(warpPipe);
+                    break;
+                }
+            }
+            return;
+        }
+
+        MarioObj.setScriptedPose(pos.x, level12EntranceCutscene.marioY - (MarioObj.getIsBig() || MarioObj.getIsFire() ? TILE_SIZE : 0.0f), true, 3.0f);
+    };
+
+    auto DrawLevel12EntranceCastle = [&]() {
+        DrawTexturePro(
+            spriteSheet,
+            (Rectangle){24.0f, 696.0f, 80.0f, 80.0f},
+            (Rectangle){0.0f, 390.0f, 210.0f, 210.0f},
+            (Vector2){0.0f, 0.0f},
+            0.0f,
+            WHITE
+        );
     };
 
     ResetLevel();
@@ -222,23 +304,21 @@ int main() {
             BeginDrawing();
                 if (IsKeyPressed(KEY_ENTER)) {
                     gameStarted = true;
-                    levelIntroActive = true;
-                    levelIntroTimer = 3.0f;
+                    levelIntro.start();
                 }
                 ClearBackground(BLACK);
                 DrawTextEx(nesFont, "press enter", (Vector2){50, 50}, 36, 2, WHITE);
             EndDrawing();
         } else {
-            if (levelIntroActive) {
-                levelIntroTimer -= GetFrameTime();
-                if (levelIntroTimer <= 0.0f) {
-                    levelIntroActive = false;
-                }
+            if (levelIntro.active) {
+                levelIntro.update(GetFrameTime());
             } else if (!isDead) {
                 if (pipeTransition.active) {
                     UpdatePipeTransition();
+                } else if (level12EntranceCutscene.active) {
+                    UpdateLevel12EntranceCutscene();
                 } else {
-                if (currentArea == LevelArea::Subarea || !castleFlagpole->isActive()) {
+                if (currentArea != LevelArea::Overworld || !castleFlagpole->isActive()) {
                     scoreboard.updateTimer(GetFrameTime());
                 }
                 scorePopups.update(GetFrameTime());
@@ -390,7 +470,7 @@ int main() {
                     else ++it;
                 }
 
-                if (currentArea == LevelArea::Subarea || !castleFlagpole->isActive()) {
+                if (currentArea != LevelArea::Overworld || !castleFlagpole->isActive()) {
                     bool wasBig = MarioObj.getIsBig();
                     bool wasFire = MarioObj.getIsFire();
                     bool wasStarPowered = MarioObj.getIsStarPowered();
@@ -433,8 +513,10 @@ int main() {
                     float scrollThreshold = screenWidth / 1.967f;
                     if (MarioObj.getPos().x > scrollThreshold) {
                         float targetX = MarioObj.getPos().x - scrollThreshold;
-                        if (currentArea == LevelArea::Subarea && targetX > (32 * TILE_SIZE) - screenWidth) {
+                        if (currentArea == LevelArea::Level1Subarea && targetX > (32 * TILE_SIZE) - screenWidth) {
                             targetX = (32 * TILE_SIZE) - screenWidth;
+                        } else if (currentArea == LevelArea::Level12Underground && targetX > 2000.0f - screenWidth) {
+                            targetX = 2000.0f - screenWidth;
                         }
                         if (targetX > camera.target.x) camera.target.x = targetX;
                     }
@@ -447,7 +529,7 @@ int main() {
                     StartDeath();
                 }
                 if (currentArea == LevelArea::Overworld && castleFlagpole->isComplete()) {
-                    ResetLevel();
+                    StartLevel12Entrance();
                 }
                 }
             } else {
@@ -456,14 +538,16 @@ int main() {
             }
 
             BeginDrawing();
-            if (levelIntroActive) {
+            if (levelIntro.active) {
                 ClearBackground(BLACK);
                 scoreboard.drawLevelIntro(nesFont, hudSheet, screenWidth, marioLives);
             } else {
-                const SceneType& drawScene = currentArea == LevelArea::Subarea ? GetSceneType(SceneKind::Underground) : GetLevel1Scene();
+                const bool undergroundScene = currentArea == LevelArea::Level1Subarea || currentArea == LevelArea::Level12Underground;
+                const SceneType& drawScene = undergroundScene ? GetSceneType(SceneKind::Underground) : GetLevel1Scene();
                 ClearBackground(drawScene.backgroundColor);
                 BeginMode2D(camera);
                     for (auto& prop : levelProps) prop.draw();
+                    if (currentArea == LevelArea::Level12Entrance) DrawLevel12EntranceCastle();
                     bool drawMarioBehindPipe = pipeTransition.active;
                     if (drawMarioBehindPipe) {
                         MarioObj.draw();
@@ -482,7 +566,7 @@ int main() {
                     BrickBlock::drawParticles(brickParticles, spriteSheet, drawScene);
                     scorePopups.draw(mushroomSheet);
                     if (!drawMarioBehindPipe &&
-                        (pipeTransition.active || currentArea == LevelArea::Subarea || (!castleFlagpole->isActive() && !castleFlagpole->isComplete()))) {
+                        (pipeTransition.active || currentArea != LevelArea::Overworld || (!castleFlagpole->isActive() && !castleFlagpole->isComplete()))) {
                         MarioObj.draw();
                     }
                 EndMode2D();

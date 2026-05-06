@@ -77,7 +77,7 @@ class Mario {
         void setIsBig(bool b) { isBig = b; }
         bool getIsFire() const { return isFire; }
         void setVelY(float y) { velY = y; }
-        void setScriptedPose(float x, float y, bool faceRight);
+        void setScriptedPose(float x, float y, bool faceRight, float scriptedVelX = 0.0f);
         bool getIsTransforming() const { return isTransforming; }
         bool getIsFireTransforming() const { return isFireTransforming; }
         void startShrink();

@@ -45,4 +45,34 @@ void LoadLevel1Subarea(
     int tileSize
 );
 
+void LoadLevel12EntranceCutscene(
+    std::vector<std::unique_ptr<Block>>& blocks,
+    std::vector<std::unique_ptr<Goomba>>& goombas,
+    std::vector<std::unique_ptr<Koopa>>& koopas,
+    std::vector<Coin>& coins,
+    std::vector<BackgroundProp>& levelProps,
+    std::unique_ptr<CastleFlagpole>& castleFlagpole,
+    bool& followCamera,
+    Texture2D& spriteSheet,
+    Texture2D& mushroomSheet,
+    Texture2D& marioSheet,
+    Texture2D& enemiesSheet,
+    int tileSize
+);
+
+void LoadLevel12UndergroundStart(
+    std::vector<std::unique_ptr<Block>>& blocks,
+    std::vector<std::unique_ptr<Goomba>>& goombas,
+    std::vector<std::unique_ptr<Koopa>>& koopas,
+    std::vector<Coin>& coins,
+    std::vector<BackgroundProp>& levelProps,
+    std::unique_ptr<CastleFlagpole>& castleFlagpole,
+    bool& followCamera,
+    Texture2D& spriteSheet,
+    Texture2D& mushroomSheet,
+    Texture2D& marioSheet,
+    Texture2D& enemiesSheet,
+    int tileSize
+);
+
 #endif

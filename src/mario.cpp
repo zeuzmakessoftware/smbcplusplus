@@ -263,13 +263,23 @@ void Mario::reset(float x, float y) {
     collectedOneUps = 0;
 }
 
-void Mario::setScriptedPose(float x, float y, bool faceRight) {
+void Mario::setScriptedPose(float x, float y, bool faceRight, float scriptedVelX) {
     posX = x;
     posY = y;
-    velX = 0.0f;
+    velX = scriptedVelX;
     velY = 0.0f;
     facingRight = faceRight;
     isGrounded = true;
+
+    if (std::abs(velX) > 0.1f) {
+        frameTimer += GetFrameTime();
+        if (frameTimer >= frameDuration) {
+            frameTimer = 0.0f;
+            currentFrame = (currentFrame + 1) % 3;
+        }
+    } else {
+        currentFrame = 0;
+    }
 }
 
 void Mario::drawDebug() {

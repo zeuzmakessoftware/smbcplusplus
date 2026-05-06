@@ -53,6 +53,11 @@ void Scoreboard::setLevel(int worldNumber, int stageNumber) {
     stage = stageNumber;
 }
 
+void Scoreboard::setTime(int startTime) {
+    time = startTime;
+    timerAccumulator = 0.0f;
+}
+
 bool Scoreboard::isTimeUp() const {
     return time <= 0;
 }

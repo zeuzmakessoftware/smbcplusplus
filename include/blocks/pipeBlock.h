@@ -12,7 +12,8 @@ enum class PipeOrientation {
 enum class WarpDestination {
     None,
     Level1Subarea,
-    Level1Overworld
+    Level1Overworld,
+    Level12Underground
 };
 
 class PipeBlock : public Block {
