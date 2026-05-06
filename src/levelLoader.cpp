@@ -12,7 +12,7 @@ void LevelLoader::load(const LevelAreaId& nextArea, Vector2 marioStart, Mario& m
     area = config->id;
 
     config->load(
-        blocks, goombas, koopas, coins, levelProps, castleFlagpole, followCamera,
+        blocks, goombas, koopas, piranhaPlants, coins, levelProps, castleFlagpole, followCamera,
         resources.spriteSheet, resources.mushroomSheet, resources.marioSheet, resources.enemiesSheet, resources.tileSize
     );
     rebuildCollisionObjects();
@@ -113,6 +113,7 @@ void LevelLoader::clearLevelEntities() {
     blocks.clear();
     goombas.clear();
     koopas.clear();
+    piranhaPlants.clear();
     coins.clear();
     collisionObjects.clear();
     levelProps.clear();

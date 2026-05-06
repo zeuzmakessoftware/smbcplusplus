@@ -18,6 +18,7 @@ void LoadLevel1(
     std::vector<std::unique_ptr<Block>>& blocks,
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
+    std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
@@ -83,6 +84,12 @@ void LoadLevel1(
     goombas.push_back(std::make_unique<Goomba>((176 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet, scene));
 
     koopas.push_back(std::make_unique<Koopa>((106 * TILE_SIZE), 537.0f, enemiesSheet, scene));
+    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((28 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
+    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((38 * TILE_SIZE), (11 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
+    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((46 * TILE_SIZE), (10 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
+    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((57 * TILE_SIZE), (10 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
+    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((163 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
+    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((179 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
 
     blocks.push_back(std::make_unique<DrawTiledRect>(
         0, 600, 2882, 80, spriteSheet, scene.groundBlock, TILE_SIZE, TILE_SIZE, scene
@@ -244,6 +251,7 @@ void LoadLevel1Subarea(
     std::vector<std::unique_ptr<Block>>& blocks,
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
+    std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
@@ -257,6 +265,7 @@ void LoadLevel1Subarea(
     const SceneType& scene = GetSceneType(SceneKind::Underground);
     (void)goombas;
     (void)koopas;
+    (void)piranhaPlants;
     (void)levelProps;
     (void)enemiesSheet;
     (void)tileSize;
@@ -340,6 +349,7 @@ void LoadLevel12EntranceCutscene(
     std::vector<std::unique_ptr<Block>>& blocks,
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
+    std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
@@ -353,6 +363,7 @@ void LoadLevel12EntranceCutscene(
     const SceneType& scene = GetSceneType(SceneKind::Overworld);
     (void)goombas;
     (void)koopas;
+    (void)piranhaPlants;
     (void)coins;
     (void)enemiesSheet;
     (void)tileSize;
@@ -380,6 +391,7 @@ void LoadLevel12UndergroundStart(
     std::vector<std::unique_ptr<Block>>& blocks,
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
+    std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
@@ -426,6 +438,9 @@ void LoadLevel12UndergroundStart(
     goombas.push_back(std::make_unique<Goomba>((97 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
     goombas.push_back(std::make_unique<Goomba>((112 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
     koopas.push_back(std::make_unique<Koopa>((146 * TILE_SIZE), 537, enemiesSheet, GetSceneType(SceneKind::Underground)));
+    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((102 * TILE_SIZE), (11 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
+    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((108 * TILE_SIZE), (10 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
+    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((114 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
     goombas.push_back(std::make_unique<Goomba>((134 * TILE_SIZE), (10 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
     goombas.push_back(std::make_unique<Goomba>((135 * TILE_SIZE), (9 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
 
@@ -808,6 +823,7 @@ void LoadLevel12Subarea(
     std::vector<std::unique_ptr<Block>>& blocks,
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
+    std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
@@ -821,6 +837,7 @@ void LoadLevel12Subarea(
     const SceneType& scene = GetSceneType(SceneKind::Underground);
     (void)goombas;
     (void)koopas;
+    (void)piranhaPlants;
     (void)levelProps;
     (void)enemiesSheet;
     (void)tileSize;
@@ -940,6 +957,7 @@ void LoadLevel12Final(
     std::vector<std::unique_ptr<Block>>& blocks,
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
+    std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
@@ -953,6 +971,7 @@ void LoadLevel12Final(
     const SceneType& scene = GetSceneType(SceneKind::Underground);
     (void)goombas;
     (void)koopas;
+    (void)piranhaPlants;
     (void)levelProps;
     (void)enemiesSheet;
     (void)tileSize;

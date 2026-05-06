@@ -11,6 +11,7 @@
 #include "koopa.h"
 #include "levelData.h"
 #include "mario.h"
+#include "piranhaPlant.h"
 #include "scorepopup.h"
 
 struct LevelLoaderResources {
@@ -27,6 +28,7 @@ public:
     std::vector<std::unique_ptr<Block>> blocks;
     std::vector<std::unique_ptr<Goomba>> goombas;
     std::vector<std::unique_ptr<Koopa>> koopas;
+    std::vector<std::unique_ptr<PiranhaPlant>> piranhaPlants;
     std::vector<Coin> coins;
     std::vector<Rectangle> collisionObjects;
     std::vector<BackgroundProp> levelProps;

@@ -13,6 +13,7 @@
 #include "fireball.h"
 #include "goomba.h"
 #include "koopa.h"
+#include "piranhaPlant.h"
 #include "levelLoader.h"
 #include "scoreboard.h"
 #include "castleFlagpole.h"
@@ -384,6 +385,18 @@ int main() {
                     else ++it;
                 }
 
+                for (auto it = levelLoader.piranhaPlants.begin(); it != levelLoader.piranhaPlants.end(); ) {
+                    if (!MarioObj.getIsTransforming() && !MarioObj.getIsFireTransforming()) {
+                        (*it)->update(MarioObj, isDead, deathTimer, camera.target.x);
+                    }
+                    if ((*it)->justDefeated()) {
+                        scoreboard.addScore(100);
+                        scorePopups.spawn(100, { (*it)->getPos().x, (*it)->getPos().y - 10.0f });
+                    }
+                    if ((*it)->shouldRemove()) it = levelLoader.piranhaPlants.erase(it);
+                    else ++it;
+                }
+
                 for (auto& koopa : levelLoader.koopas) {
                     if (!koopa->isMovingShell()) continue;
 
@@ -432,6 +445,16 @@ int main() {
                             if (koopa->justDefeated()) {
                                 scoreboard.addScore(100);
                                 scorePopups.spawn(100, { koopa->getPos().x, koopa->getPos().y - 10.0f });
+                            }
+                            fireball->destroy();
+                        }
+                    }
+                    for (auto& plant : levelLoader.piranhaPlants) {
+                        if (CheckCollisionRecs(fireball->returnRec(), plant->returnRec())) {
+                            plant->defeat();
+                            if (plant->justDefeated()) {
+                                scoreboard.addScore(100);
+                                scorePopups.spawn(100, { plant->getPos().x, plant->getPos().y - 10.0f });
                             }
                             fireball->destroy();
                         }
@@ -523,6 +546,7 @@ int main() {
                     if (drawMarioBehindPipe) {
                         MarioObj.draw();
                     }
+                    for (auto& plant : levelLoader.piranhaPlants) plant->draw();
                     for (auto& block : levelLoader.blocks) block->draw();
                     for (auto& coin : levelLoader.coins) coin.draw();
                     for (auto& mush : activeMushrooms) mush->draw();

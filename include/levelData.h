@@ -12,6 +12,7 @@
 #include "goomba.h"
 #include "koopa.h"
 #include "mushroom.h"
+#include "piranhaPlant.h"
 #include "sceneType.h"
 
 using LevelAreaId = std::string;
@@ -29,6 +30,7 @@ using LevelLoadFunction = void (*)(
     std::vector<std::unique_ptr<Block>>& blocks,
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
+    std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
     std::unique_ptr<CastleFlagpole>& castleFlagpole,
