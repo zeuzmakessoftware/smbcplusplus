@@ -445,7 +445,7 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sc
                       << ", " << Expr(obj.y) << ", enemiesSheet, " << sceneExpr << "));\n";
         } else if (obj.type == ObjectType::Coin) {
             std::cout << "coins.emplace_back((float)" << Expr(obj.x)
-                      << ", (float)" << Expr(obj.y) << ", mushroomSheet);\n";
+                      << ", (float)" << Expr(obj.y) << ", spriteSheet, " << sceneExpr << ");\n";
         }
     }
     std::cout << "\n";
