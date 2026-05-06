@@ -12,6 +12,7 @@ private:
     float animTimer = 0.0f;
     int frame = 0;
     bool collected = false;
+    int frameDirection = 1;
 
 public:
     Coin(float x, float y, Texture2D sprites, const SceneType& scene = GetSceneType(SceneKind::Overworld));

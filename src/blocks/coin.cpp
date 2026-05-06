@@ -9,9 +9,15 @@ Rectangle Coin::returnRec() const {
 
 bool Coin::update(Rectangle marioRec) {
     animTimer += GetFrameTime();
-    if (animTimer >= 0.08f) {
+    
+    if (animTimer >= 0.30f) {
         animTimer = 0.0f;
-        frame = (frame + 1) % 3;
+        
+        frame += frameDirection;
+
+        if (frame >= 2 || frame <= 0) {
+            frameDirection *= -1;
+        }
     }
 
     if (!collected && CheckCollisionRecs(marioRec, returnRec())) {
