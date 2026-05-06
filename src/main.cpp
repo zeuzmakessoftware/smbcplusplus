@@ -45,6 +45,7 @@ int main() {
     
     Image img1 = LoadImage("assets/images/52571.png");
     ImageColorReplace(&img1, (Color){148, 148, 255, 255}, BLANK);
+    ImageColorReplace(&img4, (Color){0, 41, 140, 255}, BLANK);
     Texture2D spriteSheet = LoadTextureFromImage(img1);
     UnloadImage(img1);
 
