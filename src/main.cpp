@@ -327,6 +327,15 @@ int main() {
                             auto newFlower = pBlock->takeFireFlower();
                             if (newFlower) activeFireFlowers.push_back(std::move(newFlower));
                         }
+                        auto* coinBrick = dynamic_cast<CoinBrickBlock*>(it->get());
+                        if (coinBrick) {
+                            if (bumped) {
+                                scoreboard.addCoin();
+                            }
+                            if (coinBrick->justFinishedCoinAnimation()) {
+                                scorePopups.spawn(200, { coinBrick->returnRec().x, coinBrick->returnRec().y - 8.0f });
+                            }
+                        }
                         auto* starBlock = dynamic_cast<StarBrickBlock*>(it->get());
                         if (starBlock) {
                             auto newStar = starBlock->takeStar();

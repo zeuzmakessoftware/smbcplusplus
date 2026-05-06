@@ -266,7 +266,7 @@ static void DrawProp(const LevelObject& obj, Texture2D spriteSheet) {
 
 static Rectangle BlockSourceFor(const BlockDefinition& block, const SceneType& scene) {
     std::string className = block.className;
-    if (className == "BrickBlock" || className == "StarBrickBlock") return scene.brickBlock;
+    if (className == "BrickBlock" || className == "StarBrickBlock" || className == "CoinBrickBlock") return scene.brickBlock;
     if (className == "EmptyBlock") return scene.emptyBlock;
     if (className == "ShinyBlock") return scene.solidBlock;
     return block.source;
@@ -458,8 +458,9 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sc
                           << sceneExpr << "\n));\n";
                 break;
             case ObjectType::Block:
-                if (std::string(BlockDefinitionFor(obj).className) == "StarBrickBlock") {
-                    std::cout << "blocks.push_back(std::make_unique<StarBrickBlock>(" << Expr(obj.x)
+                if (std::string(BlockDefinitionFor(obj).className) == "StarBrickBlock" ||
+                    std::string(BlockDefinitionFor(obj).className) == "CoinBrickBlock") {
+                    std::cout << "blocks.push_back(std::make_unique<" << BlockDefinitionFor(obj).className << ">(" << Expr(obj.x)
                               << ", " << Expr(obj.y) << ", spriteSheet, mushroomSheet, "
                               << sceneExpr << "));\n";
                 } else {
