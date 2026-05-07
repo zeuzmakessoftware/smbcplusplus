@@ -25,6 +25,7 @@ enum class ObjectType {
     WarpPipe,
     PipeWall,
     Lift,
+    PiranhaPlant,
     CastleScenery,
     FlagPole
 };
@@ -49,6 +50,8 @@ struct LevelObject {
     EditorLiftMovement liftMovement = EditorLiftMovement::VerticalWrap;
     bool liftStartsPositive = false;
     int liftSpeed = 72;
+    int liftMinTravel = -32;
+    int liftMaxTravel = 680;
 };
 
 struct PaletteItem {
@@ -90,6 +93,7 @@ static const char* TypeName(ObjectType type) {
         case ObjectType::WarpPipe: return "Warp Pipe";
         case ObjectType::PipeWall: return "Pipe Wall";
         case ObjectType::Lift: return "Lift";
+        case ObjectType::PiranhaPlant: return "Piranha Plant";
         case ObjectType::CastleScenery: return "Castle";
         case ObjectType::FlagPole: return "Flag Pole";
     }
@@ -226,11 +230,9 @@ static Rectangle ObjectBounds(const LevelObject& obj) {
     if (obj.type == ObjectType::Ground) return {(float)obj.x, (float)obj.y, (float)obj.w, (float)obj.h};
     if (obj.type == ObjectType::Lift) {
         if (obj.liftMovement == EditorLiftMovement::HorizontalBounce) {
-            return {(float)obj.x, (float)obj.y, (float)(obj.w + obj.h), 21.0f};
+            return {(float)obj.liftMinTravel, (float)obj.y, (float)(obj.liftMaxTravel - obj.liftMinTravel + obj.w), 21.0f};
         }
-        int topY = obj.liftMovement == EditorLiftMovement::VerticalWrap ? -32 : obj.y - obj.h / 2;
-        int bottomY = obj.liftMovement == EditorLiftMovement::VerticalWrap ? 680 : obj.y + obj.h / 2;
-        return {(float)obj.x, (float)topY, (float)obj.w, (float)(bottomY - topY + 21)};
+        return {(float)obj.x, (float)obj.liftMinTravel, (float)obj.w, (float)(obj.liftMaxTravel - obj.liftMinTravel + 21)};
     }
     if (obj.type == ObjectType::Pipe || obj.type == ObjectType::WarpPipe) {
         return {(float)obj.x, (float)obj.y, (float)(obj.pipeWide * TILE_SIZE), (float)(obj.pipeHigh * TILE_SIZE)};
@@ -242,6 +244,7 @@ static Rectangle ObjectBounds(const LevelObject& obj) {
         return {(float)obj.x, (float)obj.y, (float)(TILE_SIZE * 5), (float)(TILE_SIZE * 5)};
     }
     if (obj.type == ObjectType::Koopa) return {(float)obj.x, (float)obj.y, (float)TILE_SIZE, (float)(TILE_SIZE * 1.5f)};
+    if (obj.type == ObjectType::PiranhaPlant) return {(float)obj.x, (float)(obj.y - 63), (float)obj.w, 63.0f};
     if (obj.type == ObjectType::FlagPole) return {(float)obj.x, (float)obj.y - TILE_SIZE * 11.0f, (float)(TILE_SIZE * 9), (float)(TILE_SIZE * 11)};
     return {(float)obj.x, (float)obj.y, (float)TILE_SIZE, (float)TILE_SIZE};
 }
@@ -270,6 +273,9 @@ static int SnapYForType(ObjectType type, float value) {
     if (type == ObjectType::Koopa) {
         return SnapWithOffset(value, TILE_SIZE, -9);
     }
+    if (type == ObjectType::PiranhaPlant) {
+        return SnapWithOffset(value, TILE_SIZE, BLOCK_GRID_OFFSET_Y);
+    }
     if (type == ObjectType::Block || type == ObjectType::CoinBlock ||
         type == ObjectType::MushroomBlock || type == ObjectType::FireFlowerBlock ||
         type == ObjectType::OneUpBlock || type == ObjectType::Pipe ||
@@ -289,7 +295,18 @@ static void SnapObject(LevelObject& obj) {
     }
     if (obj.type == ObjectType::Lift) {
         obj.w = std::max(TILE_SIZE, Snap(obj.w, TILE_SIZE));
-        obj.h = std::max(TILE_SIZE, Snap(obj.h, TILE_SIZE));
+        if (obj.liftMovement == EditorLiftMovement::HorizontalBounce) {
+            obj.liftMinTravel = std::min(obj.liftMinTravel, obj.x);
+            obj.liftMaxTravel = std::max(obj.liftMaxTravel, obj.x);
+            obj.h = std::max(TILE_SIZE, Snap(obj.liftMaxTravel - obj.liftMinTravel, TILE_SIZE));
+        } else {
+            obj.liftMinTravel = std::min(obj.liftMinTravel, obj.y);
+            obj.liftMaxTravel = std::max(obj.liftMaxTravel, obj.y);
+            obj.h = std::max(TILE_SIZE, Snap(obj.liftMaxTravel - obj.liftMinTravel, TILE_SIZE));
+        }
+    }
+    if (obj.type == ObjectType::PiranhaPlant) {
+        obj.w = std::max(TILE_SIZE, Snap(obj.w, TILE_SIZE));
     }
     if (obj.type == ObjectType::Pipe || obj.type == ObjectType::WarpPipe || obj.type == ObjectType::PipeWall) {
         obj.pipeWide = std::max(1, obj.pipeWide);
@@ -404,17 +421,25 @@ static void DrawLift(const LevelObject& obj, Texture2D mushroomSheet) {
     DrawSpritePart(mushroomSheet, {116.0f, 64.0f, 48.0f, 8.0f}, {(float)obj.x, (float)obj.y, (float)obj.w, 21.0f});
     Rectangle lift = {(float)obj.x, (float)obj.y, (float)obj.w, 21.0f};
     if (obj.liftMovement == EditorLiftMovement::HorizontalBounce) {
-        DrawLineEx({(float)obj.x, obj.y + 31.0f}, {(float)(obj.x + obj.h), obj.y + 31.0f}, 3.0f, Fade(YELLOW, 0.7f));
-        DrawTriangle({(float)(obj.x + obj.h), obj.y + 31.0f}, {(float)(obj.x + obj.h - 10), obj.y + 25.0f}, {(float)(obj.x + obj.h - 10), obj.y + 37.0f}, YELLOW);
+        DrawLineEx({(float)obj.liftMinTravel, obj.y + 31.0f}, {(float)obj.liftMaxTravel, obj.y + 31.0f}, 3.0f, Fade(YELLOW, 0.7f));
+        DrawTriangle({obj.liftStartsPositive ? (float)obj.liftMaxTravel : (float)obj.liftMinTravel, obj.y + 31.0f},
+            {obj.liftStartsPositive ? (float)obj.liftMaxTravel - 10.0f : (float)obj.liftMinTravel + 10.0f, obj.y + 25.0f},
+            {obj.liftStartsPositive ? (float)obj.liftMaxTravel - 10.0f : (float)obj.liftMinTravel + 10.0f, obj.y + 37.0f}, YELLOW);
     } else {
-        int topY = obj.liftMovement == EditorLiftMovement::VerticalWrap ? -32 : obj.y - obj.h / 2;
-        int bottomY = obj.liftMovement == EditorLiftMovement::VerticalWrap ? 680 : obj.y + obj.h / 2;
-        DrawLineEx({obj.x - 10.0f, (float)topY}, {obj.x - 10.0f, (float)bottomY}, 3.0f, Fade(YELLOW, 0.7f));
-        DrawTriangle({obj.x - 10.0f, obj.liftStartsPositive ? (float)bottomY : (float)topY},
-            {obj.x - 16.0f, obj.liftStartsPositive ? (float)bottomY - 10.0f : (float)topY + 10.0f},
-            {obj.x - 4.0f, obj.liftStartsPositive ? (float)bottomY - 10.0f : (float)topY + 10.0f}, YELLOW);
+        DrawLineEx({obj.x - 10.0f, (float)obj.liftMinTravel}, {obj.x - 10.0f, (float)obj.liftMaxTravel}, 3.0f, Fade(YELLOW, 0.7f));
+        DrawTriangle({obj.x - 10.0f, obj.liftStartsPositive ? (float)obj.liftMaxTravel : (float)obj.liftMinTravel},
+            {obj.x - 16.0f, obj.liftStartsPositive ? (float)obj.liftMaxTravel - 10.0f : (float)obj.liftMinTravel + 10.0f},
+            {obj.x - 4.0f, obj.liftStartsPositive ? (float)obj.liftMaxTravel - 10.0f : (float)obj.liftMinTravel + 10.0f}, YELLOW);
     }
     DrawRectangleLinesEx(lift, 1.0f, Fade(BLACK, 0.65f));
+}
+
+static void DrawPiranhaPlant(const LevelObject& obj, Texture2D enemiesSheet) {
+    const float plantW = 42.0f;
+    const float plantH = 63.0f;
+    const float plantX = obj.x + (obj.w - plantW) * 0.5f;
+    DrawSpritePart(enemiesSheet, {0.0f, 138.0f, 16.0f, 24.0f}, {plantX, (float)obj.y - plantH, plantW, plantH});
+    DrawRectangleLinesEx({(float)obj.x, (float)obj.y - plantH, (float)obj.w, plantH}, 1.0f, Fade(RED, 0.7f));
 }
 
 static void DrawObject(const LevelObject& obj, Texture2D spriteSheet, Texture2D mushroomSheet, Texture2D enemiesSheet, const SceneType& scene) {
@@ -466,6 +491,9 @@ static void DrawObject(const LevelObject& obj, Texture2D spriteSheet, Texture2D 
         case ObjectType::Lift:
             DrawLift(obj, mushroomSheet);
             break;
+        case ObjectType::PiranhaPlant:
+            DrawPiranhaPlant(obj, enemiesSheet);
+            break;
         case ObjectType::CastleScenery:
             DrawCastleScenery(obj, spriteSheet);
             break;
@@ -508,6 +536,9 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sc
         } else if (obj.type == ObjectType::Koopa) {
             std::cout << "koopas.push_back(std::make_unique<Koopa>(" << Expr(obj.x)
                       << ", " << Expr(obj.y) << ", enemiesSheet, " << sceneExpr << "));\n";
+        } else if (obj.type == ObjectType::PiranhaPlant) {
+            std::cout << "piranhaPlants.push_back(std::make_unique<PiranhaPlant>(" << Expr(obj.x)
+                      << ", " << Expr(obj.y) << ", " << Expr(obj.w) << ", enemiesSheet));\n";
         } else if (obj.type == ObjectType::Coin) {
             std::cout << "coins.emplace_back((float)" << Expr(obj.x)
                       << ", (float)" << Expr(obj.y) << ", spriteSheet, " << sceneExpr << ");\n";
@@ -521,14 +552,11 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sc
                   << Expr(obj.x) << ", " << Expr(obj.y) << ", " << (float)obj.w
                   << "f, mushroomSheet, ";
         if (obj.liftMovement == EditorLiftMovement::HorizontalBounce) {
-            std::cout << Expr(obj.x) << ", " << Expr(obj.x + obj.h) << ", "
-                      << (float)obj.liftSpeed << "f, " << (obj.liftStartsPositive ? "true" : "false") << "));\n";
-        } else if (obj.liftMovement == EditorLiftMovement::VerticalBounce) {
-            std::cout << Expr(obj.y - obj.h / 2) << ", " << Expr(obj.y + obj.h / 2) << ", "
+            std::cout << Expr(obj.liftMinTravel) << ", " << Expr(obj.liftMaxTravel) << ", "
                       << (float)obj.liftSpeed << "f, " << (obj.liftStartsPositive ? "true" : "false") << "));\n";
         } else {
-            std::cout << "-32.0f, 680.0f, " << (float)obj.liftSpeed << "f, "
-                      << (obj.liftStartsPositive ? "true" : "false") << "));\n";
+            std::cout << Expr(obj.liftMinTravel) << ", " << Expr(obj.liftMaxTravel) << ", "
+                      << (float)obj.liftSpeed << "f, " << (obj.liftStartsPositive ? "true" : "false") << "));\n";
         }
     }
     std::cout << "\n";
@@ -619,13 +647,25 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sc
 
 static int ReadExpr(const std::string& text) {
     std::smatch match;
-    if (std::regex_search(text, match, std::regex(R"((\d+)\s*\*\s*TILE_SIZE\)\s*\+\s*(\d+))"))) {
-        return std::stoi(match[1]) * TILE_SIZE + std::stoi(match[2]);
+    if (std::regex_search(text, match, std::regex(R"((-?\d+(?:\.\d+)?)f?\s*-\s*\(?\s*TILE_SIZE\s*\*\s*(-?\d+(?:\.\d+)?)f?\s*\)?)"))) {
+        return (int)std::round(std::stof(match[1]) - TILE_SIZE * std::stof(match[2]));
     }
-    if (std::regex_search(text, match, std::regex(R"((\d+)\s*\*\s*TILE_SIZE)"))) {
-        return std::stoi(match[1]) * TILE_SIZE;
+    if (std::regex_search(text, match, std::regex(R"((-?\d+(?:\.\d+)?)f?\s*-\s*\(?\s*(-?\d+(?:\.\d+)?)f?\s*\*\s*TILE_SIZE\s*\)?)"))) {
+        return (int)std::round(std::stof(match[1]) - std::stof(match[2]) * TILE_SIZE);
     }
-    if (std::regex_search(text, match, std::regex(R"(-?\d+)"))) return std::stoi(match[0]);
+    if (std::regex_search(text, match, std::regex(R"((-?\d+(?:\.\d+)?)f?\s*\+\s*\(?\s*TILE_SIZE\s*\*\s*(-?\d+(?:\.\d+)?)f?\s*\)?)"))) {
+        return (int)std::round(std::stof(match[1]) + TILE_SIZE * std::stof(match[2]));
+    }
+    if (std::regex_search(text, match, std::regex(R"((-?\d+(?:\.\d+)?)f?\s*\+\s*\(?\s*(-?\d+(?:\.\d+)?)f?\s*\*\s*TILE_SIZE\s*\)?)"))) {
+        return (int)std::round(std::stof(match[1]) + std::stof(match[2]) * TILE_SIZE);
+    }
+    if (std::regex_search(text, match, std::regex(R"((-?\d+(?:\.\d+)?)f?\s*\*\s*TILE_SIZE\)?\s*\+\s*(-?\d+(?:\.\d+)?)f?)"))) {
+        return (int)std::round(std::stof(match[1]) * TILE_SIZE + std::stof(match[2]));
+    }
+    if (std::regex_search(text, match, std::regex(R"((-?\d+(?:\.\d+)?)f?\s*\*\s*TILE_SIZE)"))) {
+        return (int)std::round(std::stof(match[1]) * TILE_SIZE);
+    }
+    if (std::regex_search(text, match, std::regex(R"(-?\d+(?:\.\d+)?)"))) return (int)std::round(std::stof(match[0]));
     return 0;
 }
 
@@ -731,13 +771,22 @@ static void ParseLevelCode(const std::string& code, std::vector<LevelObject>& ob
         } else if (statement.find("Koopa") != std::string::npos) {
             std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, "Koopa"));
             if (args.size() >= 2) objects.push_back({ObjectType::Koopa, ReadExpr(args[0]), ReadExpr(args[1])});
+        } else if (statement.find("PiranhaPlant") != std::string::npos) {
+            std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, "PiranhaPlant"));
+            if (args.size() >= 3) {
+                LevelObject obj = {ObjectType::PiranhaPlant, ReadExpr(args[0]), ReadExpr(args[1])};
+                obj.w = std::max(TILE_SIZE, ReadExpr(args[2]));
+                objects.push_back(obj);
+            }
         } else if (statement.find("Lift::") != std::string::npos) {
             EditorLiftMovement movement = ReadLiftMovement(statement);
             std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, LiftFactoryName(movement)));
             if (args.size() >= 8) {
                 LevelObject obj = {ObjectType::Lift, ReadExpr(args[0]), ReadExpr(args[1])};
                 obj.w = std::max(TILE_SIZE, ReadExpr(args[2]));
-                obj.h = std::max(TILE_SIZE, std::abs(ReadExpr(args[5]) - ReadExpr(args[4])));
+                obj.liftMinTravel = std::min(ReadExpr(args[4]), ReadExpr(args[5]));
+                obj.liftMaxTravel = std::max(ReadExpr(args[4]), ReadExpr(args[5]));
+                obj.h = std::max(TILE_SIZE, obj.liftMaxTravel - obj.liftMinTravel);
                 obj.liftMovement = movement;
                 obj.liftSpeed = ReadExpr(args[6]);
                 obj.liftStartsPositive = args[7].find("true") != std::string::npos;
@@ -857,6 +906,19 @@ static LevelObject MakeAddObject(ObjectType addType, int addBlockIndex, int addP
         obj.liftMovement = addLiftMovement;
         obj.liftStartsPositive = addLiftStartsPositive;
         obj.liftSpeed = addLiftMovement == EditorLiftMovement::HorizontalBounce ? 68 : 72;
+        if (addLiftMovement == EditorLiftMovement::HorizontalBounce) {
+            obj.liftMinTravel = x;
+            obj.liftMaxTravel = x + obj.h;
+        } else if (addLiftMovement == EditorLiftMovement::VerticalBounce) {
+            obj.liftMinTravel = y - obj.h / 2;
+            obj.liftMaxTravel = y + obj.h / 2;
+        } else {
+            obj.liftMinTravel = -32;
+            obj.liftMaxTravel = 680;
+        }
+    }
+    if (addType == ObjectType::PiranhaPlant) {
+        obj.w = TILE_SIZE * 2;
     }
     return obj;
 }
@@ -876,6 +938,7 @@ static std::vector<PaletteItem> BuildPalette() {
 
     items.push_back({{ObjectType::Goomba, 0, 0}, "Goomba", "Enemies"});
     items.push_back({{ObjectType::Koopa, 0, 0}, "Koopa", "Enemies"});
+    items.push_back({{ObjectType::PiranhaPlant, 0, 0, TILE_SIZE * 2, TILE_SIZE}, "Piranha", "Enemies"});
 
     LevelObject pipe = {ObjectType::Pipe, 0, 0};
     pipe.pipeWide = 2;
@@ -992,6 +1055,9 @@ static void DrawPalettePreview(const LevelObject& item, Rectangle box, Texture2D
             break;
         case ObjectType::Koopa:
             DrawSpritePart(enemiesSheet, scene.koopaFrames[0], {cx - 15.0f, top - 4.0f, 30.0f, 45.0f});
+            break;
+        case ObjectType::PiranhaPlant:
+            DrawSpritePart(enemiesSheet, {0.0f, 138.0f, 16.0f, 24.0f}, {cx - 14.0f, top - 7.0f, 28.0f, 42.0f});
             break;
         case ObjectType::Pipe:
         case ObjectType::WarpPipe:
@@ -1340,11 +1406,30 @@ int main() {
                     if (IsKeyPressed(KEY_S)) obj.pipeHigh++;
                 }
                 if (obj.type == ObjectType::Lift) {
-                    if (IsKeyPressed(KEY_W)) obj.h = std::max(TILE_SIZE, obj.h - TILE_SIZE);
-                    if (IsKeyPressed(KEY_S)) obj.h += TILE_SIZE;
+                    if (IsKeyPressed(KEY_W)) {
+                        obj.h = std::max(TILE_SIZE, obj.h - TILE_SIZE);
+                        obj.liftMaxTravel = obj.liftMinTravel + obj.h;
+                    }
+                    if (IsKeyPressed(KEY_S)) {
+                        obj.h += TILE_SIZE;
+                        obj.liftMaxTravel = obj.liftMinTravel + obj.h;
+                    }
                     if (IsKeyPressed(KEY_A)) obj.w = std::max(TILE_SIZE, obj.w - TILE_SIZE);
                     if (IsKeyPressed(KEY_D)) obj.w += TILE_SIZE;
-                    if (IsKeyPressed(KEY_R)) obj.liftMovement = NextLiftMovement(obj.liftMovement);
+                    if (IsKeyPressed(KEY_R)) {
+                        obj.liftMovement = NextLiftMovement(obj.liftMovement);
+                        if (obj.liftMovement == EditorLiftMovement::HorizontalBounce) {
+                            obj.liftMinTravel = obj.x;
+                            obj.liftMaxTravel = obj.x + obj.h;
+                        } else if (obj.liftMovement == EditorLiftMovement::VerticalBounce) {
+                            obj.liftMinTravel = obj.y - obj.h / 2;
+                            obj.liftMaxTravel = obj.y + obj.h / 2;
+                        } else {
+                            obj.liftMinTravel = -32;
+                            obj.liftMaxTravel = 680;
+                            obj.h = obj.liftMaxTravel - obj.liftMinTravel;
+                        }
+                    }
                     if (IsKeyPressed(KEY_T)) obj.liftStartsPositive = !obj.liftStartsPositive;
                 }
             }
