@@ -713,6 +713,9 @@ void LoadLevel12UndergroundStart(
         LevelAreaIds::Level12Subarea, (Vector2){ (2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f },
         GetSceneType(SceneKind::Underground)
     ));
+    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((102 * TILE_SIZE), (11 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
+    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((108 * TILE_SIZE), (10 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
+    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((114 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
     blocks.push_back(std::make_unique<PipeBlock>((108 * TILE_SIZE), (10 * TILE_SIZE) + 12, 2, 4, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<PipeBlock>((114 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2, 2, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<DrawTiledRect>(
