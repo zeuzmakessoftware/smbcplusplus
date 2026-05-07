@@ -415,12 +415,10 @@ void LoadLevel12UndergroundStart(
 
     castleFlagpole = std::make_unique<CastleFlagpole>(5000.0f, 600.0f, spriteSheet, mushroomSheet, marioSheet);
 
-    lifts.push_back(Lift::VerticalWrap(141.0f * TILE_SIZE, 650.0f, 132.0f, mushroomSheet, -32.0f, 680.0f, 72.0f, false));
-    lifts.push_back(Lift::VerticalWrap(146.0f * TILE_SIZE, -20.0f, 132.0f, mushroomSheet, -32.0f, 680.0f, 72.0f, true));
-    lifts.push_back(Lift::VerticalBounce(152.0f * TILE_SIZE, 430.0f, 132.0f, mushroomSheet, 250.0f, 500.0f, 64.0f, true));
-    lifts.push_back(Lift::HorizontalBounce(157.0f * TILE_SIZE, 390.0f, 132.0f, mushroomSheet, 157.0f * TILE_SIZE, 163.0f * TILE_SIZE, 68.0f, true));
-    lifts.push_back(Lift::VerticalWrap(164.0f * TILE_SIZE, 650.0f, 84.0f, mushroomSheet, -32.0f, 680.0f, 80.0f, false));
-    lifts.push_back(Lift::VerticalWrap(166.0f * TILE_SIZE, -20.0f, 84.0f, mushroomSheet, -32.0f, 680.0f, 80.0f, true));
+    lifts.push_back(Lift::VerticalWrap(139.0f * TILE_SIZE, 650.0f, 132.0f, mushroomSheet, TILE_SIZE, 680.0f, 72.0f, true));
+    lifts.push_back(Lift::VerticalWrap(139.0f * TILE_SIZE, 650.0f - (TILE_SIZE * 7), 132.0f, mushroomSheet, TILE_SIZE, 680.0f, 72.0f, true));
+    lifts.push_back(Lift::VerticalWrap(155.0f * TILE_SIZE, 650.0f, 132.0f, mushroomSheet, TILE_SIZE, 680.0f, 72.0f, false));
+    lifts.push_back(Lift::VerticalWrap(155.0f * TILE_SIZE, 650.0f - (TILE_SIZE * 7), 132.0f, mushroomSheet, TILE_SIZE, 680.0f, 72.0f, false));
 
     goombas.push_back(std::make_unique<Goomba>((16 * TILE_SIZE), (13 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
     goombas.push_back(std::make_unique<Goomba>((17 * TILE_SIZE), (12 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
@@ -433,27 +431,30 @@ void LoadLevel12UndergroundStart(
     coins.emplace_back((float)(44 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet), GetSceneType(SceneKind::Underground);
     koopas.push_back(std::make_unique<Koopa>((44 * TILE_SIZE), 537, enemiesSheet, GetSceneType(SceneKind::Underground)));
     koopas.push_back(std::make_unique<Koopa>((46 * TILE_SIZE), 537, enemiesSheet, GetSceneType(SceneKind::Underground)));
-    coins.emplace_back((float)(58 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet), GetSceneType(SceneKind::Underground);
-    coins.emplace_back((float)(59 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet), GetSceneType(SceneKind::Underground);
-    coins.emplace_back((float)(60 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet), GetSceneType(SceneKind::Underground);
-    coins.emplace_back((float)(61 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet), GetSceneType(SceneKind::Underground);
-    coins.emplace_back((float)(68 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet), GetSceneType(SceneKind::Underground);
-    coins.emplace_back((float)(83 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet), GetSceneType(SceneKind::Underground);
-    coins.emplace_back((float)(84 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet), GetSceneType(SceneKind::Underground);
-    coins.emplace_back((float)(85 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet), GetSceneType(SceneKind::Underground);
-    coins.emplace_back((float)(86 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet), GetSceneType(SceneKind::Underground);
-    coins.emplace_back((float)(87 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet), GetSceneType(SceneKind::Underground);
-    coins.emplace_back((float)(88 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet), GetSceneType(SceneKind::Underground);
+    coins.emplace_back((float)(58 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(59 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(60 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(61 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(68 * TILE_SIZE), (float)(9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(83 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(84 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(85 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(86 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(87 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
+    coins.emplace_back((float)(88 * TILE_SIZE), (float)(6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground));
     goombas.push_back(std::make_unique<Goomba>((101 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
     goombas.push_back(std::make_unique<Goomba>((99 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
     goombas.push_back(std::make_unique<Goomba>((97 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
     goombas.push_back(std::make_unique<Goomba>((112 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
     koopas.push_back(std::make_unique<Koopa>((146 * TILE_SIZE), 537, enemiesSheet, GetSceneType(SceneKind::Underground)));
-    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((102 * TILE_SIZE), (11 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
-    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((108 * TILE_SIZE), (10 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
-    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((114 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
     goombas.push_back(std::make_unique<Goomba>((134 * TILE_SIZE), (10 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
     goombas.push_back(std::make_unique<Goomba>((135 * TILE_SIZE), (9 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
+    koopas.push_back(std::make_unique<Koopa>((59 * TILE_SIZE), 537, enemiesSheet, GetSceneType(SceneKind::Underground)));
+    goombas.push_back(std::make_unique<Goomba>((62 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
+    goombas.push_back(std::make_unique<Goomba>((64 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
+    goombas.push_back(std::make_unique<Goomba>((73 * TILE_SIZE), (6 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
+    goombas.push_back(std::make_unique<Goomba>((76 * TILE_SIZE), (10 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
+    goombas.push_back(std::make_unique<Goomba>((78 * TILE_SIZE), (10 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Underground)));
 
     blocks.push_back(std::make_unique<DrawTiledRect>(
         0, 600, 3344, 80, spriteSheet, GetSceneType(SceneKind::Underground).groundBlock, TILE_SIZE, TILE_SIZE, GetSceneType(SceneKind::Underground)
@@ -480,7 +481,7 @@ void LoadLevel12UndergroundStart(
     blocks.push_back(std::make_unique<ShinyBlock>((27 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<ShinyBlock>((27 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<ShinyBlock>((27 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
-    blocks.push_back(std::make_unique<CoinBrickBlock>((29 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((29 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((0 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
@@ -638,7 +639,7 @@ void LoadLevel12UndergroundStart(
     blocks.push_back(std::make_unique<BrickBlock>((69 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((69 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((69 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
-    blocks.push_back(std::make_unique<MushroomBrickBlock>((69 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, scene));
+    blocks.push_back(std::make_unique<BrickBlock>((69 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((72 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((72 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((72 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
@@ -647,7 +648,7 @@ void LoadLevel12UndergroundStart(
     blocks.push_back(std::make_unique<BrickBlock>((70 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((71 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((72 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
-    blocks.push_back(std::make_unique<CoinBrickBlock>((73 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, GetSceneType(SceneKind::Underground)));
+    blocks.push_back(std::make_unique<BrickBlock>((73 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((73 * TILE_SIZE), (3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((73 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((73 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
@@ -784,7 +785,7 @@ void LoadLevel12UndergroundStart(
     blocks.push_back(std::make_unique<BrickBlock>((147 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((148 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<BrickBlock>((149 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
-    blocks.push_back(std::make_unique<MushroomBrickBlock>((150 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, scene));
+    blocks.push_back(std::make_unique<BrickBlock>((150 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Underground)));
     blocks.push_back(std::make_unique<DrawTiledRect>(
         6762, 600, 378, 84, spriteSheet, GetSceneType(SceneKind::Underground).groundBlock, TILE_SIZE, TILE_SIZE, GetSceneType(SceneKind::Underground)
     ));

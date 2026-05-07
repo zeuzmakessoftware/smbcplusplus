@@ -4,6 +4,12 @@
 
 namespace {
 const Rectangle LiftSource = {116.0f, 64.0f, 48.0f, 8.0f};
+
+float WrapDistance(float distance, float span) {
+    if (span <= 0.0f) return 0.0f;
+    float wrapped = std::fmod(distance, span);
+    return wrapped < 0.0f ? wrapped + span : wrapped;
+}
 }
 
 Lift::Lift(
@@ -55,12 +61,13 @@ void Lift::update(Mario& mario, const std::vector<Rectangle>& solids, float came
     } else {
         pos.y += distance * direction;
         if (movement == LiftMovement::VerticalWrap) {
+            const float span = (maxTravel - minTravel) + height;
             if (direction > 0 && pos.y > maxTravel) {
-                pos.y = minTravel - height;
+                pos.y = (minTravel - height) + WrapDistance(pos.y - maxTravel, span);
                 wrapped = true;
             }
             if (direction < 0 && pos.y + height < minTravel) {
-                pos.y = maxTravel;
+                pos.y = maxTravel - WrapDistance(minTravel - (pos.y + height), span);
                 wrapped = true;
             }
         } else {

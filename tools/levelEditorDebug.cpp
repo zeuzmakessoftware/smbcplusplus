@@ -24,8 +24,15 @@ enum class ObjectType {
     Pipe,
     WarpPipe,
     PipeWall,
+    Lift,
     CastleScenery,
     FlagPole
+};
+
+enum class EditorLiftMovement {
+    VerticalWrap,
+    VerticalBounce,
+    HorizontalBounce
 };
 
 struct LevelObject {
@@ -39,6 +46,9 @@ struct LevelObject {
     int propIndex = 0;
     int blockIndex = 0;
     PipeOrientation pipeOrientation = PipeOrientation::Vertical;
+    EditorLiftMovement liftMovement = EditorLiftMovement::VerticalWrap;
+    bool liftStartsPositive = false;
+    int liftSpeed = 72;
 };
 
 struct PaletteItem {
@@ -79,6 +89,7 @@ static const char* TypeName(ObjectType type) {
         case ObjectType::Pipe: return "Pipe";
         case ObjectType::WarpPipe: return "Warp Pipe";
         case ObjectType::PipeWall: return "Pipe Wall";
+        case ObjectType::Lift: return "Lift";
         case ObjectType::CastleScenery: return "Castle";
         case ObjectType::FlagPole: return "Flag Pole";
     }
@@ -110,6 +121,21 @@ static PipeOrientation ReadPipeOrientation(const std::string& text) {
     return PipeOrientation::Vertical;
 }
 
+static std::string LiftFactoryName(EditorLiftMovement movement) {
+    switch (movement) {
+        case EditorLiftMovement::VerticalWrap: return "VerticalWrap";
+        case EditorLiftMovement::VerticalBounce: return "VerticalBounce";
+        case EditorLiftMovement::HorizontalBounce: return "HorizontalBounce";
+    }
+    return "VerticalWrap";
+}
+
+static EditorLiftMovement ReadLiftMovement(const std::string& text) {
+    if (text.find("HorizontalBounce") != std::string::npos) return EditorLiftMovement::HorizontalBounce;
+    if (text.find("VerticalBounce") != std::string::npos) return EditorLiftMovement::VerticalBounce;
+    return EditorLiftMovement::VerticalWrap;
+}
+
 static int SceneIndex(SceneKind kind) {
     for (int i = 0; i < SCENE_KIND_COUNT; i++) {
         if (SCENE_KINDS[i] == kind) return i;
@@ -136,6 +162,11 @@ static const char* ObjectName(const LevelObject& obj) {
         const std::vector<BlockDefinition>& blocks = GetBlockDefinitions();
         int index = std::max(0, std::min(obj.blockIndex, (int)blocks.size() - 1));
         return blocks[index].displayName;
+    }
+    if (obj.type == ObjectType::Lift) {
+        if (obj.liftMovement == EditorLiftMovement::HorizontalBounce) return "Horizontal Lift";
+        if (obj.liftMovement == EditorLiftMovement::VerticalBounce) return "Vertical Bounce Lift";
+        return obj.w < TILE_SIZE * 3 ? "Elevator Lift" : "Vertical Wrap Lift";
     }
     return TypeName(obj.type);
 }
@@ -193,6 +224,14 @@ static Rectangle ObjectBounds(const LevelObject& obj) {
         return {(float)obj.x, (float)obj.y, (float)(maxX * TILE_SIZE), (float)(maxY * TILE_SIZE)};
     }
     if (obj.type == ObjectType::Ground) return {(float)obj.x, (float)obj.y, (float)obj.w, (float)obj.h};
+    if (obj.type == ObjectType::Lift) {
+        if (obj.liftMovement == EditorLiftMovement::HorizontalBounce) {
+            return {(float)obj.x, (float)obj.y, (float)(obj.w + obj.h), 21.0f};
+        }
+        int topY = obj.liftMovement == EditorLiftMovement::VerticalWrap ? -32 : obj.y - obj.h / 2;
+        int bottomY = obj.liftMovement == EditorLiftMovement::VerticalWrap ? 680 : obj.y + obj.h / 2;
+        return {(float)obj.x, (float)topY, (float)obj.w, (float)(bottomY - topY + 21)};
+    }
     if (obj.type == ObjectType::Pipe || obj.type == ObjectType::WarpPipe) {
         return {(float)obj.x, (float)obj.y, (float)(obj.pipeWide * TILE_SIZE), (float)(obj.pipeHigh * TILE_SIZE)};
     }
@@ -234,7 +273,8 @@ static int SnapYForType(ObjectType type, float value) {
     if (type == ObjectType::Block || type == ObjectType::CoinBlock ||
         type == ObjectType::MushroomBlock || type == ObjectType::FireFlowerBlock ||
         type == ObjectType::OneUpBlock || type == ObjectType::Pipe ||
-        type == ObjectType::WarpPipe || type == ObjectType::PipeWall || type == ObjectType::Coin) {
+        type == ObjectType::WarpPipe || type == ObjectType::PipeWall || type == ObjectType::Coin ||
+        type == ObjectType::Lift) {
         return SnapWithOffset(value, TILE_SIZE, BLOCK_GRID_OFFSET_Y);
     }
     return SnapWithOffset(value, TILE_SIZE, OBJECT_GRID_OFFSET_Y);
@@ -244,6 +284,10 @@ static void SnapObject(LevelObject& obj) {
     obj.x = SnapXForType(obj.type, obj.x);
     obj.y = SnapYForType(obj.type, obj.y);
     if (obj.type == ObjectType::Ground) {
+        obj.w = std::max(TILE_SIZE, Snap(obj.w, TILE_SIZE));
+        obj.h = std::max(TILE_SIZE, Snap(obj.h, TILE_SIZE));
+    }
+    if (obj.type == ObjectType::Lift) {
         obj.w = std::max(TILE_SIZE, Snap(obj.w, TILE_SIZE));
         obj.h = std::max(TILE_SIZE, Snap(obj.h, TILE_SIZE));
     }
@@ -356,6 +400,23 @@ static void DrawCastleScenery(const LevelObject& obj, Texture2D spriteSheet) {
         {(float)obj.x, (float)obj.y, TILE_SIZE * 5.0f, TILE_SIZE * 5.0f});
 }
 
+static void DrawLift(const LevelObject& obj, Texture2D mushroomSheet) {
+    DrawSpritePart(mushroomSheet, {116.0f, 64.0f, 48.0f, 8.0f}, {(float)obj.x, (float)obj.y, (float)obj.w, 21.0f});
+    Rectangle lift = {(float)obj.x, (float)obj.y, (float)obj.w, 21.0f};
+    if (obj.liftMovement == EditorLiftMovement::HorizontalBounce) {
+        DrawLineEx({(float)obj.x, obj.y + 31.0f}, {(float)(obj.x + obj.h), obj.y + 31.0f}, 3.0f, Fade(YELLOW, 0.7f));
+        DrawTriangle({(float)(obj.x + obj.h), obj.y + 31.0f}, {(float)(obj.x + obj.h - 10), obj.y + 25.0f}, {(float)(obj.x + obj.h - 10), obj.y + 37.0f}, YELLOW);
+    } else {
+        int topY = obj.liftMovement == EditorLiftMovement::VerticalWrap ? -32 : obj.y - obj.h / 2;
+        int bottomY = obj.liftMovement == EditorLiftMovement::VerticalWrap ? 680 : obj.y + obj.h / 2;
+        DrawLineEx({obj.x - 10.0f, (float)topY}, {obj.x - 10.0f, (float)bottomY}, 3.0f, Fade(YELLOW, 0.7f));
+        DrawTriangle({obj.x - 10.0f, obj.liftStartsPositive ? (float)bottomY : (float)topY},
+            {obj.x - 16.0f, obj.liftStartsPositive ? (float)bottomY - 10.0f : (float)topY + 10.0f},
+            {obj.x - 4.0f, obj.liftStartsPositive ? (float)bottomY - 10.0f : (float)topY + 10.0f}, YELLOW);
+    }
+    DrawRectangleLinesEx(lift, 1.0f, Fade(BLACK, 0.65f));
+}
+
 static void DrawObject(const LevelObject& obj, Texture2D spriteSheet, Texture2D mushroomSheet, Texture2D enemiesSheet, const SceneType& scene) {
     switch (obj.type) {
         case ObjectType::BackgroundProp:
@@ -402,6 +463,9 @@ static void DrawObject(const LevelObject& obj, Texture2D spriteSheet, Texture2D 
         case ObjectType::PipeWall:
             DrawPipeWall(obj, spriteSheet);
             break;
+        case ObjectType::Lift:
+            DrawLift(obj, mushroomSheet);
+            break;
         case ObjectType::CastleScenery:
             DrawCastleScenery(obj, spriteSheet);
             break;
@@ -447,6 +511,24 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sc
         } else if (obj.type == ObjectType::Coin) {
             std::cout << "coins.emplace_back((float)" << Expr(obj.x)
                       << ", (float)" << Expr(obj.y) << ", spriteSheet, " << sceneExpr << ");\n";
+        }
+    }
+    std::cout << "\n";
+    for (const LevelObject& obj : objects) {
+        if (obj.type != ObjectType::Lift) continue;
+
+        std::cout << "lifts.push_back(Lift::" << LiftFactoryName(obj.liftMovement) << "("
+                  << Expr(obj.x) << ", " << Expr(obj.y) << ", " << (float)obj.w
+                  << "f, mushroomSheet, ";
+        if (obj.liftMovement == EditorLiftMovement::HorizontalBounce) {
+            std::cout << Expr(obj.x) << ", " << Expr(obj.x + obj.h) << ", "
+                      << (float)obj.liftSpeed << "f, " << (obj.liftStartsPositive ? "true" : "false") << "));\n";
+        } else if (obj.liftMovement == EditorLiftMovement::VerticalBounce) {
+            std::cout << Expr(obj.y - obj.h / 2) << ", " << Expr(obj.y + obj.h / 2) << ", "
+                      << (float)obj.liftSpeed << "f, " << (obj.liftStartsPositive ? "true" : "false") << "));\n";
+        } else {
+            std::cout << "-32.0f, 680.0f, " << (float)obj.liftSpeed << "f, "
+                      << (obj.liftStartsPositive ? "true" : "false") << "));\n";
         }
     }
     std::cout << "\n";
@@ -649,6 +731,18 @@ static void ParseLevelCode(const std::string& code, std::vector<LevelObject>& ob
         } else if (statement.find("Koopa") != std::string::npos) {
             std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, "Koopa"));
             if (args.size() >= 2) objects.push_back({ObjectType::Koopa, ReadExpr(args[0]), ReadExpr(args[1])});
+        } else if (statement.find("Lift::") != std::string::npos) {
+            EditorLiftMovement movement = ReadLiftMovement(statement);
+            std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, LiftFactoryName(movement)));
+            if (args.size() >= 8) {
+                LevelObject obj = {ObjectType::Lift, ReadExpr(args[0]), ReadExpr(args[1])};
+                obj.w = std::max(TILE_SIZE, ReadExpr(args[2]));
+                obj.h = std::max(TILE_SIZE, std::abs(ReadExpr(args[5]) - ReadExpr(args[4])));
+                obj.liftMovement = movement;
+                obj.liftSpeed = ReadExpr(args[6]);
+                obj.liftStartsPositive = args[7].find("true") != std::string::npos;
+                objects.push_back(obj);
+            }
         } else if (statement.find("DrawTiledRect") != std::string::npos) {
             std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, "DrawTiledRect"));
             if (args.size() >= 4) {
@@ -729,11 +823,17 @@ static bool SamePaletteSelection(const LevelObject& selected, const LevelObject&
                selected.pipeWide == item.pipeWide &&
                selected.pipeHigh == item.pipeHigh;
     }
+    if (selected.type == ObjectType::Lift) {
+        return selected.liftMovement == item.liftMovement &&
+               selected.liftStartsPositive == item.liftStartsPositive &&
+               selected.w == item.w;
+    }
     return true;
 }
 
 static LevelObject MakeAddObject(ObjectType addType, int addBlockIndex, int addPropIndex,
                                  int addPipeWide, int addPipeHigh, PipeOrientation addPipeOrientation,
+                                 EditorLiftMovement addLiftMovement, bool addLiftStartsPositive, int addLiftWidth,
                                  int x, int y) {
     LevelObject obj = {addType, x, y};
     if (addType == ObjectType::Block) obj.blockIndex = addBlockIndex;
@@ -750,6 +850,13 @@ static LevelObject MakeAddObject(ObjectType addType, int addBlockIndex, int addP
     if (addType == ObjectType::PipeWall) {
         obj.pipeWide = 1;
         obj.pipeHigh = addPipeHigh;
+    }
+    if (addType == ObjectType::Lift) {
+        obj.w = addLiftWidth;
+        obj.h = TILE_SIZE * 6;
+        obj.liftMovement = addLiftMovement;
+        obj.liftStartsPositive = addLiftStartsPositive;
+        obj.liftSpeed = addLiftMovement == EditorLiftMovement::HorizontalBounce ? 68 : 72;
     }
     return obj;
 }
@@ -794,6 +901,25 @@ static std::vector<PaletteItem> BuildPalette() {
     pipeWall.pipeWide = 1;
     pipeWall.pipeHigh = 8;
     items.push_back({pipeWall, "Pipe Wall", "Special"});
+    LevelObject liftUp = {ObjectType::Lift, 0, 0, TILE_SIZE * 3, TILE_SIZE * 6};
+    liftUp.liftMovement = EditorLiftMovement::VerticalWrap;
+    liftUp.liftStartsPositive = false;
+    items.push_back({liftUp, "Lift Up", "Special"});
+    LevelObject liftDown = liftUp;
+    liftDown.liftStartsPositive = true;
+    items.push_back({liftDown, "Lift Down", "Special"});
+    LevelObject liftBounce = liftUp;
+    liftBounce.liftMovement = EditorLiftMovement::VerticalBounce;
+    liftBounce.liftStartsPositive = true;
+    items.push_back({liftBounce, "Lift V", "Special"});
+    LevelObject liftHorizontal = liftUp;
+    liftHorizontal.liftMovement = EditorLiftMovement::HorizontalBounce;
+    liftHorizontal.liftStartsPositive = true;
+    items.push_back({liftHorizontal, "Lift H", "Special"});
+    LevelObject elevator = liftUp;
+    elevator.w = TILE_SIZE * 2;
+    elevator.liftSpeed = 80;
+    items.push_back({elevator, "Elevator", "Special"});
     items.push_back({{ObjectType::Ground, 0, 0, TILE_SIZE * 8, TILE_SIZE * 2}, "Ground", "Special"});
     items.push_back({{ObjectType::FlagPole, 0, 0}, "Flag Pole", "Special"});
     items.push_back({{ObjectType::CastleScenery, 0, 0}, "Castle", "Scenery"});
@@ -805,7 +931,8 @@ static std::vector<PaletteItem> BuildPalette() {
 }
 
 static void ApplyPaletteSelection(const LevelObject& item, ObjectType& addType, int& addBlockIndex, int& addPropIndex,
-                                  int& addPipeWide, int& addPipeHigh, PipeOrientation& addPipeOrientation) {
+                                  int& addPipeWide, int& addPipeHigh, PipeOrientation& addPipeOrientation,
+                                  EditorLiftMovement& addLiftMovement, bool& addLiftStartsPositive, int& addLiftWidth) {
     addType = item.type;
     if (item.type == ObjectType::Block) addBlockIndex = item.blockIndex;
     if (item.type == ObjectType::BackgroundProp) addPropIndex = item.propIndex;
@@ -813,6 +940,11 @@ static void ApplyPaletteSelection(const LevelObject& item, ObjectType& addType, 
         addPipeWide = item.pipeWide;
         addPipeHigh = item.pipeHigh;
         addPipeOrientation = item.pipeOrientation;
+    }
+    if (item.type == ObjectType::Lift) {
+        addLiftMovement = item.liftMovement;
+        addLiftStartsPositive = item.liftStartsPositive;
+        addLiftWidth = item.w;
     }
 }
 
@@ -823,6 +955,15 @@ static PipeOrientation NextPipeOrientation(PipeOrientation orientation) {
         case PipeOrientation::HorizontalLeft: return PipeOrientation::Vertical;
     }
     return PipeOrientation::Vertical;
+}
+
+static EditorLiftMovement NextLiftMovement(EditorLiftMovement movement) {
+    switch (movement) {
+        case EditorLiftMovement::VerticalWrap: return EditorLiftMovement::VerticalBounce;
+        case EditorLiftMovement::VerticalBounce: return EditorLiftMovement::HorizontalBounce;
+        case EditorLiftMovement::HorizontalBounce: return EditorLiftMovement::VerticalWrap;
+    }
+    return EditorLiftMovement::VerticalWrap;
 }
 
 static void DrawPalettePreview(const LevelObject& item, Rectangle box, Texture2D spriteSheet, Texture2D mushroomSheet, Texture2D enemiesSheet, const SceneType& scene) {
@@ -876,6 +1017,14 @@ static void DrawPalettePreview(const LevelObject& item, Rectangle box, Texture2D
             DrawSpritePart(spriteSheet, {119.0f, 213.0f, 16.0f, 16.0f}, {cx - 9.0f, top + 14.0f, 18.0f, 18.0f});
             DrawSpritePart(spriteSheet, {119.0f, 230.0f, 16.0f, 16.0f}, {cx - 9.0f, top + 32.0f, 18.0f, 18.0f});
             break;
+        case ObjectType::Lift:
+            DrawSpritePart(mushroomSheet, {116.0f, 64.0f, 48.0f, 8.0f}, {cx - 24.0f, top + 13.0f, 48.0f, 12.0f});
+            if (item.liftMovement == EditorLiftMovement::HorizontalBounce) {
+                DrawLine((int)(cx - 24), (int)(top + 33), (int)(cx + 24), (int)(top + 33), YELLOW);
+            } else {
+                DrawLine((int)(cx - 30), (int)(top - 2), (int)(cx - 30), (int)(top + 42), YELLOW);
+            }
+            break;
         case ObjectType::CastleScenery:
             DrawSpritePart(spriteSheet, {24.0f, 696.0f, 80.0f, 80.0f}, {cx - 24.0f, top - 4.0f, 48.0f, 48.0f});
             break;
@@ -905,6 +1054,7 @@ static void DrawPalettePreview(const LevelObject& item, Rectangle box, Texture2D
 
 static int DrawPalette(const std::vector<PaletteItem>& palette, ObjectType addType, int addBlockIndex, int addPropIndex,
                        int addPipeWide, int addPipeHigh, PipeOrientation addPipeOrientation,
+                       EditorLiftMovement addLiftMovement, bool addLiftStartsPositive, int addLiftWidth,
                        Texture2D spriteSheet, Texture2D mushroomSheet, Texture2D enemiesSheet, const SceneType& scene) {
     LevelObject current = {addType, 0, 0};
     current.blockIndex = addBlockIndex;
@@ -912,10 +1062,13 @@ static int DrawPalette(const std::vector<PaletteItem>& palette, ObjectType addTy
     current.pipeWide = addPipeWide;
     current.pipeHigh = addPipeHigh;
     current.pipeOrientation = addPipeOrientation;
+    current.liftMovement = addLiftMovement;
+    current.liftStartsPositive = addLiftStartsPositive;
+    current.w = addLiftWidth;
 
     DrawRectangle(0, 0, GetScreenWidth(), PALETTE_HEIGHT, Fade(BLACK, 0.84f));
     DrawText("LMB place/select/drag | RMB pan | Wheel zoom | P print | I paste | Delete remove | Arrows move | W/A/S/D resize selected", 12, 8, 16, RAYWHITE);
-    DrawText(TextFormat("Scene: %s | Add: %s | Objects visible in palette: blocks, items, enemies, pipes, flag pole, scenery",
+    DrawText(TextFormat("Scene: %s | Add: %s | Objects visible in palette: blocks, items, enemies, lifts, pipes, flag pole, scenery",
         scene.name, ObjectName(current)), 12, 30, 16, YELLOW);
 
     int hovered = -1;
@@ -951,7 +1104,7 @@ static int DrawPalette(const std::vector<PaletteItem>& palette, ObjectType addTy
         x += PALETTE_CELL_W;
     }
 
-    DrawText("Hotkeys: 1 block, 2 ? coin, 3 ? mushroom, 4 ? fire, 5 coin, 6 goomba, 7 pipe, 8 ground, F flag, R cycle selected pipe", 12, PALETTE_HEIGHT - 24, 14, Fade(RAYWHITE, 0.86f));
+    DrawText("Hotkeys: 1 block, 2 ? coin, 3 ? mushroom, 4 ? fire, 5 coin, 6 goomba, 7 pipe, 8 ground, L lift, F flag, R cycle selected pipe/lift", 12, PALETTE_HEIGHT - 24, 14, Fade(RAYWHITE, 0.86f));
     return hovered;
 }
 
@@ -1014,6 +1167,9 @@ int main() {
     int addPipeWide = 2;
     int addPipeHigh = 2;
     PipeOrientation addPipeOrientation = PipeOrientation::Vertical;
+    EditorLiftMovement addLiftMovement = EditorLiftMovement::VerticalWrap;
+    bool addLiftStartsPositive = false;
+    int addLiftWidth = TILE_SIZE * 3;
     int selected = -1;
     bool dragging = false;
     bool dragPending = false;
@@ -1072,6 +1228,12 @@ int main() {
                 addPipeOrientation = PipeOrientation::Vertical;
             }
             if (IsKeyPressed(KEY_EIGHT)) addType = ObjectType::Ground;
+            if (IsKeyPressed(KEY_L)) {
+                addType = ObjectType::Lift;
+                addLiftMovement = EditorLiftMovement::VerticalWrap;
+                addLiftStartsPositive = false;
+                addLiftWidth = TILE_SIZE * 3;
+            }
             if (IsKeyPressed(KEY_F)) addType = ObjectType::FlagPole;
             if (IsKeyPressed(KEY_COMMA) && !blocks.empty()) {
                 addType = ObjectType::Block;
@@ -1111,7 +1273,7 @@ int main() {
                 int paletteIndex = GetMouseY() < PALETTE_HEIGHT ? PaletteIndexAtPoint(palette, GetMousePosition()) : -1;
                 if (paletteIndex >= 0) {
                     ApplyPaletteSelection(palette[paletteIndex].object, addType, addBlockIndex, addPropIndex,
-                        addPipeWide, addPipeHigh, addPipeOrientation);
+                        addPipeWide, addPipeHigh, addPipeOrientation, addLiftMovement, addLiftStartsPositive, addLiftWidth);
                     selected = -1;
                     dragging = false;
                     dragPending = false;
@@ -1129,7 +1291,7 @@ int main() {
                     }
                     if (selected == -1) {
                         LevelObject obj = MakeAddObject(addType, addBlockIndex, addPropIndex,
-                            addPipeWide, addPipeHigh, addPipeOrientation,
+                            addPipeWide, addPipeHigh, addPipeOrientation, addLiftMovement, addLiftStartsPositive, addLiftWidth,
                             SnapXForType(addType, mouseWorld.x), SnapYForType(addType, mouseWorld.y));
                         objects.push_back(obj);
                         selected = (int)objects.size() - 1;
@@ -1177,6 +1339,14 @@ int main() {
                     if (IsKeyPressed(KEY_W)) obj.pipeHigh = std::max(1, obj.pipeHigh - 1);
                     if (IsKeyPressed(KEY_S)) obj.pipeHigh++;
                 }
+                if (obj.type == ObjectType::Lift) {
+                    if (IsKeyPressed(KEY_W)) obj.h = std::max(TILE_SIZE, obj.h - TILE_SIZE);
+                    if (IsKeyPressed(KEY_S)) obj.h += TILE_SIZE;
+                    if (IsKeyPressed(KEY_A)) obj.w = std::max(TILE_SIZE, obj.w - TILE_SIZE);
+                    if (IsKeyPressed(KEY_D)) obj.w += TILE_SIZE;
+                    if (IsKeyPressed(KEY_R)) obj.liftMovement = NextLiftMovement(obj.liftMovement);
+                    if (IsKeyPressed(KEY_T)) obj.liftStartsPositive = !obj.liftStartsPositive;
+                }
             }
         }
 
@@ -1208,6 +1378,7 @@ int main() {
         EndMode2D();
 
         DrawPalette(palette, addType, addBlockIndex, addPropIndex, addPipeWide, addPipeHigh, addPipeOrientation,
+            addLiftMovement, addLiftStartsPositive, addLiftWidth,
             spriteSheet, mushroomSheet, enemiesSheet, scene);
         DrawRectangle(0, screenHeight - 28, screenWidth, 28, Fade(BLACK, 0.72f));
         DrawText(TextFormat("Selected: %s | Objects: %d",
@@ -1216,9 +1387,12 @@ int main() {
 
         if (selected >= 0 && selected < (int)objects.size() &&
             (objects[selected].type == ObjectType::Ground || objects[selected].type == ObjectType::Pipe ||
-             objects[selected].type == ObjectType::WarpPipe || objects[selected].type == ObjectType::PipeWall)) {
+             objects[selected].type == ObjectType::WarpPipe || objects[selected].type == ObjectType::PipeWall ||
+             objects[selected].type == ObjectType::Lift)) {
             DrawText(objects[selected].type == ObjectType::Pipe || objects[selected].type == ObjectType::WarpPipe
                 ? "Selected pipe: W/A/S/D resize | R cycle vertical/right/left"
+                : objects[selected].type == ObjectType::Lift
+                ? "Selected lift: A/D width | W/S travel | R cycle mode | T toggle direction"
                 : "Selected size: W/A/S/D resize", 560, screenHeight - 22, 16, ORANGE);
         }
 
