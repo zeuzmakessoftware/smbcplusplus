@@ -20,6 +20,7 @@ private:
     float speed;
     float minTravel;
     float maxTravel;
+    float phase = 0.0f;
     int direction;
     LiftMovement movement;
 
