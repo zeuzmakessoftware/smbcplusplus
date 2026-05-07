@@ -519,6 +519,10 @@ static std::string Expr(int value) {
     return std::to_string(value);
 }
 
+static std::string FloatLiteral(int value) {
+    return std::to_string(value) + ".0f";
+}
+
 static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sceneKind) {
     const std::string sceneExpr = SceneExpr(sceneKind);
     std::cout << "\n// --- Level Editor Output ---\n";
@@ -549,14 +553,14 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sc
         if (obj.type != ObjectType::Lift) continue;
 
         std::cout << "lifts.push_back(Lift::" << LiftFactoryName(obj.liftMovement) << "("
-                  << Expr(obj.x) << ", " << Expr(obj.y) << ", " << (float)obj.w
-                  << "f, mushroomSheet, ";
+                  << Expr(obj.x) << ", " << Expr(obj.y) << ", " << FloatLiteral(obj.w)
+                  << ", mushroomSheet, ";
         if (obj.liftMovement == EditorLiftMovement::HorizontalBounce) {
             std::cout << Expr(obj.liftMinTravel) << ", " << Expr(obj.liftMaxTravel) << ", "
-                      << (float)obj.liftSpeed << "f, " << (obj.liftStartsPositive ? "true" : "false") << "));\n";
+                      << FloatLiteral(obj.liftSpeed) << ", " << (obj.liftStartsPositive ? "true" : "false") << "));\n";
         } else {
             std::cout << Expr(obj.liftMinTravel) << ", " << Expr(obj.liftMaxTravel) << ", "
-                      << (float)obj.liftSpeed << "f, " << (obj.liftStartsPositive ? "true" : "false") << "));\n";
+                      << FloatLiteral(obj.liftSpeed) << ", " << (obj.liftStartsPositive ? "true" : "false") << "));\n";
         }
     }
     std::cout << "\n";
