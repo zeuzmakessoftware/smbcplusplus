@@ -85,12 +85,6 @@ void LoadLevel1(
     goombas.push_back(std::make_unique<Goomba>((176 * TILE_SIZE), (14 * TILE_SIZE), enemiesSheet, scene));
 
     koopas.push_back(std::make_unique<Koopa>((106 * TILE_SIZE), 537.0f, enemiesSheet, scene));
-    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((28 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
-    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((38 * TILE_SIZE), (11 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
-    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((46 * TILE_SIZE), (10 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
-    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((57 * TILE_SIZE), (10 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
-    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((163 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
-    piranhaPlants.push_back(std::make_unique<PiranhaPlant>((179 * TILE_SIZE), (12 * TILE_SIZE) + 12, 2 * TILE_SIZE, enemiesSheet));
 
     blocks.push_back(std::make_unique<DrawTiledRect>(
         0, 600, 2882, 80, spriteSheet, scene.groundBlock, TILE_SIZE, TILE_SIZE, scene
