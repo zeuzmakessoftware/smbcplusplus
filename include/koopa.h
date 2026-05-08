@@ -29,6 +29,12 @@ private:
     bool defeatedThisFrame = false;
     bool facingRight = false;
     bool ignoreMarioUntilSeparated = false;
+    bool hasWings = false;
+    float flightMinY = 0.0f;
+    float flightMaxY = 0.0f;
+    float flightSpeed = 72.0f;
+    float flightPhase = 0.0f;
+    int flightDirection = 1;
 
     static constexpr float Width = 42.0f;
     static constexpr float WalkHeight = 63.0f;
@@ -40,10 +46,21 @@ private:
     void updatePhysics(const std::vector<Rectangle>& statics);
     void hurtMario(Mario& marioObj, bool& marioIsDead, float& deathTimer);
     void becomeShell();
+    void loseWings();
     void kickShell(float marioCenterX);
 
 public:
-    Koopa(float x, float y, Texture2D s, const SceneType& scene = GetSceneType(SceneKind::Overworld));
+    Koopa(
+        float x,
+        float y,
+        Texture2D s,
+        const SceneType& scene = GetSceneType(SceneKind::Overworld),
+        bool startsAsParatroopa = false,
+        float minFlightY = 0.0f,
+        float maxFlightY = 0.0f,
+        float speed = 72.0f,
+        bool startsDown = true
+    );
     void update(const std::vector<Rectangle>& statics, Mario& marioObj, bool& marioIsDead, float& deathTimer, float cameraX);
     void draw();
     void drawDebug();

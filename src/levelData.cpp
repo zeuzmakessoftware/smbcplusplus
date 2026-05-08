@@ -1078,23 +1078,24 @@ void LoadLevel13(
 
     levelProps.push_back(BackgroundProp(378, 348, spriteSheet, CLOUD_LAYOUT));
     levelProps.push_back(BackgroundProp(0, 388, spriteSheet, CASTLE_LAYOUT));
-    levelProps.push_back(BackgroundProp(126, 138, spriteSheet, MEDIUM_CLOUD_LAYOUT));
-    levelProps.push_back(BackgroundProp(756, 96, spriteSheet, MEDIUM_CLOUD_LAYOUT));
+    levelProps.push_back(BackgroundProp(126, 138, spriteSheet, CLOUD_LAYOUT));
+    levelProps.push_back(BackgroundProp(756, 96, spriteSheet, CLOUD_LAYOUT));
     levelProps.push_back(BackgroundProp(1428, 348, spriteSheet, CLOUD_LAYOUT));
     levelProps.push_back(BackgroundProp(1554, 306, spriteSheet, CLOUD_LAYOUT));
     levelProps.push_back(BackgroundProp(1890, 516, spriteSheet, CLOUD_LAYOUT));
-    levelProps.push_back(BackgroundProp(2100, 180, spriteSheet, MEDIUM_CLOUD_LAYOUT));
+    levelProps.push_back(BackgroundProp(2100, 180, spriteSheet, CLOUD_LAYOUT));
 
     coins.emplace_back((float)(26 * TILE_SIZE), (float)(5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld));
     coins.emplace_back((float)(27 * TILE_SIZE), (float)(5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld));
     coins.emplace_back((float)(28 * TILE_SIZE), (float)(5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld));
-    koopas.push_back(std::make_unique<Koopa>((29 * TILE_SIZE), 201, enemiesSheet, GetSceneType(SceneKind::Overworld)));
     coins.emplace_back((float)(36 * TILE_SIZE), (float)(3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld));
     coins.emplace_back((float)(37 * TILE_SIZE), (float)(3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld));
     goombas.push_back(std::make_unique<Goomba>((43 * TILE_SIZE), (5 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Overworld)));
     goombas.push_back(std::make_unique<Goomba>((45 * TILE_SIZE), (5 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Overworld)));
     coins.emplace_back((float)(49 * TILE_SIZE), (float)(7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld));
     coins.emplace_back((float)(50 * TILE_SIZE), (float)(7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld));
+    koopas.push_back(std::make_unique<Koopa>((57 * TILE_SIZE), 411, enemiesSheet, GetSceneType(SceneKind::Overworld), true, 285, 537, 72.0f, true));
+    koopas.push_back(std::make_unique<Koopa>((29 * TILE_SIZE), 201, enemiesSheet, GetSceneType(SceneKind::Overworld)));
 
     lifts.push_back(Lift::HorizontalBounce((53 * TILE_SIZE), (7 * TILE_SIZE) + 12, 126.0f, mushroomSheet, (53 * TILE_SIZE), (55 * TILE_SIZE), 68.0f, true));
 
@@ -1251,7 +1252,7 @@ void LoadLevel13(
     blocks.push_back(std::make_unique<IslandSolidTopLeftBlock>((49 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
     blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((50 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
     blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((51 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
-    blocks.push_back(std::make_unique<IslandSolidTopRightBlock>((52 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));    
+    blocks.push_back(std::make_unique<IslandSolidTopRightBlock>((52 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
 }
 
 const std::vector<LevelAreaConfig>& GetLevelAreaConfigs() {

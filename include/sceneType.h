@@ -31,6 +31,7 @@ struct SceneType {
     Rectangle goombaSquashed;
 
     Rectangle koopaFrames[2];
+    Rectangle koopaParatroopaFrames[2];
     Rectangle koopaShellFrames[2];
 };
 

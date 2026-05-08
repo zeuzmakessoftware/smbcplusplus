@@ -1,6 +1,45 @@
 #include "koopa.h"
+#include <algorithm>
+#include <cmath>
 
-Koopa::Koopa(float x, float y, Texture2D s, const SceneType& scene) : pos({x, y}), sprites(s), scene(&scene) {}
+namespace {
+constexpr float Pi = 3.14159265358979323846f;
+
+float InitialSinePhase(float value, float minTravel, float maxTravel, int direction) {
+    const float amplitude = (maxTravel - minTravel) * 0.5f;
+    if (amplitude <= 0.0f) return 0.0f;
+
+    const float center = (minTravel + maxTravel) * 0.5f;
+    const float normalized = std::max(-1.0f, std::min(1.0f, (value - center) / amplitude));
+    float phase = std::asin(normalized);
+    const float velocitySign = std::cos(phase) >= 0.0f ? 1.0f : -1.0f;
+    if ((direction >= 0 && velocitySign < 0.0f) || (direction < 0 && velocitySign > 0.0f)) {
+        phase = Pi - phase;
+    }
+    return phase;
+}
+}
+
+Koopa::Koopa(
+    float x,
+    float y,
+    Texture2D s,
+    const SceneType& scene,
+    bool startsAsParatroopa,
+    float minFlightY,
+    float maxFlightY,
+    float speed,
+    bool startsDown
+) : pos({x, y}), sprites(s), scene(&scene), hasWings(startsAsParatroopa) {
+    if (hasWings) {
+        velX = 0.0f;
+        flightMinY = minFlightY == maxFlightY ? y - 96.0f : std::min(minFlightY, maxFlightY);
+        flightMaxY = minFlightY == maxFlightY ? y + 96.0f : std::max(minFlightY, maxFlightY);
+        flightSpeed = speed;
+        flightDirection = startsDown ? 1 : -1;
+        flightPhase = InitialSinePhase(y, flightMinY, flightMaxY, flightDirection);
+    }
+}
 
 float Koopa::height() const {
     return state == State::Walking ? WalkHeight : ShellHeight;
@@ -11,6 +50,22 @@ Rectangle Koopa::returnRec() const {
 }
 
 void Koopa::updatePhysics(const std::vector<Rectangle>& statics) {
+    if (hasWings && state == State::Walking) {
+        const float amplitude = (flightMaxY - flightMinY) * 0.5f;
+        if (amplitude > 0.0f) {
+            flightPhase += (flightSpeed / amplitude) * GetFrameTime();
+            pos.y = ((flightMinY + flightMaxY) * 0.5f) + std::sin(flightPhase) * amplitude;
+            flightDirection = std::cos(flightPhase) >= 0.0f ? 1 : -1;
+        }
+
+        frameTimer += GetFrameTime();
+        if (frameTimer >= 0.12f) {
+            frameTimer = 0.0f;
+            currentFrame = (currentFrame + 1) % 2;
+        }
+        return;
+    }
+
     velY += Gravity;
     pos.y += velY;
 
@@ -72,6 +127,17 @@ void Koopa::becomeShell() {
     pos.y += WalkHeight - ShellHeight;
 }
 
+void Koopa::loseWings() {
+    if (!hasWings || state != State::Walking) return;
+
+    hasWings = false;
+    defeatedThisFrame = true;
+    velX = facingRight ? 1.35f : -1.35f;
+    velY = 0.0f;
+    currentFrame = 0;
+    frameTimer = 0.0f;
+}
+
 void Koopa::kickShell(float marioCenterX) {
     state = State::ShellMoving;
     ignoreMarioUntilSeparated = true;
@@ -117,6 +183,9 @@ void Koopa::update(const std::vector<Rectangle>& statics, Mario& marioObj, bool&
         currentFrame = 0;
         ignoreMarioUntilSeparated = false;
         marioObj.setVelY(-10.0f);
+    } else if (stomped && hasWings && !marioObj.getIsTransforming()) {
+        loseWings();
+        marioObj.setVelY(-10.0f);
     } else if (stomped && !marioObj.getIsTransforming()) {
         becomeShell();
         marioObj.setVelY(-10.0f);
@@ -151,6 +220,9 @@ void Koopa::draw() {
 
     Rectangle source = scene->koopaFrames[currentFrame];
     float drawHeight = WalkHeight;
+    if (hasWings && state == State::Walking) {
+        source = scene->koopaParatroopaFrames[currentFrame];
+    }
     if (state == State::ShellStill || state == State::ShellMoving || state == State::Flipped) {
         source = scene->koopaShellFrames[currentFrame];
         drawHeight = ShellHeight;

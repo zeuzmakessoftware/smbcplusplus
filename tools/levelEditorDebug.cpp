@@ -15,6 +15,7 @@ enum class ObjectType {
     Block,
     Goomba,
     Koopa,
+    KoopaParatroopa,
     Ground,
     Coin,
     CoinBlock,
@@ -83,6 +84,7 @@ static const char* TypeName(ObjectType type) {
         case ObjectType::Block: return "Block";
         case ObjectType::Goomba: return "Goomba";
         case ObjectType::Koopa: return "Koopa";
+        case ObjectType::KoopaParatroopa: return "Koopa Paratroopa";
         case ObjectType::Ground: return "Ground";
         case ObjectType::Coin: return "Coin";
         case ObjectType::CoinBlock: return "Coin Block";
@@ -244,6 +246,9 @@ static Rectangle ObjectBounds(const LevelObject& obj) {
         return {(float)obj.x, (float)obj.y, (float)(TILE_SIZE * 5), (float)(TILE_SIZE * 5)};
     }
     if (obj.type == ObjectType::Koopa) return {(float)obj.x, (float)obj.y, (float)TILE_SIZE, (float)(TILE_SIZE * 1.5f)};
+    if (obj.type == ObjectType::KoopaParatroopa) {
+        return {(float)obj.x, (float)obj.liftMinTravel, (float)TILE_SIZE, (float)(obj.liftMaxTravel - obj.liftMinTravel + TILE_SIZE * 1.5f)};
+    }
     if (obj.type == ObjectType::PiranhaPlant) return {(float)obj.x, (float)(obj.y - 63), (float)obj.w, 63.0f};
     if (obj.type == ObjectType::FlagPole) return {(float)obj.x, (float)obj.y - TILE_SIZE * 11.0f, (float)(TILE_SIZE * 9), (float)(TILE_SIZE * 11)};
     return {(float)obj.x, (float)obj.y, (float)TILE_SIZE, (float)TILE_SIZE};
@@ -270,7 +275,7 @@ static int SnapYForType(ObjectType type, float value) {
     if (type == ObjectType::Goomba) {
         return Snap(value, TILE_SIZE);
     }
-    if (type == ObjectType::Koopa) {
+    if (type == ObjectType::Koopa || type == ObjectType::KoopaParatroopa) {
         return SnapWithOffset(value, TILE_SIZE, -9);
     }
     if (type == ObjectType::PiranhaPlant) {
@@ -304,6 +309,11 @@ static void SnapObject(LevelObject& obj) {
             obj.liftMaxTravel = std::max(obj.liftMaxTravel, obj.y);
             obj.h = std::max(TILE_SIZE, Snap(obj.liftMaxTravel - obj.liftMinTravel, TILE_SIZE));
         }
+    }
+    if (obj.type == ObjectType::KoopaParatroopa) {
+        obj.liftMinTravel = std::min(obj.liftMinTravel, obj.y);
+        obj.liftMaxTravel = std::max(obj.liftMaxTravel, obj.y);
+        obj.h = std::max(TILE_SIZE, Snap(obj.liftMaxTravel - obj.liftMinTravel, TILE_SIZE));
     }
     if (obj.type == ObjectType::PiranhaPlant) {
         obj.w = std::max(TILE_SIZE, Snap(obj.w, TILE_SIZE));
@@ -434,6 +444,14 @@ static void DrawLift(const LevelObject& obj, Texture2D mushroomSheet) {
     DrawRectangleLinesEx(lift, 1.0f, Fade(BLACK, 0.65f));
 }
 
+static void DrawKoopaParatroopa(const LevelObject& obj, Texture2D enemiesSheet, const SceneType& scene) {
+    DrawLineEx({obj.x - 10.0f, (float)obj.liftMinTravel}, {obj.x - 10.0f, (float)obj.liftMaxTravel}, 3.0f, Fade(YELLOW, 0.7f));
+    DrawTriangle({obj.x - 10.0f, obj.liftStartsPositive ? (float)obj.liftMaxTravel : (float)obj.liftMinTravel},
+        {obj.x - 16.0f, obj.liftStartsPositive ? (float)obj.liftMaxTravel - 10.0f : (float)obj.liftMinTravel + 10.0f},
+        {obj.x - 4.0f, obj.liftStartsPositive ? (float)obj.liftMaxTravel - 10.0f : (float)obj.liftMinTravel + 10.0f}, YELLOW);
+    DrawSpritePart(enemiesSheet, scene.koopaParatroopaFrames[0], {(float)obj.x, (float)obj.y, TILE_SIZE, TILE_SIZE * 1.5f});
+}
+
 static void DrawPiranhaPlant(const LevelObject& obj, Texture2D enemiesSheet) {
     const float plantW = 42.0f;
     const float plantH = 63.0f;
@@ -452,6 +470,9 @@ static void DrawObject(const LevelObject& obj, Texture2D spriteSheet, Texture2D 
             break;
         case ObjectType::Koopa:
             DrawSpritePart(enemiesSheet, scene.koopaFrames[0], {(float)obj.x, (float)obj.y, TILE_SIZE, TILE_SIZE * 1.5f});
+            break;
+        case ObjectType::KoopaParatroopa:
+            DrawKoopaParatroopa(obj, enemiesSheet, scene);
             break;
         case ObjectType::Ground:
             DrawGround(obj, spriteSheet, scene);
@@ -540,6 +561,12 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sc
         } else if (obj.type == ObjectType::Koopa) {
             std::cout << "koopas.push_back(std::make_unique<Koopa>(" << Expr(obj.x)
                       << ", " << Expr(obj.y) << ", enemiesSheet, " << sceneExpr << "));\n";
+        } else if (obj.type == ObjectType::KoopaParatroopa) {
+            std::cout << "koopas.push_back(std::make_unique<Koopa>(" << Expr(obj.x)
+                      << ", " << Expr(obj.y) << ", enemiesSheet, " << sceneExpr
+                      << ", true, " << Expr(obj.liftMinTravel) << ", " << Expr(obj.liftMaxTravel)
+                      << ", " << FloatLiteral(obj.liftSpeed) << ", "
+                      << (obj.liftStartsPositive ? "true" : "false") << "));\n";
         } else if (obj.type == ObjectType::PiranhaPlant) {
             std::cout << "piranhaPlants.push_back(std::make_unique<PiranhaPlant>(" << Expr(obj.x)
                       << ", " << Expr(obj.y) << ", " << Expr(obj.w) << ", enemiesSheet));\n";
@@ -772,7 +799,18 @@ static void ParseLevelCode(const std::string& code, std::vector<LevelObject>& ob
             if (args.size() >= 2) objects.push_back({ObjectType::Goomba, ReadExpr(args[0]), ReadExpr(args[1])});
         } else if (statement.find("Koopa") != std::string::npos) {
             std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, "Koopa"));
-            if (args.size() >= 2) objects.push_back({ObjectType::Koopa, ReadExpr(args[0]), ReadExpr(args[1])});
+            if (args.size() >= 2) {
+                LevelObject obj = {ObjectType::Koopa, ReadExpr(args[0]), ReadExpr(args[1])};
+                if (args.size() >= 9 && args[4].find("true") != std::string::npos) {
+                    obj.type = ObjectType::KoopaParatroopa;
+                    obj.liftMinTravel = std::min(ReadExpr(args[5]), ReadExpr(args[6]));
+                    obj.liftMaxTravel = std::max(ReadExpr(args[5]), ReadExpr(args[6]));
+                    obj.h = std::max(TILE_SIZE, obj.liftMaxTravel - obj.liftMinTravel);
+                    obj.liftSpeed = ReadExpr(args[7]);
+                    obj.liftStartsPositive = args[8].find("true") != std::string::npos;
+                }
+                objects.push_back(obj);
+            }
         } else if (statement.find("PiranhaPlant") != std::string::npos) {
             std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, "PiranhaPlant"));
             if (args.size() >= 3) {
@@ -919,6 +957,14 @@ static LevelObject MakeAddObject(ObjectType addType, int addBlockIndex, int addP
             obj.liftMaxTravel = 680;
         }
     }
+    if (addType == ObjectType::KoopaParatroopa) {
+        obj.h = TILE_SIZE * 6;
+        obj.liftMovement = EditorLiftMovement::VerticalBounce;
+        obj.liftStartsPositive = true;
+        obj.liftSpeed = 72;
+        obj.liftMinTravel = y - obj.h / 2;
+        obj.liftMaxTravel = y + obj.h / 2;
+    }
     if (addType == ObjectType::PiranhaPlant) {
         obj.w = TILE_SIZE * 2;
     }
@@ -940,6 +986,10 @@ static std::vector<PaletteItem> BuildPalette() {
 
     items.push_back({{ObjectType::Goomba, 0, 0}, "Goomba", "Enemies"});
     items.push_back({{ObjectType::Koopa, 0, 0}, "Koopa", "Enemies"});
+    LevelObject paratroopa = {ObjectType::KoopaParatroopa, 0, 0, TILE_SIZE, TILE_SIZE * 6};
+    paratroopa.liftMovement = EditorLiftMovement::VerticalBounce;
+    paratroopa.liftStartsPositive = true;
+    items.push_back({paratroopa, "Paratroopa", "Enemies"});
     items.push_back({{ObjectType::PiranhaPlant, 0, 0, TILE_SIZE * 2, TILE_SIZE}, "Piranha", "Enemies"});
 
     LevelObject pipe = {ObjectType::Pipe, 0, 0};
@@ -1057,6 +1107,9 @@ static void DrawPalettePreview(const LevelObject& item, Rectangle box, Texture2D
         case ObjectType::Koopa:
             DrawSpritePart(enemiesSheet, scene.koopaFrames[0], {cx - 15.0f, top - 4.0f, 30.0f, 45.0f});
             break;
+        case ObjectType::KoopaParatroopa:
+            DrawSpritePart(enemiesSheet, scene.koopaParatroopaFrames[0], {cx - 15.0f, top - 4.0f, 30.0f, 45.0f});
+            break;
         case ObjectType::PiranhaPlant:
             DrawSpritePart(enemiesSheet, {0.0f, 138.0f, 16.0f, 24.0f}, {cx - 14.0f, top - 7.0f, 28.0f, 42.0f});
             break;
@@ -1171,7 +1224,7 @@ static int DrawPalette(const std::vector<PaletteItem>& palette, ObjectType addTy
         x += PALETTE_CELL_W;
     }
 
-    DrawText("Hotkeys: 1 block, 2 ? coin, 3 ? mushroom, 4 ? fire, 5 coin, 6 goomba, 7 pipe, 8 ground, L lift, F flag, R cycle selected pipe/lift", 12, PALETTE_HEIGHT - 24, 14, Fade(RAYWHITE, 0.86f));
+    DrawText("Hotkeys: 1 block, 2 ? coin, 3 ? mushroom, 4 ? fire, 5 coin, 6 goomba, Shift+6 koopa, Ctrl+6 paratroopa, 7 pipe, 8 ground, L lift, F flag", 12, PALETTE_HEIGHT - 24, 14, Fade(RAYWHITE, 0.86f));
     return hovered;
 }
 
@@ -1282,6 +1335,7 @@ int main() {
             if (IsKeyPressed(KEY_FIVE)) addType = ObjectType::Coin;
             if (IsKeyPressed(KEY_SIX)) addType = ObjectType::Goomba;
             if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_SIX)) addType = ObjectType::Koopa;
+            if ((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) && IsKeyPressed(KEY_SIX)) addType = ObjectType::KoopaParatroopa;
             if (IsKeyPressed(KEY_SEVEN)) {
                 addType = ObjectType::Pipe;
                 addPipeWide = 2;
@@ -1433,6 +1487,17 @@ int main() {
                     }
                     if (IsKeyPressed(KEY_T)) obj.liftStartsPositive = !obj.liftStartsPositive;
                 }
+                if (obj.type == ObjectType::KoopaParatroopa) {
+                    if (IsKeyPressed(KEY_W)) {
+                        obj.h = std::max(TILE_SIZE, obj.h - TILE_SIZE);
+                        obj.liftMaxTravel = obj.liftMinTravel + obj.h;
+                    }
+                    if (IsKeyPressed(KEY_S)) {
+                        obj.h += TILE_SIZE;
+                        obj.liftMaxTravel = obj.liftMinTravel + obj.h;
+                    }
+                    if (IsKeyPressed(KEY_T)) obj.liftStartsPositive = !obj.liftStartsPositive;
+                }
             }
         }
 
@@ -1474,11 +1539,13 @@ int main() {
         if (selected >= 0 && selected < (int)objects.size() &&
             (objects[selected].type == ObjectType::Ground || objects[selected].type == ObjectType::Pipe ||
              objects[selected].type == ObjectType::WarpPipe || objects[selected].type == ObjectType::PipeWall ||
-             objects[selected].type == ObjectType::Lift)) {
+             objects[selected].type == ObjectType::Lift || objects[selected].type == ObjectType::KoopaParatroopa)) {
             DrawText(objects[selected].type == ObjectType::Pipe || objects[selected].type == ObjectType::WarpPipe
                 ? "Selected pipe: W/A/S/D resize | R cycle vertical/right/left"
                 : objects[selected].type == ObjectType::Lift
                 ? "Selected lift: A/D width | W/S travel | R cycle mode | T toggle direction"
+                : objects[selected].type == ObjectType::KoopaParatroopa
+                ? "Selected paratroopa: W/S travel | T toggle direction"
                 : "Selected size: W/A/S/D resize", 560, screenHeight - 22, 16, ORANGE);
         }
 

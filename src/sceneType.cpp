@@ -50,6 +50,10 @@ constexpr SceneType MakeScene(
             Rect(18.0f + koopaOffsetX, 111.0f, 16.0f, 24.0f),
         },
         {
+            Rect(36.0f + koopaOffsetX, 112.0f, 16.0f, 24.0f),
+            Rect(54.0f + koopaOffsetX, 112.0f, 16.0f, 24.0f),
+        },
+        {
             Rect(72.0f + koopaOffsetX, 119.0f, 16.0f, 16.0f),
             Rect(90.0f + koopaOffsetX, 119.0f, 16.0f, 16.0f),
         },
