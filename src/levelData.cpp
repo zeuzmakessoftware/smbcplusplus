@@ -1253,6 +1253,7 @@ void LoadLevel13(
     blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((50 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
     blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((51 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
     blocks.push_back(std::make_unique<IslandSolidTopRightBlock>((52 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    // finish 1-3 later
 }
 
 const std::vector<LevelAreaConfig>& GetLevelAreaConfigs() {
