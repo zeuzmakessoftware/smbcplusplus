@@ -119,6 +119,7 @@ int main() {
     });
     // Change this to another LevelAreaIds value or registered area id to boot elsewhere.
     LevelAreaId startingArea = LevelAreaIds::Level11;
+    LevelAreaId respawnArea = startingArea;
 
     Camera2D camera = { 0 };
     camera.target = (Vector2){ 0, 0 };
@@ -149,17 +150,18 @@ int main() {
     };
 
     auto ResetLevel = [&]() {
-        Vector2 startPosition = levelLoader.defaultMarioStart(startingArea);
+        Vector2 startPosition = levelLoader.defaultMarioStart(respawnArea);
         MarioObj.reset(startPosition.x, startPosition.y);
-        LoadArea(startingArea, startPosition);
+        LoadArea(respawnArea, startPosition);
         scoreboard.reset(400);
         int world = 1;
         int level = 1;
-        levelLoader.scoreboardLevel(startingArea, world, level);
+        levelLoader.scoreboardLevel(respawnArea, world, level);
         scoreboard.setLevel(world, level);
     };
 
     auto StartAreaIntro = [&](const LevelAreaId& area) {
+        respawnArea = area;
         int world = 1;
         int level = 1;
         levelLoader.scoreboardLevel(area, world, level);
