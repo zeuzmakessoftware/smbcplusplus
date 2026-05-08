@@ -5,11 +5,34 @@
 Mario::Mario(int x, int y, Texture2D sprites) : posX((float)x), posY((float)y), sprites(sprites) {}
 
 float Mario::visualHeight() const {
+    if (isBig && isDucking) return (float)TILE_SIZE * 1.5f;
     return isBig ? (float)TILE_SIZE * 2.0f : (float)TILE_SIZE;
 }
 
 float Mario::collisionTopInset() const {
+    if (isBig && isDucking) return (float)TILE_SIZE * 0.5f;
     return isBig ? 12.0f : 6.0f;
+}
+
+bool Mario::canStandUp(const std::vector<Rectangle>& statics) const {
+    if (!isBig || !isDucking) return true;
+
+    const float standingHeight = (float)TILE_SIZE * 2.0f;
+    const float duckingHeight = (float)TILE_SIZE * 1.5f;
+    const float standingTopInset = 12.0f;
+    const float standingY = posY - (standingHeight - duckingHeight);
+    Rectangle standingRec = {
+        posX,
+        standingY + standingTopInset,
+        (float)TILE_SIZE,
+        standingHeight - standingTopInset
+    };
+
+    for (const auto& rect : statics) {
+        if (CheckCollisionRecs(standingRec, rect)) return false;
+    }
+
+    return true;
 }
 
 Rectangle Mario::returnRec() {
@@ -81,18 +104,27 @@ void Mario::update(
         return;
     }
 
+    bool wantsDuck = isBig && isGrounded && IsKeyDown(KEY_S);
+    if (wantsDuck && !isDucking) {
+        posY += (float)TILE_SIZE * 0.5f;
+        isDucking = true;
+    } else if (isDucking && (!wantsDuck || !isGrounded) && canStandUp(statics)) {
+        posY -= (float)TILE_SIZE * 0.5f;
+        isDucking = false;
+    }
+
     bool isRunning = IsKeyDown(KEY_LEFT_SHIFT);
     float currentMaxSpeed = isRunning ? runMaxSpeed : walkMaxSpeed;
     float currentAccel = isRunning ? runAcceleration : walkAcceleration;
 
     bool moving = false;
     
-    if (IsKeyDown(KEY_D)) { 
+    if (!isDucking && IsKeyDown(KEY_D)) {
         velX += currentAccel; 
         facingRight = true; 
         moving = true; 
     }
-    if (IsKeyDown(KEY_A)) { 
+    if (!isDucking && IsKeyDown(KEY_A)) {
         velX -= currentAccel; 
         facingRight = false; 
         moving = true; 
@@ -120,7 +152,7 @@ void Mario::update(
 
     if (IsKeyReleased(KEY_SPACE) && velY < -4.0f) velY = -4.0f; 
     
-    if (IsKeyPressed(KEY_SPACE) && isGrounded) {
+    if (!isDucking && IsKeyPressed(KEY_SPACE) && isGrounded) {
         float jumpBoost = (std::abs(velX) > walkMaxSpeed) ? -2.0f : 0.0f;
         velY = jumpForce + jumpBoost;
         isGrounded = false;
@@ -183,6 +215,10 @@ void Mario::update(
     for (auto it = fireFlowers.begin(); it != fireFlowers.end(); ) {
         if (CheckCollisionRecs(this->returnRec(), (*it)->returnRec())) {
             if (!isFire) {
+                if (isDucking && canStandUp(statics)) {
+                    posY -= (float)TILE_SIZE * 0.5f;
+                    isDucking = false;
+                }
                 isFireTransforming = true;
                 fireTransformTimer = fireTransformDuration;
                 
@@ -226,7 +262,9 @@ void Mario::draw() {
     float drawHeight = (float)TILE_SIZE;
     float drawY = posY;
 
-    if (!isGrounded) {
+    if (isDucking) {
+        sourceX = 116.0f;
+    } else if (!isGrounded) {
         sourceX = 96.0f;
     } else if (std::abs(velX) > 0.1f) {
         sourceX = walkFrames[currentFrame];
@@ -249,9 +287,10 @@ void Mario::draw() {
         drawY = posY;
     }
     else if (isBig) {
-        sourceY = isFire ? 140.0f : 32.0f; 
-        sourceHeight = 32.0f;
-        drawHeight = (float)TILE_SIZE * 2;
+        sourceY = isFire ? 140.0f : 32.0f;
+        sourceHeight = isDucking ? 24.0f : 32.0f;
+        if (isDucking) sourceY = isFire ? 148.0f : 40.0f;
+        drawHeight = isDucking ? (float)TILE_SIZE * 1.5f : (float)TILE_SIZE * 2;
         drawY = posY;
     }
 
@@ -288,6 +327,7 @@ void Mario::reset(float x, float y) {
     velX = 0;
     velY = 0;
     isGrounded = false;
+    isDucking = false;
     isBig = false;
     isFire = false;
     isTransforming = false;
@@ -307,6 +347,7 @@ void Mario::setScriptedPose(float x, float y, bool faceRight, float scriptedVelX
     velY = 0.0f;
     facingRight = faceRight;
     isGrounded = true;
+    isDucking = false;
 
     if (std::abs(velX) > 0.1f) {
         frameTimer += GetFrameTime();
@@ -329,7 +370,12 @@ void Mario::startShrink() {
     if (!isTransforming && isBig) {
         isFire = false;
         isBig = false;
-        posY += TILE_SIZE;
+        if (isDucking) {
+            isDucking = false;
+            posY += (float)TILE_SIZE * 0.5f;
+        } else {
+            posY += TILE_SIZE;
+        }
 
         isTransforming = true;
         transformationTimer = transformationDuration;

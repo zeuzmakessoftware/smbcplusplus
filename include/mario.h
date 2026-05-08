@@ -30,6 +30,7 @@ class Mario {
 
         bool isGrounded = false;
         bool facingRight = true;
+        bool isDucking = false;
         Texture2D sprites;
 
         bool isBig = false;
@@ -58,6 +59,7 @@ class Mario {
 
         float visualHeight() const;
         float collisionTopInset() const;
+        bool canStandUp(const std::vector<Rectangle>& statics) const;
 
     public:
         Mario(int x, int y, Texture2D sprites);
