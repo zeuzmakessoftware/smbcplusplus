@@ -20,6 +20,7 @@ extern std::vector<SpritePart> MEDIUM_GRASS_LAYOUT;
 extern std::vector<SpritePart> CLOUD_LAYOUT;
 extern std::vector<SpritePart> MEDIUM_CLOUD_LAYOUT;
 extern std::vector<SpritePart> LARGE_CLOUD_LAYOUT;
+extern std::vector<SpritePart> CASTLE_LAYOUT;
 
 struct BackgroundPropDefinition {
     const char* displayName;

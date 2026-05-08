@@ -1082,13 +1082,27 @@ void LoadLevel13(
 
     castleFlagpole = std::make_unique<CastleFlagpole>(5000.0f, 600.0f, spriteSheet, mushroomSheet, marioSheet);
 
-    levelProps.push_back(BackgroundProp(756, 138, spriteSheet, MEDIUM_CLOUD_LAYOUT));
+    levelProps.push_back(BackgroundProp(378, 348, spriteSheet, CLOUD_LAYOUT));
+    levelProps.push_back(BackgroundProp(0, 388, spriteSheet, CASTLE_LAYOUT));
+    levelProps.push_back(BackgroundProp(126, 138, spriteSheet, MEDIUM_CLOUD_LAYOUT));
+    levelProps.push_back(BackgroundProp(756, 96, spriteSheet, MEDIUM_CLOUD_LAYOUT));
+    levelProps.push_back(BackgroundProp(1428, 348, spriteSheet, CLOUD_LAYOUT));
+    levelProps.push_back(BackgroundProp(1554, 306, spriteSheet, CLOUD_LAYOUT));
+    levelProps.push_back(BackgroundProp(1890, 516, spriteSheet, CLOUD_LAYOUT));
+    levelProps.push_back(BackgroundProp(2100, 180, spriteSheet, MEDIUM_CLOUD_LAYOUT));
 
     coins.emplace_back((float)(26 * TILE_SIZE), (float)(5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld));
     coins.emplace_back((float)(27 * TILE_SIZE), (float)(5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld));
     coins.emplace_back((float)(28 * TILE_SIZE), (float)(5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld));
     koopas.push_back(std::make_unique<Koopa>((29 * TILE_SIZE), 201, enemiesSheet, GetSceneType(SceneKind::Overworld)));
+    coins.emplace_back((float)(36 * TILE_SIZE), (float)(3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld));
+    coins.emplace_back((float)(37 * TILE_SIZE), (float)(3 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld));
+    goombas.push_back(std::make_unique<Goomba>((43 * TILE_SIZE), (5 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Overworld)));
+    goombas.push_back(std::make_unique<Goomba>((45 * TILE_SIZE), (5 * TILE_SIZE), enemiesSheet, GetSceneType(SceneKind::Overworld)));
+    coins.emplace_back((float)(49 * TILE_SIZE), (float)(7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld));
+    coins.emplace_back((float)(50 * TILE_SIZE), (float)(7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld));
 
+    lifts.push_back(Lift::HorizontalBounce((53 * TILE_SIZE), (7 * TILE_SIZE) + 12, 126.0f, mushroomSheet, (53 * TILE_SIZE), (55 * TILE_SIZE), 68.0f, true));
 
     blocks.push_back(std::make_unique<DrawTiledRect>(
         0, 600, 656, 80, spriteSheet, GetSceneType(SceneKind::Overworld).groundBlock, TILE_SIZE, TILE_SIZE, GetSceneType(SceneKind::Overworld)
@@ -1152,7 +1166,98 @@ void LoadLevel13(
     blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((26 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
     blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((27 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
     blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((28 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
-    blocks.push_back(std::make_unique<IslandSolidTopRightBlock>((29 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));    
+    blocks.push_back(std::make_unique<IslandSolidTopRightBlock>((29 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((32 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((32 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidTopLeftBlock>((31 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((32 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidTopRightBlock>((33 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((35 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((35 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((35 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((35 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((35 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((35 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((36 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((36 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((36 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((36 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((36 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((36 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((37 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((37 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((37 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((37 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((37 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((37 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidTopLeftBlock>((34 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((35 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((36 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((37 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidTopRightBlock>((38 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((40 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((40 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((40 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((40 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((40 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((40 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((40 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((40 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((40 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((40 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((41 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((41 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((41 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((41 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((41 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((41 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((41 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((41 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((41 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((41 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((42 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((42 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((42 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((42 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((42 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((42 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((42 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((42 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((42 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((42 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((43 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((43 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((43 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((43 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((43 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((43 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((43 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((43 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((43 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((43 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((44 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((44 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((44 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((44 * TILE_SIZE), (12 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((44 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((44 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((44 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((44 * TILE_SIZE), (8 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((44 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((44 * TILE_SIZE), (6 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidTopLeftBlock>((39 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((40 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((41 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((42 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((43 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((44 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidTopRightBlock>((45 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((50 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandBackgroundBlock>((51 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidTopLeftBlock>((49 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((50 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((51 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<IslandSolidTopRightBlock>((52 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));    
 }
 
 const std::vector<LevelAreaConfig>& GetLevelAreaConfigs() {

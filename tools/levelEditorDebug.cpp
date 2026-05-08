@@ -640,10 +640,8 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sc
                       << (obj.x / (float)TILE_SIZE) << "f, "
                       << (float)obj.y << "f, spriteSheet, mushroomSheet, marioSheet);\n";
         } else if (obj.type == ObjectType::CastleScenery) {
-            std::cout << "// Castle scenery: DrawTexturePro(spriteSheet, (Rectangle){24.0f, 696.0f, 80.0f, 80.0f}, "
-                      << "(Rectangle){" << (float)obj.x << "f, " << (float)obj.y << "f, "
-                      << (float)(TILE_SIZE * 5) << "f, " << (float)(TILE_SIZE * 5)
-                      << "f}, (Vector2){0, 0}, 0.0f, WHITE);\n";
+            std::cout << "levelProps.push_back(BackgroundProp(" << obj.x << ", " << obj.y
+                      << ", spriteSheet, CASTLE_LAYOUT));\n";
         }
     }
     std::cout << "// --- End Level Editor Output ---\n" << std::flush;
@@ -989,7 +987,6 @@ static std::vector<PaletteItem> BuildPalette() {
     items.push_back({elevator, "Elevator", "Special"});
     items.push_back({{ObjectType::Ground, 0, 0, TILE_SIZE * 8, TILE_SIZE * 2}, "Ground", "Special"});
     items.push_back({{ObjectType::FlagPole, 0, 0}, "Flag Pole", "Special"});
-    items.push_back({{ObjectType::CastleScenery, 0, 0}, "Castle", "Scenery"});
 
     for (int i = 0; i < (int)GetBackgroundPropDefinitions().size(); i++) {
         items.push_back({MakePropObject(i, 0, 0), GetBackgroundPropDefinitions()[i].displayName, "Scenery"});
