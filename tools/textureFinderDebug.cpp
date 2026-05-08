@@ -69,16 +69,16 @@ int main(int argc, char* argv[]) {
             // Only print if there's an actual area selected
             if (width > 0 && height > 0) {
                 printf("\n// --- New Sprite Selection ---\n");
-                printf("Rectangle source = { %.0ff, %.0ff, %.0ff, %.0ff };\n", 
+                printf("Rectangle source = { %.0f.0f, %.0f.0f, %.0f.0f, %.0f.0f };\n", 
                         rectX, rectY, width, height);
                 
-                printf("Rectangle dest = { x, y, %.0ff, %.0ff }; // replace x, y\n", 
+                printf("Rectangle dest = { x, y, %.0f.0f, %.0f.0f }; // replace x, y\n", 
                         width, height);
                 
                 printf("DrawTexturePro(sprites, source, dest, (Vector2){ 0, 0 }, 0.0f, WHITE);\n");
                 
                 // Cleaned up the extra printf line for clarity
-                printf("DrawTexturePro(sprites, (Rectangle){ %.0ff, %.0ff, %.0ff, %.0ff }, (Rectangle){ x, y, %.0ff, %.0ff }, (Vector2){ 0, 0 }, 0.0f, WHITE);\n", 
+                printf("DrawTexturePro(sprites, (Rectangle){ %.0f.0f, %.0f.0f, %.0f.0f, %.0f.0f }, (Rectangle){ x, y, %.0f.0f, %.0f.0f }, (Vector2){ 0, 0 }, 0.0f, WHITE);\n", 
                         rectX, rectY, width, height, width, height);            
             }
         }
