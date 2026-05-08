@@ -1288,6 +1288,7 @@ void LoadLevel13(
     blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((51 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
     blocks.push_back(std::make_unique<IslandSolidTopRightBlock>((52 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
     blocks.push_back(std::make_unique<IslandSolidTopLeftBlock>((59 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
+    blocks.push_back(std::make_unique<PowerUpBlock>((59 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "mushroom", GetSceneType(SceneKind::Overworld)));
     blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((60 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
     blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((61 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
     blocks.push_back(std::make_unique<IslandSolidMiddleBlock>((62 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Overworld)));
