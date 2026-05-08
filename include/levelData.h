@@ -25,6 +25,7 @@ namespace LevelAreaIds {
     static const char* const Level12Underground = "level_1_2_underground";
     static const char* const Level12Subarea = "level_1_2_subarea";
     static const char* const Level12Final = "level_1_2_final";
+    static const char* const Level13 = "level_1_3";
 }
 
 using LevelLoadFunction = void (*)(

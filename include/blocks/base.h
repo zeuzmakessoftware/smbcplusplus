@@ -48,6 +48,7 @@ public:
     virtual Rectangle returnRec();
     virtual void update(Rectangle marioRec, float& marioVelY, bool isBig = false) = 0;
     virtual void draw() = 0;
+    virtual bool hasCollision() const { return true; }
     virtual bool justBumped() { return false; }
 
     int getRectX() { return rectXPos; }

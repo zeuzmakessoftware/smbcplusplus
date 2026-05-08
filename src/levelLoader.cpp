@@ -32,8 +32,7 @@ void LevelLoader::load(const LevelAreaId& nextArea, Vector2 marioStart, Mario& m
 void LevelLoader::rebuildCollisionObjects() {
     collisionObjects.clear();
     for (auto& block : blocks) {
-        auto* pBlock = dynamic_cast<PowerUpBlock*>(block.get());
-        if (pBlock && !pBlock->hasCollision()) {
+        if (!block->hasCollision()) {
             continue;
         }
         collisionObjects.push_back(block->returnRec());
@@ -50,8 +49,7 @@ void LevelLoader::updateLifts(Mario& mario, float cameraX) {
     std::vector<Rectangle> solidObjects;
     solidObjects.reserve(collisionObjects.size());
     for (auto& block : blocks) {
-        auto* pBlock = dynamic_cast<PowerUpBlock*>(block.get());
-        if (pBlock && !pBlock->hasCollision()) {
+        if (!block->hasCollision()) {
             continue;
         }
         solidObjects.push_back(block->returnRec());
