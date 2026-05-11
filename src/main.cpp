@@ -401,6 +401,12 @@ int main() {
                     else ++it;
                 }
 
+                if (!MarioObj.getIsTransforming() && !MarioObj.getIsFireTransforming()) {
+                    for (auto& fireBar : levelLoader.fireBars) {
+                        fireBar.update(MarioObj, isDead, deathTimer, camera.target.x);
+                    }
+                }
+
                 for (auto& koopa : levelLoader.koopas) {
                     if (!koopa->isMovingShell()) continue;
 
@@ -558,6 +564,7 @@ int main() {
                     for (auto& flower : activeFireFlowers) flower->draw();
                     for (auto& star : activeStars) star->draw();
                     for (auto& fireball : activeFireballs) fireball->draw();
+                    for (auto& fireBar : levelLoader.fireBars) fireBar.draw();
                     for (auto& goom : levelLoader.goombas) goom->draw();
                     for (auto& koopa : levelLoader.koopas) koopa->draw();
 

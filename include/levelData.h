@@ -9,6 +9,7 @@
 #include "blocks.h"
 #include "castleFlagpole.h"
 #include "drawTiledRect.h"
+#include "firebar.h"
 #include "goomba.h"
 #include "koopa.h"
 #include "lift.h"
@@ -34,6 +35,7 @@ using LevelLoadFunction = void (*)(
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
+    std::vector<FireBar>& fireBars,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,

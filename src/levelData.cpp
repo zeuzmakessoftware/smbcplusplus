@@ -19,6 +19,7 @@ void LoadLevel1(
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
+    std::vector<FireBar>& fireBars,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -247,6 +248,7 @@ void LoadLevel1Subarea(
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
+    std::vector<FireBar>& fireBars,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -346,6 +348,7 @@ void LoadLevel12EntranceCutscene(
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
+    std::vector<FireBar>& fireBars,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -389,6 +392,7 @@ void LoadLevel12UndergroundStart(
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
+    std::vector<FireBar>& fireBars,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -833,6 +837,7 @@ void LoadLevel12Subarea(
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
+    std::vector<FireBar>& fireBars,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -968,6 +973,7 @@ void LoadLevel12Final(
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
+    std::vector<FireBar>& fireBars,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -1054,6 +1060,7 @@ void LoadLevel13(
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
+    std::vector<FireBar>& fireBars,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -1506,6 +1513,7 @@ void LoadLevel14(
     std::vector<std::unique_ptr<Goomba>>& goombas,
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
+    std::vector<FireBar>& fireBars,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -1527,8 +1535,17 @@ void LoadLevel14(
     followCamera = true;
 
     //castleFlagpole = std::make_unique<CastleFlagpole>(152.0f, 600.0f, spriteSheet, mushroomSheet, marioSheet); no castle just bow wow
+    fireBars.emplace_back(1281, 495, 6, mushroomSheet, true, 0.0f);
+    fireBars.emplace_back(2079, 327, 6, mushroomSheet, true, 0.0f);
+    fireBars.emplace_back(2541, 327, 6, mushroomSheet, true, 90.0f);
+    fireBars.emplace_back(2835, 327, 6, mushroomSheet, true, 180.0f);
+    fireBars.emplace_back(3213, 453, 6, mushroomSheet, true, 0.0f);
+    fireBars.emplace_back(3549, 453, 6, mushroomSheet, true, 90.0f);
+    fireBars.emplace_back(3717, 243, 6, mushroomSheet, true, 180.0f);
+
+
     blocks.push_back(std::make_unique<DrawCastleTiledRect>(
-    0, 474, 546, 210, spriteSheet, GetSceneType(SceneKind::Castle)
+        0, 474, 546, 210, spriteSheet, GetSceneType(SceneKind::Castle)
     ));
     blocks.push_back(std::make_unique<castleBrickBlock>((0 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
     blocks.push_back(std::make_unique<castleBrickBlock>((0 * TILE_SIZE), (9 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
@@ -1556,6 +1573,61 @@ void LoadLevel14(
     blocks.push_back(std::make_unique<PowerUpBlock>((30 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, mushroomSheet, "mushroom", GetSceneType(SceneKind::Castle)));
     blocks.push_back(std::make_unique<castleBrickBlock>((29 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
     blocks.push_back(std::make_unique<castleBrickBlock>((31 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<EmptyBlock>((30 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        1470, 432, 1554, 252, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        1008, 138, 546, 42, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        1554, 138, 1470, 168, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
+    blocks.push_back(std::make_unique<EmptyBlock>((37 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<EmptyBlock>((49 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<EmptyBlock>((60 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<EmptyBlock>((67 * TILE_SIZE), (7 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        3024, 474, 1344, 210, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
+    blocks.push_back(std::make_unique<EmptyBlock>((76 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<EmptyBlock>((84 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        0, 138, 210, 42, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
+    blocks.push_back(std::make_unique<castleBrickBlock>((4 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        3024, 138, 1050, 42, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
+    blocks.push_back(std::make_unique<castleBrickBlock>((80 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<EmptyBlock>((80 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<EmptyBlock>((92 * TILE_SIZE), (10 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<castleBrickBlock>((88 * TILE_SIZE), (4 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<EmptyBlock>((88 * TILE_SIZE), (5 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        4074, 138, 294, 126, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        4368, 600, 966, 84, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        4368, 138, 1554, 42, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        4872, 474, 168, 126, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        5124, 474, 210, 126, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        5124, 180, 210, 84, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        5880, 474, 126, 210, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        5922, 138, 84, 168, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
 }
 
 const std::vector<LevelAreaConfig>& GetLevelAreaConfigs() {
@@ -1649,7 +1721,7 @@ const std::vector<LevelAreaConfig>& GetLevelAreaConfigs() {
         {
             LevelAreaIds::Level14,
             LoadLevel14,
-            {(2.0f * TILE_SIZE) + 4.0f, (2.0f * TILE_SIZE) + 4.0f},
+            {(2.0f * TILE_SIZE) + 4.0f, (6.0f * TILE_SIZE) + 4.0f},
             1,
             4,
             true,

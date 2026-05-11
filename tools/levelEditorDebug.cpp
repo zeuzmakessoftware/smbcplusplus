@@ -27,6 +27,7 @@ enum class ObjectType {
     WarpPipe,
     PipeWall,
     Lift,
+    FireBar,
     PiranhaPlant,
     CastleScenery,
     FlagPole
@@ -54,6 +55,9 @@ struct LevelObject {
     int liftSpeed = 72;
     int liftMinTravel = -32;
     int liftMaxTravel = 680;
+    int fireBarLength = 6;
+    bool fireBarClockwise = true;
+    int fireBarStartAngle = 0;
 };
 
 struct PaletteItem {
@@ -97,6 +101,7 @@ static const char* TypeName(ObjectType type) {
         case ObjectType::WarpPipe: return "Warp Pipe";
         case ObjectType::PipeWall: return "Pipe Wall";
         case ObjectType::Lift: return "Lift";
+        case ObjectType::FireBar: return "Fire Bar";
         case ObjectType::PiranhaPlant: return "Piranha Plant";
         case ObjectType::CastleScenery: return "Castle";
         case ObjectType::FlagPole: return "Flag Pole";
@@ -214,7 +219,7 @@ static LevelObject MakeBlockObject(int blockIndex, int x, int y) {
 static int BlockIndexForClassName(const std::string& className) {
     const std::vector<BlockDefinition>& blocks = GetBlockDefinitions();
     for (int i = 0; i < (int)blocks.size(); i++) {
-        if (className.find(blocks[i].className) != std::string::npos) {
+        if (className == blocks[i].className) {
             return i;
         }
     }
@@ -237,6 +242,10 @@ static Rectangle ObjectBounds(const LevelObject& obj) {
             return {(float)obj.liftMinTravel, (float)obj.y, (float)(obj.liftMaxTravel - obj.liftMinTravel + obj.w), 21.0f};
         }
         return {(float)obj.x, (float)obj.liftMinTravel, (float)obj.w, (float)(obj.liftMaxTravel - obj.liftMinTravel + 21)};
+    }
+    if (obj.type == ObjectType::FireBar) {
+        const float reach = 21.0f * (float)(std::max(1, obj.fireBarLength) - 1) + 9.0f;
+        return {(float)obj.x - reach, (float)obj.y - reach, reach * 2.0f, reach * 2.0f};
     }
     if (obj.type == ObjectType::Pipe || obj.type == ObjectType::WarpPipe) {
         return {(float)obj.x, (float)obj.y, (float)(obj.pipeWide * TILE_SIZE), (float)(obj.pipeHigh * TILE_SIZE)};
@@ -269,7 +278,9 @@ static int FirstGridLine(int minValue, int gridSize, int offset = 0) {
 }
 
 static int SnapXForType(ObjectType type, float value) {
-    (void)type;
+    if (type == ObjectType::FireBar) {
+        return SnapWithOffset(value, TILE_SIZE, TILE_SIZE / 2);
+    }
     return Snap(value, TILE_SIZE);
 }
 
@@ -282,6 +293,9 @@ static int SnapYForType(ObjectType type, float value) {
     }
     if (type == ObjectType::PiranhaPlant) {
         return SnapWithOffset(value, TILE_SIZE, BLOCK_GRID_OFFSET_Y);
+    }
+    if (type == ObjectType::FireBar) {
+        return SnapWithOffset(value, TILE_SIZE, BLOCK_GRID_OFFSET_Y + TILE_SIZE / 2);
     }
     if (type == ObjectType::Block || type == ObjectType::CoinBlock ||
         type == ObjectType::MushroomBlock || type == ObjectType::FireFlowerBlock ||
@@ -319,6 +333,10 @@ static void SnapObject(LevelObject& obj) {
     }
     if (obj.type == ObjectType::PiranhaPlant) {
         obj.w = std::max(TILE_SIZE, Snap(obj.w, TILE_SIZE));
+    }
+    if (obj.type == ObjectType::FireBar) {
+        obj.fireBarLength = std::max(1, obj.fireBarLength);
+        obj.fireBarStartAngle = ((obj.fireBarStartAngle % 360) + 360) % 360;
     }
     if (obj.type == ObjectType::Pipe || obj.type == ObjectType::WarpPipe || obj.type == ObjectType::PipeWall) {
         obj.pipeWide = std::max(1, obj.pipeWide);
@@ -470,6 +488,26 @@ static void DrawPiranhaPlant(const LevelObject& obj, Texture2D enemiesSheet) {
     DrawRectangleLinesEx({(float)obj.x, (float)obj.y - plantH, (float)obj.w, plantH}, 1.0f, Fade(RED, 0.7f));
 }
 
+static void DrawFireBar(const LevelObject& obj, Texture2D mushroomSheet) {
+    const float radians = obj.fireBarStartAngle * DEG2RAD;
+    const float spacing = 21.0f;
+    const float size = 18.0f;
+    const float radius = size * 0.5f;
+    DrawCircle((float)obj.x, (float)obj.y, 4.0f, Fade(YELLOW, 0.75f));
+    for (int i = 0; i < std::max(1, obj.fireBarLength); i++) {
+        float distance = spacing * (float)i;
+        float cx = obj.x + std::cos(radians) * distance;
+        float cy = obj.y + std::sin(radians) * distance;
+        DrawSpritePart(mushroomSheet, {180.0f, 54.0f, 8.0f, 8.0f}, {cx - radius, cy - radius, size, size});
+    }
+    Vector2 end = {
+        obj.x + std::cos(radians) * spacing * (float)(std::max(1, obj.fireBarLength) - 1),
+        obj.y + std::sin(radians) * spacing * (float)(std::max(1, obj.fireBarLength) - 1)
+    };
+    DrawLineEx({(float)obj.x, (float)obj.y}, end, 2.0f, Fade(ORANGE, 0.55f));
+    DrawText(obj.fireBarClockwise ? "CW" : "CCW", obj.x + 10, obj.y - 26, 12, ORANGE);
+}
+
 static void DrawObject(const LevelObject& obj, Texture2D spriteSheet, Texture2D mushroomSheet, Texture2D enemiesSheet, const SceneType& scene) {
     switch (obj.type) {
         case ObjectType::BackgroundProp:
@@ -524,6 +562,9 @@ static void DrawObject(const LevelObject& obj, Texture2D spriteSheet, Texture2D 
             break;
         case ObjectType::Lift:
             DrawLift(obj, mushroomSheet);
+            break;
+        case ObjectType::FireBar:
+            DrawFireBar(obj, mushroomSheet);
             break;
         case ObjectType::PiranhaPlant:
             DrawPiranhaPlant(obj, enemiesSheet);
@@ -583,6 +624,11 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sc
         } else if (obj.type == ObjectType::PiranhaPlant) {
             std::cout << "piranhaPlants.push_back(std::make_unique<PiranhaPlant>(" << Expr(obj.x)
                       << ", " << Expr(obj.y) << ", " << Expr(obj.w) << ", enemiesSheet));\n";
+        } else if (obj.type == ObjectType::FireBar) {
+            std::cout << "fireBars.emplace_back(" << Expr(obj.x)
+                      << ", " << Expr(obj.y) << ", " << obj.fireBarLength
+                      << ", mushroomSheet, " << (obj.fireBarClockwise ? "true" : "false")
+                      << ", " << FloatLiteral(obj.fireBarStartAngle) << ");\n";
         } else if (obj.type == ObjectType::Coin) {
             std::cout << "coins.emplace_back((float)" << Expr(obj.x)
                       << ", (float)" << Expr(obj.y) << ", spriteSheet, " << sceneExpr << ");\n";
@@ -836,6 +882,17 @@ static void ParseLevelCode(const std::string& code, std::vector<LevelObject>& ob
                 obj.w = std::max(TILE_SIZE, ReadExpr(args[2]));
                 objects.push_back(obj);
             }
+        } else if (statement.find("fireBars.emplace_back") != std::string::npos ||
+                   statement.find("FireBar") != std::string::npos) {
+            std::string constructorName = statement.find("emplace_back") != std::string::npos ? "emplace_back" : "FireBar";
+            std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, constructorName));
+            if (args.size() >= 3) {
+                LevelObject obj = {ObjectType::FireBar, ReadExpr(args[0]), ReadExpr(args[1])};
+                obj.fireBarLength = std::max(1, ReadExpr(args[2]));
+                if (args.size() >= 5) obj.fireBarClockwise = args[4].find("true") != std::string::npos;
+                if (args.size() >= 6) obj.fireBarStartAngle = ReadExpr(args[5]);
+                objects.push_back(obj);
+            }
         } else if (statement.find("Lift::") != std::string::npos) {
             EditorLiftMovement movement = ReadLiftMovement(statement);
             std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, LiftFactoryName(movement)));
@@ -991,6 +1048,11 @@ static LevelObject MakeAddObject(ObjectType addType, int addBlockIndex, int addP
     if (addType == ObjectType::PiranhaPlant) {
         obj.w = TILE_SIZE * 2;
     }
+    if (addType == ObjectType::FireBar) {
+        obj.fireBarLength = 6;
+        obj.fireBarClockwise = true;
+        obj.fireBarStartAngle = 0;
+    }
     return obj;
 }
 
@@ -1014,6 +1076,10 @@ static std::vector<PaletteItem> BuildPalette() {
     paratroopa.liftStartsPositive = true;
     items.push_back({paratroopa, "Paratroopa", "Enemies"});
     items.push_back({{ObjectType::PiranhaPlant, 0, 0, TILE_SIZE * 2, TILE_SIZE}, "Piranha", "Enemies"});
+    LevelObject fireBar = {ObjectType::FireBar, 0, 0};
+    fireBar.fireBarLength = 6;
+    fireBar.fireBarClockwise = true;
+    items.push_back({fireBar, "Fire Bar", "Enemies"});
 
     LevelObject pipe = {ObjectType::Pipe, 0, 0};
     pipe.pipeWide = 2;
@@ -1137,6 +1203,12 @@ static void DrawPalettePreview(const LevelObject& item, Rectangle box, Texture2D
         case ObjectType::PiranhaPlant:
             DrawSpritePart(enemiesSheet, {0.0f, 138.0f, 16.0f, 24.0f}, {cx - 14.0f, top - 7.0f, 28.0f, 42.0f});
             break;
+        case ObjectType::FireBar:
+            DrawCircle((int)(cx - 18), (int)(top + 22), 8.0f, ORANGE);
+            DrawCircle((int)cx, (int)(top + 22), 8.0f, ORANGE);
+            DrawCircle((int)(cx + 18), (int)(top + 22), 8.0f, ORANGE);
+            DrawSpritePart(mushroomSheet, {180.0f, 54.0f, 8.0f, 8.0f}, {cx - 8.0f, top + 14.0f, 16.0f, 16.0f});
+            break;
         case ObjectType::Pipe:
         case ObjectType::WarpPipe:
             if (item.pipeOrientation == PipeOrientation::Vertical) {
@@ -1255,7 +1327,7 @@ static int DrawPalette(const std::vector<PaletteItem>& palette, ObjectType addTy
         x += PALETTE_CELL_W;
     }
 
-    DrawText("Hotkeys: 1 block, 2 ? coin, 3 ? mushroom, 4 ? fire, 5 coin, 6 goomba, Shift+6 koopa, Ctrl+6 paratroopa, 7 pipe, 8 ground, L lift, F flag", 12, PALETTE_HEIGHT - 24, 14, Fade(RAYWHITE, 0.86f));
+    DrawText("Hotkeys: 1 block, 2 ? coin, 3 ? mushroom, 4 ? fire, 5 coin, 6 goomba, Shift+6 koopa, Ctrl+6 paratroopa, 7 pipe, 8 ground, L lift, B fire bar, F flag", 12, PALETTE_HEIGHT - 24, 14, Fade(RAYWHITE, 0.86f));
     return hovered;
 }
 
@@ -1386,6 +1458,7 @@ int main() {
                 addLiftStartsPositive = false;
                 addLiftWidth = TILE_SIZE * 3;
             }
+            if (IsKeyPressed(KEY_B)) addType = ObjectType::FireBar;
             if (IsKeyPressed(KEY_F)) addType = ObjectType::FlagPole;
             if (IsKeyPressed(KEY_COMMA) && !blocks.empty()) {
                 addType = ObjectType::Block;
@@ -1529,7 +1602,14 @@ int main() {
                     }
                     if (IsKeyPressed(KEY_T)) obj.liftStartsPositive = !obj.liftStartsPositive;
                 }
+                if (obj.type == ObjectType::FireBar) {
+                    if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_D)) obj.fireBarLength++;
+                    if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_A)) obj.fireBarLength = std::max(1, obj.fireBarLength - 1);
+                    if (IsKeyPressed(KEY_R)) obj.fireBarStartAngle = (obj.fireBarStartAngle + 90) % 360;
+                    if (IsKeyPressed(KEY_T)) obj.fireBarClockwise = !obj.fireBarClockwise;
+                }
             }
+            if (selected >= 0 && selected < (int)objects.size()) SnapObject(objects[selected]);
         }
 
         BeginDrawing();
@@ -1571,13 +1651,16 @@ int main() {
             (objects[selected].type == ObjectType::Ground || objects[selected].type == ObjectType::CastleGround ||
              objects[selected].type == ObjectType::Pipe ||
              objects[selected].type == ObjectType::WarpPipe || objects[selected].type == ObjectType::PipeWall ||
-             objects[selected].type == ObjectType::Lift || objects[selected].type == ObjectType::KoopaParatroopa)) {
+             objects[selected].type == ObjectType::Lift || objects[selected].type == ObjectType::KoopaParatroopa ||
+             objects[selected].type == ObjectType::FireBar)) {
             DrawText(objects[selected].type == ObjectType::Pipe || objects[selected].type == ObjectType::WarpPipe
                 ? "Selected pipe: W/A/S/D resize | R cycle vertical/right/left"
                 : objects[selected].type == ObjectType::Lift
                 ? "Selected lift: A/D width | W/S travel | R cycle mode | T toggle direction"
                 : objects[selected].type == ObjectType::KoopaParatroopa
                 ? "Selected paratroopa: W/S travel | T toggle direction"
+                : objects[selected].type == ObjectType::FireBar
+                ? "Selected fire bar: W/D longer | S/A shorter | R rotate 90 | T toggle direction"
                 : "Selected size: W/A/S/D resize", 560, screenHeight - 22, 16, ORANGE);
         }
 
