@@ -118,7 +118,7 @@ int main() {
         screenWidth
     });
     // Change this to another LevelAreaIds value or registered area id to boot elsewhere.
-    LevelAreaId startingArea = LevelAreaIds::Level13;
+    LevelAreaId startingArea = LevelAreaIds::Level11;
     LevelAreaId respawnArea = startingArea;
 
     Camera2D camera = { 0 };
