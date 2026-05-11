@@ -1628,6 +1628,50 @@ void LoadLevel14(
     blocks.push_back(std::make_unique<DrawCastleTiledRect>(
         5922, 138, 84, 168, spriteSheet, GetSceneType(SceneKind::Castle)
     ));
+    blocks.push_back(std::make_unique<lavaTopBlock>((13 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((14 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((13 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((14 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((13 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((14 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((26 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((27 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((28 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((26 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((27 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((28 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((32 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((33 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((34 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((32 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((33 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((34 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((127 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((128 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((129 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((130 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((131 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((132 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((133 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((134 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((135 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((136 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((137 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((138 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaTopBlock>((139 * TILE_SIZE), (14 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((127 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((128 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((129 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((130 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((131 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((132 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((133 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((134 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((135 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((136 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((137 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((138 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<lavaBackgroundBlock>((139 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
 }
 
 const std::vector<LevelAreaConfig>& GetLevelAreaConfigs() {

@@ -13,5 +13,6 @@
 #include "blocks/shinyBlock.h"
 #include "blocks/islandBlock.h"
 #include "blocks/castleBlock.h"
+#include "blocks/lavaBlock.h"
 
 #endif
