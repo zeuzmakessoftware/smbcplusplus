@@ -1,8 +1,6 @@
 #include "blocks/castleBlock.h"
 
-namespace {
-const Rectangle castleBrickBlockSource = {0.0f, 151.0f, 16.0f, 16.0f};
-}
+extern const Rectangle castleBrickBlockSource = {0.0f, 151.0f, 16.0f, 16.0f};
 
 castleBlock::castleBlock(int x, int y, Texture2D sprites, Rectangle source, bool collidable,
                          const SceneType& scene)

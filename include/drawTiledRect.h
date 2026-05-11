@@ -21,4 +21,10 @@ class DrawTiledRect : public Block {
         void draw() override;
 };
 
+class DrawCastleTiledRect : public DrawTiledRect {
+    public:
+        DrawCastleTiledRect(int rectX, int rectY, int rectW, int rectH, Texture2D sprites,
+            const SceneType& scene = GetSceneType(SceneKind::Castle));
+};
+
 #endif

@@ -3,6 +3,8 @@
 
 #include "blocks/base.h"
 
+extern const Rectangle castleBrickBlockSource;
+
 class castleBlock : public Block {
 protected:
     Rectangle source;

@@ -12,5 +12,6 @@
 #include "blocks/pipeBlock.h"
 #include "blocks/shinyBlock.h"
 #include "blocks/islandBlock.h"
+#include "blocks/castleBlock.h"
 
 #endif

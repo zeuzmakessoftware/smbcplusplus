@@ -28,3 +28,8 @@ void DrawTiledRect::draw() {
         }
     }
 }
+
+DrawCastleTiledRect::DrawCastleTiledRect(int rectX, int rectY, int rectW, int rectH, Texture2D sprites,
+    const SceneType& scene)
+    : DrawTiledRect(rectX, rectY, rectW, rectH, sprites, castleBrickBlockSource, TILE_SIZE, TILE_SIZE, scene)
+    {}

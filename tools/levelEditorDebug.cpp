@@ -17,6 +17,7 @@ enum class ObjectType {
     Koopa,
     KoopaParatroopa,
     Ground,
+    CastleGround,
     Coin,
     CoinBlock,
     MushroomBlock,
@@ -86,6 +87,7 @@ static const char* TypeName(ObjectType type) {
         case ObjectType::Koopa: return "Koopa";
         case ObjectType::KoopaParatroopa: return "Koopa Paratroopa";
         case ObjectType::Ground: return "Ground";
+        case ObjectType::CastleGround: return "Castle Ground";
         case ObjectType::Coin: return "Coin";
         case ObjectType::CoinBlock: return "Coin Block";
         case ObjectType::MushroomBlock: return "Mushroom Block";
@@ -229,7 +231,7 @@ static Rectangle ObjectBounds(const LevelObject& obj) {
         }
         return {(float)obj.x, (float)obj.y, (float)(maxX * TILE_SIZE), (float)(maxY * TILE_SIZE)};
     }
-    if (obj.type == ObjectType::Ground) return {(float)obj.x, (float)obj.y, (float)obj.w, (float)obj.h};
+    if (obj.type == ObjectType::Ground || obj.type == ObjectType::CastleGround) return {(float)obj.x, (float)obj.y, (float)obj.w, (float)obj.h};
     if (obj.type == ObjectType::Lift) {
         if (obj.liftMovement == EditorLiftMovement::HorizontalBounce) {
             return {(float)obj.liftMinTravel, (float)obj.y, (float)(obj.liftMaxTravel - obj.liftMinTravel + obj.w), 21.0f};
@@ -294,7 +296,7 @@ static int SnapYForType(ObjectType type, float value) {
 static void SnapObject(LevelObject& obj) {
     obj.x = SnapXForType(obj.type, obj.x);
     obj.y = SnapYForType(obj.type, obj.y);
-    if (obj.type == ObjectType::Ground) {
+    if (obj.type == ObjectType::Ground || obj.type == ObjectType::CastleGround) {
         obj.w = std::max(TILE_SIZE, Snap(obj.w, TILE_SIZE));
         obj.h = std::max(TILE_SIZE, Snap(obj.h, TILE_SIZE));
     }
@@ -348,6 +350,14 @@ static void DrawGround(const LevelObject& obj, Texture2D spriteSheet, const Scen
     for (int y = obj.y; y < obj.y + obj.h; y += TILE_SIZE) {
         for (int x = obj.x; x < obj.x + obj.w; x += TILE_SIZE) {
             DrawSpritePart(spriteSheet, scene.groundBlock, {(float)x, (float)y, TILE_SIZE, TILE_SIZE});
+        }
+    }
+}
+
+static void DrawCastleGround(const LevelObject& obj, Texture2D spriteSheet) {
+    for (int y = obj.y; y < obj.y + obj.h; y += TILE_SIZE) {
+        for (int x = obj.x; x < obj.x + obj.w; x += TILE_SIZE) {
+            DrawSpritePart(spriteSheet, castleBrickBlockSource, {(float)x, (float)y, TILE_SIZE, TILE_SIZE});
         }
     }
 }
@@ -477,6 +487,9 @@ static void DrawObject(const LevelObject& obj, Texture2D spriteSheet, Texture2D 
         case ObjectType::Ground:
             DrawGround(obj, spriteSheet, scene);
             break;
+        case ObjectType::CastleGround:
+            DrawCastleGround(obj, spriteSheet);
+            break;
         case ObjectType::Coin:
             DrawSpritePart(mushroomSheet, {180, 36, 8, 16}, {(float)obj.x + 10, (float)obj.y, 22, TILE_SIZE});
             break;
@@ -598,6 +611,11 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sc
                           << "    " << obj.x << ", " << obj.y << ", " << obj.w << ", " << obj.h
                           << ", spriteSheet, " << sceneExpr << ".groundBlock, TILE_SIZE, TILE_SIZE, "
                           << sceneExpr << "\n));\n";
+                break;
+            case ObjectType::CastleGround:
+                std::cout << "blocks.push_back(std::make_unique<DrawCastleTiledRect>(\n"
+                          << "    " << obj.x << ", " << obj.y << ", " << obj.w << ", " << obj.h
+                          << ", spriteSheet, " << sceneExpr << "\n));\n";
                 break;
             case ObjectType::Block:
                 if (std::string(BlockDefinitionFor(obj).className) == "MushroomBrickBlock" ||
@@ -832,6 +850,11 @@ static void ParseLevelCode(const std::string& code, std::vector<LevelObject>& ob
                 obj.liftStartsPositive = args[7].find("true") != std::string::npos;
                 objects.push_back(obj);
             }
+        } else if (statement.find("DrawCastleTiledRect") != std::string::npos) {
+            std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, "DrawCastleTiledRect"));
+            if (args.size() >= 4) {
+                objects.push_back({ObjectType::CastleGround, ReadExpr(args[0]), ReadExpr(args[1]), ReadExpr(args[2]), ReadExpr(args[3])});
+            }
         } else if (statement.find("DrawTiledRect") != std::string::npos) {
             std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, "DrawTiledRect"));
             if (args.size() >= 4) {
@@ -927,7 +950,7 @@ static LevelObject MakeAddObject(ObjectType addType, int addBlockIndex, int addP
     LevelObject obj = {addType, x, y};
     if (addType == ObjectType::Block) obj.blockIndex = addBlockIndex;
     if (addType == ObjectType::BackgroundProp) obj.propIndex = addPropIndex;
-    if (addType == ObjectType::Ground) {
+    if (addType == ObjectType::Ground || addType == ObjectType::CastleGround) {
         obj.w = TILE_SIZE * 8;
         obj.h = TILE_SIZE * 2;
     }
@@ -1036,6 +1059,7 @@ static std::vector<PaletteItem> BuildPalette() {
     elevator.liftSpeed = 80;
     items.push_back({elevator, "Elevator", "Special"});
     items.push_back({{ObjectType::Ground, 0, 0, TILE_SIZE * 8, TILE_SIZE * 2}, "Ground", "Special"});
+    items.push_back({{ObjectType::CastleGround, 0, 0, TILE_SIZE * 8, TILE_SIZE * 2}, "Castle Ground", "Special"});
     items.push_back({{ObjectType::FlagPole, 0, 0}, "Flag Pole", "Special"});
 
     for (int i = 0; i < (int)GetBackgroundPropDefinitions().size(); i++) {
@@ -1152,6 +1176,13 @@ static void DrawPalettePreview(const LevelObject& item, Rectangle box, Texture2D
             for (int x = 0; x < 2; x++) {
                 for (int y = 0; y < 2; y++) {
                     DrawSpritePart(spriteSheet, scene.groundBlock, {cx - 18.0f + x * 18.0f, top + y * 18.0f, 18.0f, 18.0f});
+                }
+            }
+            break;
+        case ObjectType::CastleGround:
+            for (int x = 0; x < 2; x++) {
+                for (int y = 0; y < 2; y++) {
+                    DrawSpritePart(spriteSheet, castleBrickBlockSource, {cx - 18.0f + x * 18.0f, top + y * 18.0f, 18.0f, 18.0f});
                 }
             }
             break;
@@ -1443,7 +1474,7 @@ int main() {
                 if (IsKeyPressed(KEY_RIGHT)) obj.x += move;
                 if (IsKeyPressed(KEY_UP)) obj.y -= move;
                 if (IsKeyPressed(KEY_DOWN)) obj.y += move;
-                if (obj.type == ObjectType::Ground) {
+                if (obj.type == ObjectType::Ground || obj.type == ObjectType::CastleGround) {
                     if (IsKeyPressed(KEY_W)) obj.h = std::max(TILE_SIZE, obj.h - TILE_SIZE);
                     if (IsKeyPressed(KEY_S)) obj.h += TILE_SIZE;
                     if (IsKeyPressed(KEY_A)) obj.w = std::max(TILE_SIZE, obj.w - TILE_SIZE);
@@ -1537,7 +1568,8 @@ int main() {
                  (int)objects.size()), 12, screenHeight - 22, 16, YELLOW);
 
         if (selected >= 0 && selected < (int)objects.size() &&
-            (objects[selected].type == ObjectType::Ground || objects[selected].type == ObjectType::Pipe ||
+            (objects[selected].type == ObjectType::Ground || objects[selected].type == ObjectType::CastleGround ||
+             objects[selected].type == ObjectType::Pipe ||
              objects[selected].type == ObjectType::WarpPipe || objects[selected].type == ObjectType::PipeWall ||
              objects[selected].type == ObjectType::Lift || objects[selected].type == ObjectType::KoopaParatroopa)) {
             DrawText(objects[selected].type == ObjectType::Pipe || objects[selected].type == ObjectType::WarpPipe
