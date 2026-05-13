@@ -84,6 +84,11 @@ void LevelLoader::scoreboardLevel(const LevelAreaId& requestedArea, int& world, 
     level = config->scoreboardLevel;
 }
 
+MusicTrack LevelLoader::musicTrack(const LevelAreaId& requestedArea) const {
+    const LevelAreaConfig* config = findConfig(requestedArea);
+    return config ? config->musicTrack : MusicTrack::Overworld;
+}
+
 bool LevelLoader::shouldFollowCamera() const {
     return followCamera;
 }

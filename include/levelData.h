@@ -17,6 +17,7 @@
 #include "mushroom.h"
 #include "piranhaPlant.h"
 #include "sceneType.h"
+#include "soundObject.h"
 
 using LevelAreaId = std::string;
 
@@ -57,6 +58,7 @@ struct LevelAreaConfig {
     int scoreboardWorld;
     int scoreboardLevel;
     bool underground;
+    MusicTrack musicTrack;
     bool hasFlagpole;
     bool level12EntranceCutscene;
     LevelAreaId flagpoleCompleteArea;

@@ -48,6 +48,7 @@ public:
 
     Vector2 defaultMarioStart(const LevelAreaId& area) const;
     void scoreboardLevel(const LevelAreaId& area, int& world, int& level) const;
+    MusicTrack musicTrack(const LevelAreaId& area) const;
     const LevelAreaId& currentArea() const;
     bool shouldFollowCamera() const;
     bool isUnderground() const;

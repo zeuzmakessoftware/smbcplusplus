@@ -21,6 +21,7 @@
 #include "scorepopup.h"
 #include "bowserBoss.h"
 #include "blocks/bridgeBlock.h"
+#include "soundObject.h"
 
 #define TILE_SIZE 42
 
@@ -153,6 +154,9 @@ int main() {
     Font nesFont = LoadFontEx("assets/fonts/super-mario-bros-nes.otf", 36, NULL, 0);
     SetTextureFilter(nesFont.texture, TEXTURE_FILTER_POINT);
 
+    SoundObject sound;
+    sound.load();
+
     std::vector<std::unique_ptr<Mushroom>> activeMushrooms;
     std::vector<std::unique_ptr<FireFlower>> activeFireFlowers;
     std::vector<std::unique_ptr<Star>> activeStars;
@@ -188,9 +192,12 @@ int main() {
     float deathTimer = 0.0f;
 
     auto StartDeath = [&]() {
-        if (!isDead && marioLives > 0) marioLives--;
+        if (isDead) return;
+        if (marioLives > 0) marioLives--;
         isDead = true;
         deathTimer = 4.0f;
+        sound.stopMusic();
+        sound.play(SoundCue::Death);
     };
 
     auto LoadArea = [&](const LevelAreaId& area, Vector2 marioStart) {
@@ -203,6 +210,7 @@ int main() {
         bowserBoss.reset();
 
         levelLoader.load(area, marioStart, MarioObj, camera, scorePopups);
+        sound.playMusic(levelLoader.musicTrack(area));
         isDead = false;
         pipeTransition.active = false;
         level12EntranceCutscene.active = levelLoader.isLevel12EntranceCutscene();
@@ -239,6 +247,7 @@ int main() {
         PipeOrientation orientation = warpPipe->getOrientation();
 
         pipeTransition.active = true;
+        sound.play(SoundCue::Pipe);
         pipeTransition.destination = warpPipe->getDestination();
         pipeTransition.exitPosition = warpPipe->getExitPosition();
         pipeTransition.orientation = orientation;
@@ -466,12 +475,15 @@ int main() {
             BeginDrawing();
                 if (IsKeyPressed(KEY_ENTER)) {
                     gameStarted = true;
+                    sound.play(SoundCue::GameStart);
+                    sound.playMusic(levelLoader.musicTrack(levelLoader.currentArea()));
                     levelIntro.start();
                 }
                 ClearBackground(BLACK);
                 DrawTextEx(nesFont, "press enter", (Vector2){50, 50}, 36, 2, WHITE);
             EndDrawing();
         } else {
+            sound.update();
             if (levelIntro.active) {
                 levelIntro.update(GetFrameTime());
             } else if (!isDead) {
@@ -486,6 +498,7 @@ int main() {
                     scoreboard.updateTimer(GetFrameTime());
                 }
                 scorePopups.update(GetFrameTime());
+                bool marioWasPoweredAtFrameStart = MarioObj.getIsBig() || MarioObj.getIsFire();
 
                 for (auto it = levelLoader.blocks.begin(); it != levelLoader.blocks.end(); ) {
                     float marioVelY = MarioObj.getVelY();
@@ -512,11 +525,15 @@ int main() {
                     
                     auto* brick = dynamic_cast<BrickBlock*>(it->get());
                     if (brick && brick->isDestroyed()) {
+                        sound.play(SoundCue::BrickBreak);
                         brick->SpawnBrickParticles(brickParticles);
                         it = levelLoader.blocks.erase(it);
                         
                         levelLoader.rebuildCollisionObjects();
                     } else {
+                        if (bumped) {
+                            sound.play(SoundCue::BlockBump);
+                        }
                         auto* pBlock = dynamic_cast<PowerUpBlock*>(it->get());
                         if (pBlock) {
                             if (bumped && pBlock->isHiddenBlock()) {
@@ -524,19 +541,27 @@ int main() {
                             }
                             if (bumped && pBlock->getItemType() == "coin") {
                                 scoreboard.addCoin();
+                                sound.play(SoundCue::Coin);
                             }
                             if (pBlock->justFinishedCoinAnimation()) {
                                 scorePopups.spawn(200, { pBlock->returnRec().x, pBlock->returnRec().y - 8.0f });
                             }
                             auto newMush = pBlock->takeMushroom();
-                            if (newMush) activeMushrooms.push_back(std::move(newMush));
+                            if (newMush) {
+                                sound.play(SoundCue::PowerupAppears);
+                                activeMushrooms.push_back(std::move(newMush));
+                            }
                             auto newFlower = pBlock->takeFireFlower();
-                            if (newFlower) activeFireFlowers.push_back(std::move(newFlower));
+                            if (newFlower) {
+                                sound.play(SoundCue::PowerupAppears);
+                                activeFireFlowers.push_back(std::move(newFlower));
+                            }
                         }
                         auto* coinBrick = dynamic_cast<CoinBrickBlock*>(it->get());
                         if (coinBrick) {
                             if (bumped) {
                                 scoreboard.addCoin();
+                                sound.play(SoundCue::Coin);
                             }
                             if (coinBrick->justFinishedCoinAnimation()) {
                                 scorePopups.spawn(200, { coinBrick->returnRec().x, coinBrick->returnRec().y - 8.0f });
@@ -545,14 +570,23 @@ int main() {
                         auto* starBlock = dynamic_cast<StarBrickBlock*>(it->get());
                         if (starBlock) {
                             auto newStar = starBlock->takeStar();
-                            if (newStar) activeStars.push_back(std::move(newStar));
+                            if (newStar) {
+                                sound.play(SoundCue::PowerupAppears);
+                                activeStars.push_back(std::move(newStar));
+                            }
                         }
                         auto* mushroomBrick = dynamic_cast<MushroomBrickBlock*>(it->get());
                         if (mushroomBrick) {
                             auto newMush = mushroomBrick->takeMushroom();
-                            if (newMush) activeMushrooms.push_back(std::move(newMush));
+                            if (newMush) {
+                                sound.play(SoundCue::PowerupAppears);
+                                activeMushrooms.push_back(std::move(newMush));
+                            }
                             auto newFlower = mushroomBrick->takeFireFlower();
-                            if (newFlower) activeFireFlowers.push_back(std::move(newFlower));
+                            if (newFlower) {
+                                sound.play(SoundCue::PowerupAppears);
+                                activeFireFlowers.push_back(std::move(newFlower));
+                            }
                         }
                         ++it;
                     }
@@ -562,6 +596,7 @@ int main() {
                     if (it->update(MarioObj.returnRec())) {
                         scoreboard.addCoin();
                         scoreboard.addScore(200);
+                        sound.play(SoundCue::Coin);
                     }
                     if (it->isCollected()) it = levelLoader.coins.erase(it);
                     else ++it;
@@ -576,6 +611,7 @@ int main() {
                     if ((*it)->justDefeated()) {
                         scoreboard.addScore(100);
                         scorePopups.spawn(100, { (*it)->getPos().x, (*it)->getPos().y - 10.0f });
+                        sound.play(SoundCue::EnemyDefeat);
                     }
                     if ((*it)->shouldRemove()) it = levelLoader.goombas.erase(it);
                     else ++it;
@@ -588,6 +624,7 @@ int main() {
                     if ((*it)->justDefeated()) {
                         scoreboard.addScore(100);
                         scorePopups.spawn(100, { (*it)->getPos().x, (*it)->getPos().y - 10.0f });
+                        sound.play(SoundCue::EnemyDefeat);
                     }
                     if ((*it)->shouldRemove()) it = levelLoader.koopas.erase(it);
                     else ++it;
@@ -600,6 +637,7 @@ int main() {
                     if ((*it)->justDefeated()) {
                         scoreboard.addScore(100);
                         scorePopups.spawn(100, { (*it)->getPos().x, (*it)->getPos().y - 10.0f });
+                        sound.play(SoundCue::EnemyDefeat);
                     }
                     if ((*it)->shouldRemove()) it = levelLoader.piranhaPlants.erase(it);
                     else ++it;
@@ -621,6 +659,7 @@ int main() {
                         if (bowserBoss->justDefeated()) {
                             scoreboard.addScore(5000);
                             scorePopups.spawn(5000, { CastleBowserX, CastleBowserY - 10.0f });
+                            sound.play(SoundCue::BowserDefeat);
                         }
                     }
                 }
@@ -634,6 +673,7 @@ int main() {
                             if (goom->justDefeated()) {
                                 scoreboard.addScore(100);
                                 scorePopups.spawn(100, { goom->getPos().x, goom->getPos().y - 10.0f });
+                                sound.play(SoundCue::EnemyDefeat);
                             }
                         }
                     }
@@ -644,6 +684,7 @@ int main() {
                             if (otherKoopa->justDefeated()) {
                                 scoreboard.addScore(100);
                                 scorePopups.spawn(100, { otherKoopa->getPos().x, otherKoopa->getPos().y - 10.0f });
+                                sound.play(SoundCue::EnemyDefeat);
                             }
                         }
                     }
@@ -663,6 +704,7 @@ int main() {
                             if (goom->justDefeated()) {
                                 scoreboard.addScore(100);
                                 scorePopups.spawn(100, { goom->getPos().x, goom->getPos().y - 10.0f });
+                                sound.play(SoundCue::EnemyDefeat);
                             }
                             fireball->destroy();
                         }
@@ -673,6 +715,7 @@ int main() {
                             if (koopa->justDefeated()) {
                                 scoreboard.addScore(100);
                                 scorePopups.spawn(100, { koopa->getPos().x, koopa->getPos().y - 10.0f });
+                                sound.play(SoundCue::EnemyDefeat);
                             }
                             fireball->destroy();
                         }
@@ -683,6 +726,7 @@ int main() {
                             if (plant->justDefeated()) {
                                 scoreboard.addScore(100);
                                 scorePopups.spawn(100, { plant->getPos().x, plant->getPos().y - 10.0f });
+                                sound.play(SoundCue::EnemyDefeat);
                             }
                             fireball->destroy();
                         }
@@ -698,24 +742,39 @@ int main() {
                     bool wasBig = MarioObj.getIsBig();
                     bool wasFire = MarioObj.getIsFire();
                     bool wasStarPowered = MarioObj.getIsStarPowered();
+                    int fireballsBefore = (int)activeFireballs.size();
+                    bool jumpPressed = IsKeyPressed(KEY_SPACE);
                     MarioObj.update(levelLoader.collisionObjects, camera.target.x, activeMushrooms, activeFireFlowers, activeStars, activeFireballs, mushroomSheet);
+                    if (jumpPressed) {
+                        sound.play(SoundCue::Jump);
+                    }
+                    if ((int)activeFireballs.size() > fireballsBefore) {
+                        sound.play(SoundCue::Fireball);
+                    }
                     int oneUps = MarioObj.takeCollectedOneUps();
                     for (int i = 0; i < oneUps; i++) {
                         marioLives++;
                         scorePopups.spawn(1, { MarioObj.getPos().x, MarioObj.getPos().y - 20.0f });
+                        sound.play(SoundCue::OneUp);
                     }
                     if (!wasBig && MarioObj.getIsBig()) {
                         scoreboard.addScore(1000);
                         scorePopups.spawn(1000, { MarioObj.getPos().x, MarioObj.getPos().y - 20.0f });
+                        sound.play(SoundCue::PowerupCollect);
                     }
                     if (!wasFire && MarioObj.getIsFire()) {
                         scoreboard.addScore(1000);
                         scorePopups.spawn(1000, { MarioObj.getPos().x, MarioObj.getPos().y - 20.0f });
+                        sound.play(SoundCue::PowerupCollect);
                     }
                     if (!wasStarPowered && MarioObj.getIsStarPowered()) {
                         scoreboard.addScore(1000);
                         scorePopups.spawn(1000, { MarioObj.getPos().x, MarioObj.getPos().y - 20.0f });
+                        sound.play(SoundCue::PowerupCollect);
                     }
+                }
+                if (!isDead && marioWasPoweredAtFrameStart && !MarioObj.getIsBig() && !MarioObj.getIsFire()) {
+                    sound.play(SoundCue::PlayerDamage);
                 }
 
                 bool wantsDown = IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S);
@@ -733,7 +792,11 @@ int main() {
                 }
 
                 if (levelLoader.hasFlagpole()) {
+                    bool flagpoleWasActive = levelLoader.castleFlagpole->isActive();
                     levelLoader.castleFlagpole->update(MarioObj, scoreboard, scorePopups, isDead);
+                    if (!flagpoleWasActive && levelLoader.castleFlagpole->isActive()) {
+                        sound.play(SoundCue::Flagpole);
+                    }
                 }
 
                 if (levelLoader.shouldFollowCamera()) {
@@ -830,6 +893,7 @@ int main() {
     UnloadTexture(enemiesSheet);
     UnloadTexture(hudSheet);
     UnloadFont(nesFont);
+    sound.unload();
     CloseWindow();
     return 0;
 }
