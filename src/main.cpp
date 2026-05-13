@@ -405,6 +405,13 @@ int main() {
                     for (auto& fireBar : levelLoader.fireBars) {
                         fireBar.update(MarioObj, isDead, deathTimer, camera.target.x);
                     }
+                    for (auto& bowserFire : levelLoader.bowserFires) {
+                        bowserFire->update(MarioObj, isDead, deathTimer, camera.target.x, (float)screenWidth);
+                    }
+                    for (auto it = levelLoader.bowserFires.begin(); it != levelLoader.bowserFires.end(); ) {
+                        if ((*it)->shouldRemove()) it = levelLoader.bowserFires.erase(it);
+                        else ++it;
+                    }
                 }
 
                 for (auto& koopa : levelLoader.koopas) {
@@ -565,6 +572,7 @@ int main() {
                     for (auto& star : activeStars) star->draw();
                     for (auto& fireball : activeFireballs) fireball->draw();
                     for (auto& fireBar : levelLoader.fireBars) fireBar.draw();
+                    for (auto& bowserFire : levelLoader.bowserFires) bowserFire->draw();
                     for (auto& goom : levelLoader.goombas) goom->draw();
                     for (auto& koopa : levelLoader.koopas) koopa->draw();
 

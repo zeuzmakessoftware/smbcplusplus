@@ -5,6 +5,7 @@
 #include <vector>
 #include <raylib.h>
 #include "backgroundProp.h"
+#include "bowserFire.h"
 #include "blocks.h"
 #include "castleFlagpole.h"
 #include "firebar.h"
@@ -32,6 +33,7 @@ public:
     std::vector<std::unique_ptr<Koopa>> koopas;
     std::vector<std::unique_ptr<PiranhaPlant>> piranhaPlants;
     std::vector<FireBar> fireBars;
+    std::vector<std::unique_ptr<BowserFire>> bowserFires;
     std::vector<Lift> lifts;
     std::vector<Coin> coins;
     std::vector<Rectangle> collisionObjects;

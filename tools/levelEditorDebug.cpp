@@ -28,6 +28,7 @@ enum class ObjectType {
     PipeWall,
     Lift,
     FireBar,
+    BowserFire,
     PiranhaPlant,
     CastleScenery,
     FlagPole
@@ -102,6 +103,7 @@ static const char* TypeName(ObjectType type) {
         case ObjectType::PipeWall: return "Pipe Wall";
         case ObjectType::Lift: return "Lift";
         case ObjectType::FireBar: return "Fire Bar";
+        case ObjectType::BowserFire: return "Bowser Fire";
         case ObjectType::PiranhaPlant: return "Piranha Plant";
         case ObjectType::CastleScenery: return "Castle";
         case ObjectType::FlagPole: return "Flag Pole";
@@ -247,6 +249,7 @@ static Rectangle ObjectBounds(const LevelObject& obj) {
         const float reach = 21.0f * (float)(std::max(1, obj.fireBarLength) - 1) + 9.0f;
         return {(float)obj.x - reach, (float)obj.y - reach, reach * 2.0f, reach * 2.0f};
     }
+    if (obj.type == ObjectType::BowserFire) return {(float)obj.x, (float)obj.y, 63.0f, 21.0f};
     if (obj.type == ObjectType::Pipe || obj.type == ObjectType::WarpPipe) {
         return {(float)obj.x, (float)obj.y, (float)(obj.pipeWide * TILE_SIZE), (float)(obj.pipeHigh * TILE_SIZE)};
     }
@@ -296,6 +299,9 @@ static int SnapYForType(ObjectType type, float value) {
     }
     if (type == ObjectType::FireBar) {
         return SnapWithOffset(value, TILE_SIZE, BLOCK_GRID_OFFSET_Y + TILE_SIZE / 2);
+    }
+    if (type == ObjectType::BowserFire) {
+        return Snap(value, TILE_SIZE);
     }
     if (type == ObjectType::Block || type == ObjectType::CoinBlock ||
         type == ObjectType::MushroomBlock || type == ObjectType::FireFlowerBlock ||
@@ -508,6 +514,12 @@ static void DrawFireBar(const LevelObject& obj, Texture2D mushroomSheet) {
     DrawText(obj.fireBarClockwise ? "CW" : "CCW", obj.x + 10, obj.y - 26, 12, ORANGE);
 }
 
+static void DrawBowserFire(const LevelObject& obj, Texture2D enemiesSheet) {
+    DrawLineEx({(float)obj.x, obj.y + 10.5f}, {obj.x - 84.0f, obj.y + 10.5f}, 2.0f, Fade(ORANGE, 0.6f));
+    DrawTriangle({obj.x - 92.0f, obj.y + 10.5f}, {obj.x - 78.0f, obj.y + 3.5f}, {obj.x - 78.0f, obj.y + 17.5f}, Fade(ORANGE, 0.8f));
+    DrawSpritePart(enemiesSheet, {102.0f, 242.0f, 24.0f, 8.0f}, {(float)obj.x, (float)obj.y, 63.0f, 21.0f});
+}
+
 static void DrawObject(const LevelObject& obj, Texture2D spriteSheet, Texture2D mushroomSheet, Texture2D enemiesSheet, const SceneType& scene) {
     switch (obj.type) {
         case ObjectType::BackgroundProp:
@@ -565,6 +577,9 @@ static void DrawObject(const LevelObject& obj, Texture2D spriteSheet, Texture2D 
             break;
         case ObjectType::FireBar:
             DrawFireBar(obj, mushroomSheet);
+            break;
+        case ObjectType::BowserFire:
+            DrawBowserFire(obj, enemiesSheet);
             break;
         case ObjectType::PiranhaPlant:
             DrawPiranhaPlant(obj, enemiesSheet);
@@ -629,6 +644,9 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sc
                       << ", " << Expr(obj.y) << ", " << obj.fireBarLength
                       << ", mushroomSheet, " << (obj.fireBarClockwise ? "true" : "false")
                       << ", " << FloatLiteral(obj.fireBarStartAngle) << ");\n";
+        } else if (obj.type == ObjectType::BowserFire) {
+            std::cout << "bowserFires.push_back(std::make_unique<BowserFire>(" << Expr(obj.x)
+                      << ", " << Expr(obj.y) << ", enemiesSheet));\n";
         } else if (obj.type == ObjectType::Coin) {
             std::cout << "coins.emplace_back((float)" << Expr(obj.x)
                       << ", (float)" << Expr(obj.y) << ", spriteSheet, " << sceneExpr << ");\n";
@@ -893,6 +911,9 @@ static void ParseLevelCode(const std::string& code, std::vector<LevelObject>& ob
                 if (args.size() >= 6) obj.fireBarStartAngle = ReadExpr(args[5]);
                 objects.push_back(obj);
             }
+        } else if (statement.find("BowserFire") != std::string::npos) {
+            std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, "BowserFire"));
+            if (args.size() >= 2) objects.push_back({ObjectType::BowserFire, ReadExpr(args[0]), ReadExpr(args[1])});
         } else if (statement.find("Lift::") != std::string::npos) {
             EditorLiftMovement movement = ReadLiftMovement(statement);
             std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, LiftFactoryName(movement)));
@@ -1080,6 +1101,7 @@ static std::vector<PaletteItem> BuildPalette() {
     fireBar.fireBarLength = 6;
     fireBar.fireBarClockwise = true;
     items.push_back({fireBar, "Fire Bar", "Enemies"});
+    items.push_back({{ObjectType::BowserFire, 0, 0}, "Bowser Fire", "Enemies"});
 
     LevelObject pipe = {ObjectType::Pipe, 0, 0};
     pipe.pipeWide = 2;
@@ -1209,6 +1231,10 @@ static void DrawPalettePreview(const LevelObject& item, Rectangle box, Texture2D
             DrawCircle((int)(cx + 18), (int)(top + 22), 8.0f, ORANGE);
             DrawSpritePart(mushroomSheet, {180.0f, 54.0f, 8.0f, 8.0f}, {cx - 8.0f, top + 14.0f, 16.0f, 16.0f});
             break;
+        case ObjectType::BowserFire:
+            DrawSpritePart(enemiesSheet, {102.0f, 242.0f, 24.0f, 8.0f}, {cx - 28.0f, top + 13.0f, 56.0f, 19.0f});
+            DrawTriangle({cx - 31.0f, top + 22.0f}, {cx - 20.0f, top + 16.0f}, {cx - 20.0f, top + 28.0f}, ORANGE);
+            break;
         case ObjectType::Pipe:
         case ObjectType::WarpPipe:
             if (item.pipeOrientation == PipeOrientation::Vertical) {
@@ -1327,7 +1353,7 @@ static int DrawPalette(const std::vector<PaletteItem>& palette, ObjectType addTy
         x += PALETTE_CELL_W;
     }
 
-    DrawText("Hotkeys: 1 block, 2 ? coin, 3 ? mushroom, 4 ? fire, 5 coin, 6 goomba, Shift+6 koopa, Ctrl+6 paratroopa, 7 pipe, 8 ground, L lift, B fire bar, F flag", 12, PALETTE_HEIGHT - 24, 14, Fade(RAYWHITE, 0.86f));
+    DrawText("Hotkeys: 1 block, 2 ? coin, 3 ? mushroom, 4 ? fire, 5 coin, 6 goomba, Shift+6 koopa, Ctrl+6 paratroopa, 7 pipe, 8 ground, L lift, B fire bar, Shift+B bowser fire, F flag", 12, PALETTE_HEIGHT - 24, 14, Fade(RAYWHITE, 0.86f));
     return hovered;
 }
 
@@ -1459,6 +1485,7 @@ int main() {
                 addLiftWidth = TILE_SIZE * 3;
             }
             if (IsKeyPressed(KEY_B)) addType = ObjectType::FireBar;
+            if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_B)) addType = ObjectType::BowserFire;
             if (IsKeyPressed(KEY_F)) addType = ObjectType::FlagPole;
             if (IsKeyPressed(KEY_COMMA) && !blocks.empty()) {
                 addType = ObjectType::Block;

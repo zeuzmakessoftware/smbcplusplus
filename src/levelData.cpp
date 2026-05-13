@@ -20,6 +20,7 @@ void LoadLevel1(
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
     std::vector<FireBar>& fireBars,
+    std::vector<std::unique_ptr<BowserFire>>& bowserFires,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -249,6 +250,7 @@ void LoadLevel1Subarea(
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
     std::vector<FireBar>& fireBars,
+    std::vector<std::unique_ptr<BowserFire>>& bowserFires,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -349,6 +351,7 @@ void LoadLevel12EntranceCutscene(
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
     std::vector<FireBar>& fireBars,
+    std::vector<std::unique_ptr<BowserFire>>& bowserFires,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -393,6 +396,7 @@ void LoadLevel12UndergroundStart(
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
     std::vector<FireBar>& fireBars,
+    std::vector<std::unique_ptr<BowserFire>>& bowserFires,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -838,6 +842,7 @@ void LoadLevel12Subarea(
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
     std::vector<FireBar>& fireBars,
+    std::vector<std::unique_ptr<BowserFire>>& bowserFires,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -974,6 +979,7 @@ void LoadLevel12Final(
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
     std::vector<FireBar>& fireBars,
+    std::vector<std::unique_ptr<BowserFire>>& bowserFires,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -1061,6 +1067,7 @@ void LoadLevel13(
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
     std::vector<FireBar>& fireBars,
+    std::vector<std::unique_ptr<BowserFire>>& bowserFires,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -1514,6 +1521,7 @@ void LoadLevel14(
     std::vector<std::unique_ptr<Koopa>>& koopas,
     std::vector<std::unique_ptr<PiranhaPlant>>& piranhaPlants,
     std::vector<FireBar>& fireBars,
+    std::vector<std::unique_ptr<BowserFire>>& bowserFires,
     std::vector<Lift>& lifts,
     std::vector<Coin>& coins,
     std::vector<BackgroundProp>& levelProps,
@@ -1542,6 +1550,9 @@ void LoadLevel14(
     fireBars.emplace_back(3213, 453, 6, mushroomSheet, true, 0.0f);
     fireBars.emplace_back(3549, 453, 6, mushroomSheet, true, 90.0f);
     fireBars.emplace_back(3717, 243, 6, mushroomSheet, true, 180.0f);
+    bowserFires.push_back(std::make_unique<BowserFire>((102 * TILE_SIZE), (9 * TILE_SIZE), enemiesSheet));
+    bowserFires.push_back(std::make_unique<BowserFire>((115 * TILE_SIZE), (10 * TILE_SIZE), enemiesSheet));
+    bowserFires.push_back(std::make_unique<BowserFire>((126 * TILE_SIZE), (9 * TILE_SIZE), enemiesSheet));
 
 
     blocks.push_back(std::make_unique<DrawCastleTiledRect>(
