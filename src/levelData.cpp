@@ -106,7 +106,7 @@ const std::vector<LevelAreaConfig>& GetLevelAreaConfigs() {
             false,
             false,
             LevelAreaIds::Level11,
-            302.0f * TILE_SIZE
+            168.0f * TILE_SIZE
         }
     };
 

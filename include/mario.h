@@ -85,6 +85,7 @@ class Mario {
         void moveByPlatformDelta(float dx, float dy, const std::vector<Rectangle>& statics, float cameraX);
         bool isStandingOnPlatform(Rectangle platformRec) const;
         void setScriptedPose(float x, float y, bool faceRight, float scriptedVelX = 0.0f);
+        bool updateScriptedWalk(const std::vector<Rectangle>& statics, float cameraX, float walkSpeed);
         bool getIsTransforming() const { return isTransforming; }
         bool getIsFireTransforming() const { return isFireTransforming; }
         void startShrink();

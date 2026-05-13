@@ -39,6 +39,7 @@ void LoadLevel14(
     bowserFires.push_back(std::make_unique<BowserFire>((115 * TILE_SIZE), (10 * TILE_SIZE), enemiesSheet));
     bowserFires.push_back(std::make_unique<BowserFire>((126 * TILE_SIZE), (9 * TILE_SIZE), enemiesSheet));
 
+    lifts.push_back(Lift::HorizontalBounce((133 * TILE_SIZE), (7 * TILE_SIZE) + 12, 126.0f, mushroomSheet, (133 * TILE_SIZE), (135 * TILE_SIZE), 68.0f, true));
 
     blocks.push_back(std::make_unique<DrawCastleTiledRect>(
         0, 474, 546, 210, spriteSheet, GetSceneType(SceneKind::Castle)
@@ -119,10 +120,16 @@ void LoadLevel14(
         5124, 180, 210, 84, spriteSheet, GetSceneType(SceneKind::Castle)
     ));
     blocks.push_back(std::make_unique<DrawCastleTiledRect>(
-        5880, 474, 126, 210, spriteSheet, GetSceneType(SceneKind::Castle)
+        5880, 432, 126, 252, spriteSheet, GetSceneType(SceneKind::Castle)
     ));
     blocks.push_back(std::make_unique<DrawCastleTiledRect>(
         5922, 138, 84, 168, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        6006, 600, 1050, 84, spriteSheet, GetSceneType(SceneKind::Castle)
+    ));
+    blocks.push_back(std::make_unique<DrawCastleTiledRect>(
+        6006, 138, 1050, 42, spriteSheet, GetSceneType(SceneKind::Castle)
     ));
     blocks.push_back(std::make_unique<lavaTopBlock>((13 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
     blocks.push_back(std::make_unique<lavaTopBlock>((14 * TILE_SIZE), (13 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
@@ -168,5 +175,17 @@ void LoadLevel14(
     blocks.push_back(std::make_unique<lavaBackgroundBlock>((137 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
     blocks.push_back(std::make_unique<lavaBackgroundBlock>((138 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
     blocks.push_back(std::make_unique<lavaBackgroundBlock>((139 * TILE_SIZE), (15 * TILE_SIZE) + 12, spriteSheet, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<BridgeBlock>((127 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, 0, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<BridgeBlock>((128 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, 1, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<BridgeBlock>((129 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, 2, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<BridgeBlock>((130 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, 3, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<BridgeBlock>((131 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, 4, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<BridgeBlock>((132 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, 5, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<BridgeBlock>((133 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, 6, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<BridgeBlock>((134 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, 7, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<BridgeBlock>((135 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, 8, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<BridgeBlock>((136 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, 9, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<BridgeBlock>((137 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, 10, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<BridgeBlock>((138 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, 11, GetSceneType(SceneKind::Castle)));
+    blocks.push_back(std::make_unique<BridgeBlock>((139 * TILE_SIZE), (11 * TILE_SIZE) + 12, spriteSheet, 12, GetSceneType(SceneKind::Castle)));
 }
-

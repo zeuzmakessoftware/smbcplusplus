@@ -30,6 +30,10 @@ enum class ObjectType {
     FireBar,
     BowserFire,
     PiranhaPlant,
+    CastleBridge,
+    BowserBoss,
+    BridgeAxe,
+    BridgeChain,
     CastleScenery,
     FlagPole
 };
@@ -74,6 +78,11 @@ static const float DRAG_START_DISTANCE = 2.0f;
 static const int PALETTE_HEIGHT = 304;
 static const int PALETTE_CELL_W = 78;
 static const int PALETTE_CELL_H = 74;
+static constexpr Rectangle CASTLE_BRIDGE_SOURCE = {184.0f, 600.0f, 208.0f, 16.0f};
+static constexpr Rectangle BOWSER_SOURCE = {-0.0f, 208.0f, 32.0f, 32.0f};
+static constexpr Rectangle BRIDGE_AXE_SOURCE = {248.0f, 460.0f, 16.0f, 16.0f};
+static constexpr Rectangle BRIDGE_CHAIN_SOURCE = {17.0f, 314.0f, 16.0f, 16.0f};
+static constexpr int CASTLE_BRIDGE_SEGMENTS = 13;
 
 static constexpr SceneKind SCENE_KINDS[] = {
     SceneKind::Overworld,
@@ -105,6 +114,10 @@ static const char* TypeName(ObjectType type) {
         case ObjectType::FireBar: return "Fire Bar";
         case ObjectType::BowserFire: return "Bowser Fire";
         case ObjectType::PiranhaPlant: return "Piranha Plant";
+        case ObjectType::CastleBridge: return "Castle Bridge";
+        case ObjectType::BowserBoss: return "Bowser";
+        case ObjectType::BridgeAxe: return "Bridge Axe";
+        case ObjectType::BridgeChain: return "Bridge Chain";
         case ObjectType::CastleScenery: return "Castle";
         case ObjectType::FlagPole: return "Flag Pole";
     }
@@ -218,6 +231,13 @@ static LevelObject MakeBlockObject(int blockIndex, int x, int y) {
     return obj;
 }
 
+static LevelObject MakeBridgeObject(int x, int y) {
+    LevelObject obj = {ObjectType::CastleBridge, x, y};
+    obj.w = TILE_SIZE * CASTLE_BRIDGE_SEGMENTS;
+    obj.h = TILE_SIZE;
+    return obj;
+}
+
 static int BlockIndexForClassName(const std::string& className) {
     const std::vector<BlockDefinition>& blocks = GetBlockDefinitions();
     for (int i = 0; i < (int)blocks.size(); i++) {
@@ -239,6 +259,8 @@ static Rectangle ObjectBounds(const LevelObject& obj) {
         return {(float)obj.x, (float)obj.y, (float)(maxX * TILE_SIZE), (float)(maxY * TILE_SIZE)};
     }
     if (obj.type == ObjectType::Ground || obj.type == ObjectType::CastleGround) return {(float)obj.x, (float)obj.y, (float)obj.w, (float)obj.h};
+    if (obj.type == ObjectType::CastleBridge) return {(float)obj.x, (float)obj.y, (float)(TILE_SIZE * CASTLE_BRIDGE_SEGMENTS), (float)TILE_SIZE};
+    if (obj.type == ObjectType::BowserBoss) return {(float)obj.x, (float)obj.y, (float)(TILE_SIZE * 2), (float)(TILE_SIZE * 2)};
     if (obj.type == ObjectType::Lift) {
         if (obj.liftMovement == EditorLiftMovement::HorizontalBounce) {
             return {(float)obj.liftMinTravel, (float)obj.y, (float)(obj.liftMaxTravel - obj.liftMinTravel + obj.w), 21.0f};
@@ -284,6 +306,9 @@ static int SnapXForType(ObjectType type, float value) {
     if (type == ObjectType::FireBar) {
         return SnapWithOffset(value, TILE_SIZE, TILE_SIZE / 2);
     }
+    if (type == ObjectType::BridgeAxe) {
+        return SnapWithOffset(value, TILE_SIZE, 10);
+    }
     return Snap(value, TILE_SIZE);
 }
 
@@ -303,11 +328,14 @@ static int SnapYForType(ObjectType type, float value) {
     if (type == ObjectType::BowserFire) {
         return Snap(value, TILE_SIZE);
     }
+    if (type == ObjectType::BowserBoss || type == ObjectType::BridgeAxe || type == ObjectType::BridgeChain) {
+        return SnapWithOffset(value, TILE_SIZE, BLOCK_GRID_OFFSET_Y);
+    }
     if (type == ObjectType::Block || type == ObjectType::CoinBlock ||
         type == ObjectType::MushroomBlock || type == ObjectType::FireFlowerBlock ||
         type == ObjectType::OneUpBlock || type == ObjectType::Pipe ||
         type == ObjectType::WarpPipe || type == ObjectType::PipeWall || type == ObjectType::Coin ||
-        type == ObjectType::Lift) {
+        type == ObjectType::Lift || type == ObjectType::CastleBridge) {
         return SnapWithOffset(value, TILE_SIZE, BLOCK_GRID_OFFSET_Y);
     }
     return SnapWithOffset(value, TILE_SIZE, OBJECT_GRID_OFFSET_Y);
@@ -319,6 +347,10 @@ static void SnapObject(LevelObject& obj) {
     if (obj.type == ObjectType::Ground || obj.type == ObjectType::CastleGround) {
         obj.w = std::max(TILE_SIZE, Snap(obj.w, TILE_SIZE));
         obj.h = std::max(TILE_SIZE, Snap(obj.h, TILE_SIZE));
+    }
+    if (obj.type == ObjectType::CastleBridge) {
+        obj.w = TILE_SIZE * CASTLE_BRIDGE_SEGMENTS;
+        obj.h = TILE_SIZE;
     }
     if (obj.type == ObjectType::Lift) {
         obj.w = std::max(TILE_SIZE, Snap(obj.w, TILE_SIZE));
@@ -370,12 +402,44 @@ static Rectangle BlockSourceFor(const BlockDefinition& block, const SceneType& s
     return block.source;
 }
 
+static Rectangle BridgeSourceForSegment(int segmentIndex) {
+    int clampedSegment = std::max(0, std::min(segmentIndex, 12));
+    return {
+        CASTLE_BRIDGE_SOURCE.x + (float)clampedSegment * 16.0f,
+        CASTLE_BRIDGE_SOURCE.y,
+        16.0f,
+        CASTLE_BRIDGE_SOURCE.height
+    };
+}
+
 static void DrawGround(const LevelObject& obj, Texture2D spriteSheet, const SceneType& scene) {
     for (int y = obj.y; y < obj.y + obj.h; y += TILE_SIZE) {
         for (int x = obj.x; x < obj.x + obj.w; x += TILE_SIZE) {
             DrawSpritePart(spriteSheet, scene.groundBlock, {(float)x, (float)y, TILE_SIZE, TILE_SIZE});
         }
     }
+}
+
+static void DrawBridge(const LevelObject& obj, Texture2D spriteSheet) {
+    for (int i = 0; i < CASTLE_BRIDGE_SEGMENTS; i++) {
+        DrawSpritePart(spriteSheet, BridgeSourceForSegment(i),
+            {(float)obj.x + i * TILE_SIZE, (float)obj.y, TILE_SIZE, TILE_SIZE});
+    }
+}
+
+static void DrawBowserBossMarker(const LevelObject& obj, Texture2D enemiesSheet) {
+    DrawSpritePart(enemiesSheet, BOWSER_SOURCE,
+        {(float)obj.x, (float)obj.y, TILE_SIZE * 2.0f, TILE_SIZE * 2.0f});
+}
+
+static void DrawBridgeAxe(const LevelObject& obj, Texture2D spriteSheet) {
+    DrawSpritePart(spriteSheet, BRIDGE_AXE_SOURCE,
+        {(float)obj.x, (float)obj.y, TILE_SIZE, TILE_SIZE});
+}
+
+static void DrawBridgeChain(const LevelObject& obj, Texture2D spriteSheet) {
+    DrawSpritePart(spriteSheet, BRIDGE_CHAIN_SOURCE,
+        {(float)obj.x, (float)obj.y, TILE_SIZE, TILE_SIZE});
 }
 
 static void DrawCastleGround(const LevelObject& obj, Texture2D spriteSheet) {
@@ -540,6 +604,18 @@ static void DrawObject(const LevelObject& obj, Texture2D spriteSheet, Texture2D 
         case ObjectType::CastleGround:
             DrawCastleGround(obj, spriteSheet);
             break;
+        case ObjectType::CastleBridge:
+            DrawBridge(obj, spriteSheet);
+            break;
+        case ObjectType::BowserBoss:
+            DrawBowserBossMarker(obj, enemiesSheet);
+            break;
+        case ObjectType::BridgeAxe:
+            DrawBridgeAxe(obj, spriteSheet);
+            break;
+        case ObjectType::BridgeChain:
+            DrawBridgeChain(obj, spriteSheet);
+            break;
         case ObjectType::Coin:
             DrawSpritePart(mushroomSheet, {180, 36, 8, 16}, {(float)obj.x + 10, (float)obj.y, 22, TILE_SIZE});
             break;
@@ -694,6 +770,13 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sc
                               << sceneExpr << "));\n";
                 }
                 break;
+            case ObjectType::CastleBridge:
+                for (int i = 0; i < CASTLE_BRIDGE_SEGMENTS; i++) {
+                    std::cout << "blocks.push_back(std::make_unique<BridgeBlock>(" << Expr(obj.x + i * TILE_SIZE)
+                              << ", " << Expr(obj.y) << ", spriteSheet, " << i
+                              << ", " << sceneExpr << "));\n";
+                }
+                break;
             case ObjectType::CoinBlock:
                 std::cout << "blocks.push_back(std::make_unique<PowerUpBlock>(" << Expr(obj.x)
                           << ", " << Expr(obj.y) << ", spriteSheet, mushroomSheet, \"coin\", "
@@ -752,6 +835,32 @@ static void PrintLevelCode(const std::vector<LevelObject>& objects, SceneKind sc
             std::cout << "levelProps.push_back(BackgroundProp(" << obj.x << ", " << obj.y
                       << ", spriteSheet, CASTLE_LAYOUT));\n";
         }
+    }
+    const LevelObject* bowser = nullptr;
+    const LevelObject* axe = nullptr;
+    const LevelObject* chain = nullptr;
+    for (const LevelObject& obj : objects) {
+        if (obj.type == ObjectType::BowserBoss) bowser = &obj;
+        else if (obj.type == ObjectType::BridgeAxe) axe = &obj;
+        else if (obj.type == ObjectType::BridgeChain) chain = &obj;
+    }
+    if (bowser || axe || chain) {
+        std::cout << "\n// --- 1-4 boss fixture constants for src/main.cpp ---\n";
+        if (axe) {
+            std::cout << "constexpr float CastleAxeX = " << Expr(axe->x) << ";\n";
+            std::cout << "constexpr float CastleAxeY = " << Expr(axe->y) << ";\n";
+        }
+        if (chain) {
+            std::cout << "constexpr float CastleChainX = " << Expr(chain->x) << ";\n";
+            std::cout << "constexpr float CastleChainY = " << Expr(chain->y) << ";\n";
+        }
+        if (bowser) {
+            std::cout << "constexpr float CastleBowserX = " << Expr(bowser->x) << ";\n";
+            std::cout << "constexpr float CastleBowserY = " << Expr(bowser->y) << ";\n";
+            std::cout << "constexpr float CastleBowserLeft = " << Expr(bowser->x - 3 * TILE_SIZE) << ";\n";
+            std::cout << "constexpr float CastleBowserRight = " << Expr(bowser->x + 4 * TILE_SIZE) << ";\n";
+        }
+        std::cout << "// --- End boss fixture constants ---\n";
     }
     std::cout << "// --- End Level Editor Output ---\n" << std::flush;
 }
@@ -852,8 +961,28 @@ static std::vector<std::string> LevelStatements(const std::string& code) {
     return statements;
 }
 
+static bool ReadNamedValue(const std::string& code, const std::string& name, int& value) {
+    std::regex pattern(name + R"(\s*=\s*([^;]+);)");
+    std::smatch match;
+    if (!std::regex_search(code, match, pattern)) return false;
+
+    value = ReadExpr(match[1]);
+    return true;
+}
+
 static void ParseLevelCode(const std::string& code, std::vector<LevelObject>& objects, SceneKind& sceneKind) {
     objects.clear();
+    int x = 0;
+    int y = 0;
+    if (ReadNamedValue(code, "CastleAxeX", x) && ReadNamedValue(code, "CastleAxeY", y)) {
+        objects.push_back({ObjectType::BridgeAxe, x, y});
+    }
+    if (ReadNamedValue(code, "CastleChainX", x) && ReadNamedValue(code, "CastleChainY", y)) {
+        objects.push_back({ObjectType::BridgeChain, x, y});
+    }
+    if (ReadNamedValue(code, "CastleBowserX", x) && ReadNamedValue(code, "CastleBowserY", y)) {
+        objects.push_back({ObjectType::BowserBoss, x, y});
+    }
     for (const std::string& statement : LevelStatements(code)) {
         sceneKind = ReadSceneKind(statement, sceneKind);
 
@@ -914,6 +1043,13 @@ static void ParseLevelCode(const std::string& code, std::vector<LevelObject>& ob
         } else if (statement.find("BowserFire") != std::string::npos) {
             std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, "BowserFire"));
             if (args.size() >= 2) objects.push_back({ObjectType::BowserFire, ReadExpr(args[0]), ReadExpr(args[1])});
+        } else if (statement.find("BridgeBlock") != std::string::npos) {
+            std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, "BridgeBlock"));
+            if (args.size() >= 4) {
+                if (ReadExpr(args[3]) == 0) {
+                    objects.push_back(MakeBridgeObject(ReadExpr(args[0]), ReadExpr(args[1])));
+                }
+            }
         } else if (statement.find("Lift::") != std::string::npos) {
             EditorLiftMovement movement = ReadLiftMovement(statement);
             std::vector<std::string> args = SplitTopLevelArgs(ConstructorArgs(statement, LiftFactoryName(movement)));
@@ -1028,6 +1164,10 @@ static LevelObject MakeAddObject(ObjectType addType, int addBlockIndex, int addP
     LevelObject obj = {addType, x, y};
     if (addType == ObjectType::Block) obj.blockIndex = addBlockIndex;
     if (addType == ObjectType::BackgroundProp) obj.propIndex = addPropIndex;
+    if (addType == ObjectType::CastleBridge) {
+        obj.w = TILE_SIZE * CASTLE_BRIDGE_SEGMENTS;
+        obj.h = TILE_SIZE;
+    }
     if (addType == ObjectType::Ground || addType == ObjectType::CastleGround) {
         obj.w = TILE_SIZE * 8;
         obj.h = TILE_SIZE * 2;
@@ -1083,6 +1223,7 @@ static std::vector<PaletteItem> BuildPalette() {
         LevelObject obj = MakeBlockObject(i, 0, 0);
         items.push_back({obj, GetBlockDefinitions()[i].displayName, "Blocks"});
     }
+    items.push_back({MakeBridgeObject(0, 0), "Bridge", "Blocks"});
 
     items.push_back({{ObjectType::CoinBlock, 0, 0}, "? Coin", "Items"});
     items.push_back({{ObjectType::MushroomBlock, 0, 0}, "? Mushroom", "Items"});
@@ -1102,6 +1243,10 @@ static std::vector<PaletteItem> BuildPalette() {
     fireBar.fireBarClockwise = true;
     items.push_back({fireBar, "Fire Bar", "Enemies"});
     items.push_back({{ObjectType::BowserFire, 0, 0}, "Bowser Fire", "Enemies"});
+    items.push_back({{ObjectType::BowserBoss, 0, 0}, "Bowser", "Enemies"});
+
+    items.push_back({{ObjectType::BridgeAxe, 0, 0}, "Bridge Axe", "Boss"});
+    items.push_back({{ObjectType::BridgeChain, 0, 0}, "Bridge Chain", "Boss"});
 
     LevelObject pipe = {ObjectType::Pipe, 0, 0};
     pipe.pipeWide = 2;
@@ -1198,6 +1343,20 @@ static void DrawPalettePreview(const LevelObject& item, Rectangle box, Texture2D
     switch (item.type) {
         case ObjectType::Block:
             DrawSpritePart(spriteSheet, BlockSourceFor(BlockDefinitionFor(item), scene), {cx - 17.0f, top, 34.0f, 34.0f});
+            break;
+        case ObjectType::CastleBridge:
+            for (int i = 0; i < 3; i++) {
+                DrawSpritePart(spriteSheet, BridgeSourceForSegment(i), {cx - 27.0f + i * 18.0f, top + 8.0f, 18.0f, 18.0f});
+            }
+            break;
+        case ObjectType::BowserBoss:
+            DrawSpritePart(enemiesSheet, BOWSER_SOURCE, {cx - 22.0f, top - 2.0f, 44.0f, 44.0f});
+            break;
+        case ObjectType::BridgeAxe:
+            DrawSpritePart(spriteSheet, BRIDGE_AXE_SOURCE, {cx - 17.0f, top, 34.0f, 34.0f});
+            break;
+        case ObjectType::BridgeChain:
+            DrawSpritePart(spriteSheet, BRIDGE_CHAIN_SOURCE, {cx - 17.0f, top, 34.0f, 34.0f});
             break;
         case ObjectType::CoinBlock:
         case ObjectType::MushroomBlock:

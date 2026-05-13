@@ -360,6 +360,57 @@ void Mario::setScriptedPose(float x, float y, bool faceRight, float scriptedVelX
     }
 }
 
+bool Mario::updateScriptedWalk(const std::vector<Rectangle>& statics, float cameraX, float walkSpeed) {
+    const float dt = GetFrameTime();
+    facingRight = walkSpeed >= 0.0f;
+    isDucking = false;
+    velX = walkSpeed / 60.0f;
+
+    posX += walkSpeed * dt;
+    for (const auto& rect : statics) {
+        if (CheckCollisionRecs(returnRec(), rect)) {
+            if (walkSpeed > 0.0f) posX = rect.x - TILE_SIZE;
+            else if (walkSpeed < 0.0f) posX = rect.x + rect.width;
+            velX = 0.0f;
+        }
+    }
+
+    velY += gravity;
+    if (velY > terminalVelocity) velY = terminalVelocity;
+
+    posY += velY;
+    isGrounded = false;
+    for (const auto& rect : statics) {
+        if (CheckCollisionRecs(returnRec(), rect)) {
+            if (velY > 0.0f) {
+                posY = rect.y - visualHeight();
+                velY = 0.0f;
+                isGrounded = true;
+            } else if (velY < 0.0f) {
+                posY = rect.y + rect.height - collisionTopInset();
+                velY = 0.0f;
+            }
+        }
+    }
+
+    if (posX < cameraX) {
+        posX = cameraX;
+        if (velX < 0.0f) velX = 0.0f;
+    }
+
+    if (std::abs(walkSpeed) > 0.1f) {
+        frameTimer += dt;
+        if (frameTimer >= frameDuration) {
+            frameTimer = 0.0f;
+            currentFrame = (currentFrame + 1) % 3;
+        }
+    } else {
+        currentFrame = 0;
+    }
+
+    return isGrounded;
+}
+
 void Mario::drawDebug() {
     DrawRectangleLinesEx(returnRec(), 2.0f, GREEN);
     

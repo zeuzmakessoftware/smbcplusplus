@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <cmath>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -18,6 +19,8 @@
 #include "scoreboard.h"
 #include "castleFlagpole.h"
 #include "scorepopup.h"
+#include "bowserBoss.h"
+#include "blocks/bridgeBlock.h"
 
 #define TILE_SIZE 42
 
@@ -57,6 +60,58 @@ struct LevelIntro {
         }
     }
 };
+
+namespace {
+constexpr int CastleBridgeSegments = 13;
+constexpr float CastleBridgeY = (11.0f * TILE_SIZE) + 12.0f;
+constexpr float CastleAxeX = (140.0f * TILE_SIZE) + 10.0f;
+constexpr float CastleAxeY = (9.0f * TILE_SIZE) + 12.0f;
+constexpr float CastleChainX = 139.0f * TILE_SIZE;
+constexpr float CastleChainY = (10.0f * TILE_SIZE) + 12.0f;
+constexpr float CastleBowserX = 136.0f * TILE_SIZE;
+constexpr float CastleBowserY = (9.0f * TILE_SIZE) + 13.0f;
+constexpr float CastleBowserLeft = 133.0f * TILE_SIZE;
+constexpr float CastleBowserRight = 140.0f * TILE_SIZE;
+constexpr float CastleToadX = 154.0f * TILE_SIZE;
+constexpr float CastleToadGroundY = (14.0f * TILE_SIZE) + 12.0f;
+constexpr float CastleMarioToadStopX = CastleToadX - 80.0f;
+
+Rectangle CastleAxeRec() {
+    return {CastleAxeX, CastleAxeY, (float)TILE_SIZE, (float)TILE_SIZE};
+}
+
+enum class CastleEndingState {
+    Inactive,
+    BridgeCollapse,
+    WalkToToad,
+    Message
+};
+
+struct CastleEnding {
+    CastleEndingState state = CastleEndingState::Inactive;
+    float timer = 0.0f;
+    float bridgeTimer = 0.0f;
+    int removedBridgeSegments = 0;
+
+    void reset() {
+        state = CastleEndingState::Inactive;
+        timer = 0.0f;
+        bridgeTimer = 0.0f;
+        removedBridgeSegments = 0;
+    }
+
+    void start() {
+        state = CastleEndingState::BridgeCollapse;
+        timer = 0.0f;
+        bridgeTimer = 0.0f;
+        removedBridgeSegments = 0;
+    }
+
+    bool active() const {
+        return state != CastleEndingState::Inactive;
+    }
+};
+}
 
 int main() {
     int screenWidth = 670;
@@ -106,6 +161,8 @@ int main() {
     ScorePopupManager scorePopups;
     PipeTransition pipeTransition;
     Level12EntranceCutscene level12EntranceCutscene;
+    CastleEnding castleEnding;
+    std::unique_ptr<BowserBoss> bowserBoss;
 
     Mario MarioObj(100, 0, marioSheet);
     Scoreboard scoreboard(1, 1, 400);
@@ -118,7 +175,7 @@ int main() {
         screenWidth
     });
     // Change this to another LevelAreaIds value or registered area id to boot elsewhere.
-    LevelAreaId startingArea = LevelAreaIds::Level14;
+    LevelAreaId startingArea = LevelAreaIds::Level11;
     LevelAreaId respawnArea = startingArea;
 
     Camera2D camera = { 0 };
@@ -142,11 +199,16 @@ int main() {
         activeStars.clear();
         activeFireballs.clear();
         brickParticles.clear();
+        castleEnding.reset();
+        bowserBoss.reset();
 
         levelLoader.load(area, marioStart, MarioObj, camera, scorePopups);
         isDead = false;
         pipeTransition.active = false;
         level12EntranceCutscene.active = levelLoader.isLevel12EntranceCutscene();
+        if (area == LevelAreaIds::Level14) {
+            bowserBoss = std::make_unique<BowserBoss>(CastleBowserX, CastleBowserY, CastleBowserLeft, CastleBowserRight, enemiesSheet);
+        }
     };
 
     auto ResetLevel = [&]() {
@@ -255,6 +317,146 @@ int main() {
         );
     };
 
+    auto MarioScriptedGroundY = [&]() {
+        return CastleToadGroundY - (MarioObj.getIsBig() || MarioObj.getIsFire() ? (2.0f * TILE_SIZE) : (float)TILE_SIZE);
+    };
+
+    auto RemoveBridgeSegment = [&](int segmentIndex) {
+        for (auto it = levelLoader.blocks.begin(); it != levelLoader.blocks.end(); ++it) {
+            auto* bridge = dynamic_cast<BridgeBlock*>(it->get());
+            if (bridge && bridge->getSegmentIndex() == segmentIndex) {
+                levelLoader.blocks.erase(it);
+                levelLoader.rebuildCollisionObjects();
+                return;
+            }
+        }
+    };
+
+    auto StartCastleEnding = [&]() {
+        castleEnding.start();
+        activeFireballs.clear();
+        if (bowserBoss) bowserBoss->dropFromBridge();
+
+        Vector2 pos = MarioObj.getPos();
+        MarioObj.setScriptedPose(pos.x, pos.y, true);
+    };
+
+    auto UpdateCastleEnding = [&]() {
+        const float dt = GetFrameTime();
+        castleEnding.timer += dt;
+
+        if (bowserBoss) {
+            bowserBoss->updateFalling(MarioObj, isDead, deathTimer, camera.target.x);
+        }
+
+        if (castleEnding.state == CastleEndingState::BridgeCollapse) {
+            castleEnding.bridgeTimer += dt;
+            while (castleEnding.bridgeTimer >= 0.075f && castleEnding.removedBridgeSegments < CastleBridgeSegments) {
+                castleEnding.bridgeTimer -= 0.075f;
+                RemoveBridgeSegment((CastleBridgeSegments - 1) - castleEnding.removedBridgeSegments);
+                castleEnding.removedBridgeSegments++;
+            }
+
+            bool grounded = MarioObj.updateScriptedWalk(levelLoader.collisionObjects, camera.target.x, 112.0f);
+            Vector2 pos = MarioObj.getPos();
+            float targetX = pos.x - screenWidth * 0.48f;
+            if (targetX < 0.0f) targetX = 0.0f;
+            float maxCameraX = levelLoader.maxCameraX();
+            if (maxCameraX >= 0.0f && targetX > maxCameraX) targetX = maxCameraX;
+            if (targetX > camera.target.x) camera.target.x = targetX;
+
+            if (castleEnding.timer >= 1.0f && grounded && pos.y >= MarioScriptedGroundY() - 1.0f) {
+                castleEnding.state = CastleEndingState::WalkToToad;
+                castleEnding.timer = 0.0f;
+            }
+            return;
+        }
+
+        if (castleEnding.state == CastleEndingState::WalkToToad) {
+            Vector2 pos = MarioObj.getPos();
+            pos.x += 112.0f * dt;
+            if (pos.x >= CastleMarioToadStopX) {
+                pos.x = CastleMarioToadStopX;
+                castleEnding.state = CastleEndingState::Message;
+                castleEnding.timer = 0.0f;
+            }
+            MarioObj.setScriptedPose(pos.x, MarioScriptedGroundY(), true, 3.0f);
+
+            float targetX = pos.x - screenWidth * 0.48f;
+            if (targetX < 0.0f) targetX = 0.0f;
+            float maxCameraX = levelLoader.maxCameraX();
+            if (maxCameraX >= 0.0f && targetX > maxCameraX) targetX = maxCameraX;
+            if (targetX > camera.target.x) camera.target.x = targetX;
+            return;
+        }
+
+        if (castleEnding.state == CastleEndingState::Message) {
+            MarioObj.setScriptedPose(CastleMarioToadStopX, MarioScriptedGroundY(), true);
+            if (castleEnding.timer >= 6.5f) {
+                StartAreaIntro(LevelAreaIds::Level11);
+            }
+        }
+    };
+
+    auto DrawCastleBossFixtures = [&]() {
+        if (levelLoader.currentArea() != LevelAreaIds::Level14) return;
+
+        DrawTexturePro(
+            spriteSheet,
+            {17.0f, 314.0f, 16.0f, 16.0f},
+            {CastleChainX, CastleChainY, (float)TILE_SIZE, (float)TILE_SIZE},
+            {0.0f, 0.0f},
+            0.0f,
+            WHITE
+        );
+
+        if (!castleEnding.active()) {
+            DrawTexturePro(
+                spriteSheet,
+                {248.0f, 460.0f, 16.0f, 16.0f},
+                {CastleAxeX, CastleAxeY, (float)TILE_SIZE, (float)TILE_SIZE},
+                {0.0f, 0.0f},
+                0.0f,
+                WHITE
+            );
+        }
+
+        float toadBob = castleEnding.state == CastleEndingState::Message ? std::sin(castleEnding.timer * 10.0f) * 3.0f : 0.0f;
+        DrawTexturePro(
+            mushroomSheet,
+            {-0.0f, 444.0f, 16.0f, 24.0f},
+            {CastleToadX, CastleToadGroundY - 63.0f + toadBob, (float)TILE_SIZE, 63.0f},
+            {0.0f, 0.0f},
+            0.0f,
+            WHITE
+        );
+    };
+
+    auto DrawCastleEndingMessage = [&]() {
+        if (castleEnding.state != CastleEndingState::Message) return;
+
+        DrawRectangle(0, 118, screenWidth, 202, Fade(BLACK, 0.86f));
+        const char* lines[] = {
+            "THANK YOU MARIO!",
+            "BUT PRINCESS PEACH IS IN",
+            "ANOTHER CASTLE!"
+        };
+        int visibleLines = castleEnding.timer > 2.0f ? 3 : (castleEnding.timer > 1.0f ? 2 : 1);
+        const float fontSize = 24.0f;
+        const float spacing = 2.0f;
+        for (int i = 0; i < visibleLines; i++) {
+            Vector2 size = MeasureTextEx(nesFont, lines[i], fontSize, spacing);
+            DrawTextEx(
+                nesFont,
+                lines[i],
+                {(float)screenWidth * 0.5f - size.x * 0.5f, 152.0f + (float)i * 46.0f},
+                fontSize,
+                spacing,
+                WHITE
+            );
+        }
+    };
+
     ResetLevel();
 
     SetTargetFPS(60);
@@ -277,6 +479,8 @@ int main() {
                     UpdatePipeTransition();
                 } else if (level12EntranceCutscene.active) {
                     UpdateLevel12EntranceCutscene();
+                } else if (castleEnding.active()) {
+                    UpdateCastleEnding();
                 } else {
                 if (!levelLoader.hasFlagpole() || !levelLoader.castleFlagpole->isActive()) {
                     scoreboard.updateTimer(GetFrameTime());
@@ -412,6 +616,13 @@ int main() {
                         if ((*it)->shouldRemove()) it = levelLoader.bowserFires.erase(it);
                         else ++it;
                     }
+                    if (bowserBoss) {
+                        bowserBoss->update(levelLoader.collisionObjects, MarioObj, isDead, deathTimer, camera.target.x, activeFireballs);
+                        if (bowserBoss->justDefeated()) {
+                            scoreboard.addScore(5000);
+                            scorePopups.spawn(5000, { CastleBowserX, CastleBowserY - 10.0f });
+                        }
+                    }
                 }
 
                 for (auto& koopa : levelLoader.koopas) {
@@ -510,6 +721,9 @@ int main() {
                 bool wantsDown = IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S);
                 bool wantsRight = IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D);
                 bool wantsLeft = IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A);
+                if (levelLoader.currentArea() == LevelAreaIds::Level14 && CheckCollisionRecs(MarioObj.returnRec(), CastleAxeRec())) {
+                    StartCastleEnding();
+                }
                 for (auto& block : levelLoader.blocks) {
                     auto* warpPipe = dynamic_cast<WarpPipeBlock*>(block.get());
                     if (warpPipe && warpPipe->canEnter(MarioObj.returnRec(), wantsDown, wantsRight, wantsLeft)) {
@@ -566,6 +780,7 @@ int main() {
                     for (auto& plant : levelLoader.piranhaPlants) plant->draw();
                     for (auto& lift : levelLoader.lifts) lift.draw();
                     for (auto& block : levelLoader.blocks) block->draw();
+                    DrawCastleBossFixtures();
                     for (auto& coin : levelLoader.coins) coin.draw();
                     for (auto& mush : activeMushrooms) mush->draw();
                     for (auto& flower : activeFireFlowers) flower->draw();
@@ -573,6 +788,7 @@ int main() {
                     for (auto& fireball : activeFireballs) fireball->draw();
                     for (auto& fireBar : levelLoader.fireBars) fireBar.draw();
                     for (auto& bowserFire : levelLoader.bowserFires) bowserFire->draw();
+                    if (bowserBoss) bowserBoss->draw();
                     for (auto& goom : levelLoader.goombas) goom->draw();
                     for (auto& koopa : levelLoader.koopas) koopa->draw();
 
@@ -587,6 +803,7 @@ int main() {
                 EndMode2D();
                 
                 scoreboard.draw(nesFont, hudSheet, screenWidth);
+                DrawCastleEndingMessage();
                 if (isDead) {
                     DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.6f));
                     
