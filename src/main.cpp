@@ -430,11 +430,10 @@ int main() {
             );
         }
 
-        float toadBob = castleEnding.state == CastleEndingState::Message ? std::sin(castleEnding.timer * 10.0f) * 3.0f : 0.0f;
         DrawTexturePro(
             mushroomSheet,
             {-0.0f, 444.0f, 16.0f, 24.0f},
-            {CastleToadX, CastleToadGroundY - 63.0f + toadBob, (float)TILE_SIZE, 63.0f},
+            {CastleToadX, CastleToadGroundY - 63.0f, (float)TILE_SIZE, 63.0f},
             {0.0f, 0.0f},
             0.0f,
             WHITE
