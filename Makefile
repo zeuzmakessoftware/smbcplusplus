@@ -3,9 +3,10 @@ CXXFLAGS = -Iinclude -I/opt/homebrew/include -MMD -MP
 LDFLAGS = -L/opt/homebrew/lib -lraylib
 
 BLOCK_SRCS = $(wildcard src/blocks/*.cpp)
+LEVEL_SRCS = $(wildcard src/levels/*.cpp)
 COMMON_SRCS = src/backgroundProp.cpp $(BLOCK_SRCS) src/sceneType.cpp src/mushroom.cpp src/star.cpp
 MAIN_SRCS = src/main.cpp src/mario.cpp src/drawTiledRect.cpp src/fireflower.cpp src/fireball.cpp src/firebar.cpp src/bowserFire.cpp \
-            src/goomba.cpp src/koopa.cpp src/piranhaPlant.cpp src/lift.cpp src/levelData.cpp src/levelLoader.cpp src/scoreboard.cpp src/scorepopup.cpp src/castleFlagpole.cpp $(COMMON_SRCS)
+            src/goomba.cpp src/koopa.cpp src/piranhaPlant.cpp src/lift.cpp src/levelData.cpp $(LEVEL_SRCS) src/levelLoader.cpp src/scoreboard.cpp src/scorepopup.cpp src/castleFlagpole.cpp $(COMMON_SRCS)
 EDITOR_SRCS = tools/levelEditorDebug.cpp $(COMMON_SRCS)
 TEXTURE_SRCS = tools/textureFinderDebug.cpp
 

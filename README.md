@@ -118,7 +118,8 @@ Important entry points:
   input handling, scoring, lives, and level reset flow.
 - `src/mario.cpp` implements Mario movement, collisions, power-ups, fireballs,
   and animation state.
-- `src/levelData.cpp` defines the hand-authored level layouts.
+- `src/levelData.cpp` registers level areas; `src/levels/*.cpp` contains the
+  hand-authored layouts split by level.
 - `src/levelLoader.cpp` loads registered areas, rebuilds collision data, and
   manages camera/scene settings.
 
@@ -139,6 +140,7 @@ Available registered area IDs are declared in `include/levelData.h`:
 - `LevelAreaIds::Level12Subarea`
 - `LevelAreaIds::Level12Final`
 - `LevelAreaIds::Level13`
+- `LevelAreaIds::Level14`
 
 Change `startingArea`, rebuild, and run the game again.
 
