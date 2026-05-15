@@ -15,7 +15,7 @@ const std::vector<LevelAreaConfig>& GetLevelAreaConfigs() {
         {
             LevelAreaIds::Level11,
             LoadLevel1,
-            {100.0f, 0.0f},
+            {100.0f, 600.0f},
             1,
             1,
             false,
