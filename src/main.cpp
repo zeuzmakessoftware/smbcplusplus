@@ -190,6 +190,18 @@ int main() {
 
     bool isDead = false;
     float deathTimer = 0.0f;
+    bool levelTimerWasActive = false;
+
+    auto IsLevelTimerActive = [&]() {
+        if (!gameStarted || levelIntro.active || isDead || pipeTransition.active || castleEnding.active()) return false;
+        return !levelLoader.hasFlagpole() || !levelLoader.castleFlagpole->isActive();
+    };
+
+    auto PlayCurrentAreaMusicIfTimerActive = [&]() {
+        if (IsLevelTimerActive()) {
+            sound.playMusic(levelLoader.musicTrack(levelLoader.currentArea()));
+        }
+    };
 
     auto StartDeath = [&]() {
         if (isDead) return;
@@ -210,13 +222,13 @@ int main() {
         bowserBoss.reset();
 
         levelLoader.load(area, marioStart, MarioObj, camera, scorePopups);
-        sound.playMusic(levelLoader.musicTrack(area));
         isDead = false;
         pipeTransition.active = false;
         level12EntranceCutscene.active = levelLoader.isLevel12EntranceCutscene();
         if (area == LevelAreaIds::Level14) {
             bowserBoss = std::make_unique<BowserBoss>(CastleBowserX, CastleBowserY, CastleBowserLeft, CastleBowserRight, enemiesSheet);
         }
+        PlayCurrentAreaMusicIfTimerActive();
     };
 
     auto ResetLevel = [&]() {
@@ -237,8 +249,8 @@ int main() {
         levelLoader.scoreboardLevel(area, world, level);
         scoreboard.setLevel(world, level);
         scoreboard.setTime(400);
-        LoadArea(area, levelLoader.defaultMarioStart(area));
         levelIntro.start();
+        LoadArea(area, levelLoader.defaultMarioStart(area));
     };
 
     auto StartPipeTransition = [&](WarpPipeBlock* warpPipe) {
@@ -475,7 +487,6 @@ int main() {
                 if (IsKeyPressed(KEY_ENTER)) {
                     gameStarted = true;
                     sound.play(SoundCue::GameStart);
-                    sound.playMusic(levelLoader.musicTrack(levelLoader.currentArea()));
                     levelIntro.start();
                 }
                 ClearBackground(BLACK);
@@ -794,6 +805,7 @@ int main() {
                     bool flagpoleWasActive = levelLoader.castleFlagpole->isActive();
                     levelLoader.castleFlagpole->update(MarioObj, scoreboard, scorePopups, isDead);
                     if (!flagpoleWasActive && levelLoader.castleFlagpole->isActive()) {
+                        sound.stopMusic();
                         sound.play(SoundCue::Flagpole);
                     }
                 }
@@ -824,6 +836,12 @@ int main() {
                 deathTimer -= GetFrameTime();
                 if (deathTimer <= 0) ResetLevel();
             }
+
+            bool levelTimerActive = IsLevelTimerActive();
+            if (levelTimerActive && !levelTimerWasActive) {
+                PlayCurrentAreaMusicIfTimerActive();
+            }
+            levelTimerWasActive = levelTimerActive;
 
             BeginDrawing();
             if (levelIntro.active) {
